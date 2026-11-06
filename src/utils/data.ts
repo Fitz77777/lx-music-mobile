@@ -560,26 +560,31 @@ export const getUserApiData = async(): Promise<LX.UserApi.UserApiData> => {
  */
 export const overwriteUserApiData = async(data: LX.UserApi.UserApiData): Promise<LX.UserApi.UserApiInfo[]> => {
   const { apis, scripts } = sanitizeUserApiData(data)
-  const removedIds = userApis.filter(api => !scripts[api.id]).map(api => api.id)
-  const changes: Array<[string, any]> = [
-    [userApiPrefix, apis],
-  ]
+  const newIds = new Set(apis.map(api => api.id))
+  // 删除判定以“源是否还存在”为准，而不是“是否带了脚本内容”，避免空脚本误删源
+  const removedIds = userApis.filter(api => !newIds.has(api.id)).map(api => api.id)
   const currentScripts = new Map<string, string>()
   if (apis.length) {
     const values = await getDataMultiple(apis.map(api => `${userApiPrefix}${api.id}`))
-    for (const [key, value] of values) {
-      currentScripts.set(key, value as string)
-    }
+    for (const [key, value] of values) currentScripts.set(key, value as string)
   }
+  const apisChanged = JSON.stringify(userApis) != JSON.stringify(apis)
+  const scriptChanges: Array<[string, any]> = []
   for (const api of apis) {
+    const script = scripts[api.id]
+    // 远端未携带脚本内容时保留本地已有脚本，避免把已同步的脚本抹掉
+    if (typeof script != 'string' || script == '') continue
     const key = `${userApiPrefix}${api.id}`
-    if (currentScripts.get(key) == scripts[api.id]) continue
-    changes.push([key, scripts[api.id]])
+    if (currentScripts.get(key) == script) continue
+    scriptChanges.push([key, script])
   }
   userApis.splice(0, userApis.length, ...apis)
-  if (changes.length <= 1 && !removedIds.length) return apis
-  if (removedIds.length) await removeDataMultiple(removedIds.map(id => `${userApiPrefix}${id}`))
-  if (changes.length > 1) await saveDataMultiple(changes)
+  const tasks: Array<Promise<any>> = []
+  if (removedIds.length) tasks.push(removeDataMultiple(removedIds.map(id => `${userApiPrefix}${id}`)))
+  // 元数据（名称/描述/更新提醒等）变化也必须落盘，否则 md5 会与内存不一致导致反复同步
+  if (apisChanged) tasks.push(saveData(userApiPrefix, apis))
+  if (scriptChanges.length) tasks.push(saveDataMultiple(scriptChanges))
+  if (tasks.length) await Promise.all(tasks)
   return apis
 }
 

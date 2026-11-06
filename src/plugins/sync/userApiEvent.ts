@@ -6,8 +6,9 @@ import apiSourceInfo from '@/utils/musicSdk/api-source-info'
 import { event as userApiEvent } from '@/store/userApi/event'
 import { toMD5 } from '@/utils/tools'
 
-// 应用远端数据期间拦截 list_changed 事件的回推，避免 A/B 双端应答死循环
-let isRemoteApplying = false
+// 应用远端数据期间拦截 list_changed 事件的回推，避免 A/B 双端应答死循环。
+// 用计数而非布尔：并发应用多份远端数据时，先完成的一份不能提前解除抑制。
+let remoteApplyingCount = 0
 
 const serializeUserApiData = (data: LX.UserApi.UserApiData) => {
   // 与 server 端快照 key 的序列化方式保持一致（scripts 按 id 排序）
@@ -29,7 +30,7 @@ export const getLocalUserApiData = async(): Promise<LX.UserApi.UserApiData> => {
 }
 
 export const setLocalUserApiData = async(data: LX.UserApi.UserApiData, apiSource?: string | null) => {
-  isRemoteApplying = true
+  remoteApplyingCount++
   try {
     const list = await overwriteUserApiData(data)
 
@@ -47,14 +48,16 @@ export const setLocalUserApiData = async(data: LX.UserApi.UserApiData, apiSource
 
     setUserApiList(list)
   } finally {
-    isRemoteApplying = false
+    remoteApplyingCount--
   }
 }
 
 export const registerUserApiActionEvent = (sendUserApiAction: (action: LX.Sync.UserApi.ActionList) => (void | Promise<void>)) => {
   const list_changed = async(_list: LX.UserApi.UserApiInfo[]) => {
-    if (isRemoteApplying) return
-    await sendUserApiAction({ action: 'user_api_data_overwrite', data: await getUserApiData() })
+    if (remoteApplyingCount > 0) return
+    const data = await getUserApiData()
+    // 本地变更推送不携带激活源选择，避免把本机选择传播到其他设备
+    await sendUserApiAction({ action: 'user_api_data_overwrite', data: { ...data, apiSource: null } })
   }
 
   userApiEvent.on('list_changed', list_changed)

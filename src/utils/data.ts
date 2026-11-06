@@ -523,6 +523,63 @@ export const getUserApiScript = async(id: string): Promise<string> => {
   return script
 }
 
+const sanitizeUserApiData = (data: LX.UserApi.UserApiData) => {
+  const apis: LX.UserApi.UserApiInfo[] = []
+  const scripts: Record<string, string> = {}
+  const ids = new Set<string>()
+  for (const api of data.apis) {
+    if (typeof api.id != 'string' || !api.id) continue
+    if (typeof data.scripts[api.id] != 'string' || data.scripts[api.id] == '') continue
+    if (ids.has(api.id)) continue
+    ids.add(api.id)
+    apis.push(api)
+    scripts[api.id] = data.scripts[api.id]
+  }
+  return { apis, scripts }
+}
+
+export const getUserApiData = async(): Promise<LX.UserApi.UserApiData> => {
+  const apis = await getData<LX.UserApi.UserApiInfo[]>(userApiPrefix) ?? []
+  const scripts: Record<string, string> = {}
+  if (apis.length) {
+    const values = await getDataMultiple(apis.map(api => `${userApiPrefix}${api.id}`))
+    for (const [key, value] of values) {
+      scripts[key.replace(userApiPrefix, '')] = (value as string) ?? ''
+    }
+  }
+  return sanitizeUserApiData({ apis, scripts })
+}
+
+/**
+ * 覆盖整个自定义源数据（同步 set-data 用）：以脚本 id 为单位全量替换
+ * @returns 实际生效的源清单
+ */
+export const overwriteUserApiData = async(data: LX.UserApi.UserApiData): Promise<LX.UserApi.UserApiInfo[]> => {
+  const { apis, scripts } = sanitizeUserApiData(data)
+  const removedIds = userApis.filter(api => !scripts[api.id]).map(api => api.id)
+  const changes: Array<[string, any]> = [
+    [userApiPrefix, apis],
+  ]
+  const currentScripts = new Map<string, string>()
+  if (apis.length) {
+    const values = await getDataMultiple(apis.map(api => `${userApiPrefix}${api.id}`))
+    for (const [key, value] of values) {
+      currentScripts.set(key, value as string)
+    }
+  }
+  for (const api of apis) {
+    const key = `${userApiPrefix}${api.id}`
+    if (currentScripts.get(key) == scripts[api.id]) continue
+    changes.push([key, scripts[api.id]])
+  }
+  userApis.splice(0, userApis.length, ...apis)
+  if (changes.length <= 1 && !removedIds.length) return apis
+  if (removedIds.length) await removeDataMultiple(removedIds.map(id => `${userApiPrefix}${id}`))
+  if (changes.length > 1) await saveDataMultiple(changes)
+  return apis
+}
+
+
 const INFO_NAMES = {
   name: 24,
   description: 36,

@@ -25,6 +25,11 @@ declare namespace LX {
       sources?: UserApiSources
     }
 
+    interface UserApiData {
+      apis: UserApiInfo[]
+      scripts: Record<string, string>
+    }
+
     interface UserApiStatus {
       status: boolean
       message?: string

@@ -200,6 +200,68 @@ const DislikeModeModal = () => {
   )
 }
 
+const UserApiModeModal = () => {
+  const theme = useTheme()
+  const t = useI18n()
+  const handleSelectMode = (mode: LX.Sync.UserApi.SyncMode) => {
+    global.app_event.selectSyncMode({ type: 'userApi', mode })
+  }
+
+  return (
+    <>
+      <View style={styles.main}>
+        <Text style={styles.title} size={16}>{t('sync__userApi_mode_title', { name: syncState.serverName })}</Text>
+        <ScrollView style={styles.content} keyboardShouldPersistTaps={'always'}>
+          <View style={{ ...styles.btnGroup, marginTop: 0 }}>
+            <Text size={14}>{t('sync__mode_merge_tip')}</Text>
+            <View style={styles.btns}>
+              <Button style={{ ...styles.btn, backgroundColor: theme['c-button-background'] }} onPress={() => { handleSelectMode('merge_local_remote') }}>
+                <Text size={13} color={theme['c-button-font']}>{t('sync__mode_merge_btn_local_remote')}</Text>
+              </Button>
+              <Button style={{ ...styles.btn, backgroundColor: theme['c-button-background'] }} onPress={() => { handleSelectMode('merge_remote_local') }}>
+                <Text size={13} color={theme['c-button-font']}>{t('sync__mode_merge_btn_remote_local')}</Text>
+              </Button>
+            </View>
+          </View>
+          <View style={styles.btnGroup}>
+            <Text size={14}>{t('sync__userApi_mode_overwrite_full_label')}</Text>
+            <View style={styles.btns}>
+              <Button style={{ ...styles.btn, backgroundColor: theme['c-button-background'] }} onPress={() => { handleSelectMode('overwrite_local_remote_full') }}>
+                <Text size={13} color={theme['c-button-font']}>{t('sync__userApi_mode_overwrite_full_btn_local_remote')}</Text>
+              </Button>
+              <Button style={{ ...styles.btn, backgroundColor: theme['c-button-background'] }} onPress={() => { handleSelectMode('overwrite_remote_local_full') }}>
+                <Text size={13} color={theme['c-button-font']}>{t('sync__userApi_mode_overwrite_full_btn_remote_local')}</Text>
+              </Button>
+            </View>
+          </View>
+          <View style={styles.btnGroup}>
+            <Text size={14}>{t('sync__mode_other_label')}</Text>
+            <View style={styles.btns}>
+              <Button style={{ ...styles.btn, backgroundColor: theme['c-button-background'] }} onPress={() => { handleSelectMode('cancel') }}>
+                <Text size={13} color={theme['c-button-font']}>{t('sync__mode_overwrite_btn_cancel')}</Text>
+              </Button>
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+      <View style={styles.tips}>
+        <Text style={styles.tip} size={12} color={theme['c-600']}>
+          <Text style={styles.tipTitle} size={12}>{t('sync__mode_merge_tip')}</Text>
+          {t('sync__userApi_mode_merge_tip_desc')}
+        </Text>
+        <Text style={styles.tip} size={12} color={theme['c-600']}>
+          <Text style={styles.tipTitle} size={12}>{t('sync__mode_overwrite_tip')}</Text>
+          {t('sync__userApi_mode_overwrite_full_tip_desc')}
+        </Text>
+        <Text style={styles.tip} size={12} color={theme['c-600']}>
+          <Text style={styles.tipTitle} size={12}>{t('sync__mode_other_tip')}</Text>
+          {t('sync__userApi_mode_other_tip_desc')}
+        </Text>
+      </View>
+    </>
+  )
+}
+
 export default ({ componentId }: { componentId: string }) => {
   useEffect(() => {
     setSyncModeComponentId(componentId)
@@ -211,7 +273,8 @@ export default ({ componentId }: { componentId: string }) => {
       {
         syncState.type == 'list' ? <ListModeModal />
           : syncState.type == 'dislike' ? <DislikeModeModal />
-            : null
+            : syncState.type == 'userApi' ? <UserApiModeModal />
+              : null
       }
     </ModalContent>
   )

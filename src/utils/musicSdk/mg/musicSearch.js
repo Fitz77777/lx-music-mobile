@@ -9,6 +9,32 @@ export const createSignature = (time, str) => {
   return { sign, deviceId }
 }
 
+const JADEITE_UA = 'Mozilla/5.0 (Linux; U; Android 11.0.0; zh-cn; MI 11 Build/OPR1.170623.032) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
+
+/**
+ * 咪咕搜索接口（需客户端签名），歌手页与搜索页共用
+ * @param {string} str 搜索词
+ * @param {object} searchSwitch 各类型开关
+ */
+export const searchByJadeite = async(str, searchSwitch, page = 1, limit = 20) => {
+  const time = Date.now().toString()
+  const signData = createSignature(time, str)
+  const { body } = await httpFetch(
+    `https://jadeite.migu.cn/music_search/v3/search/searchAll?isCorrect=0&isCopyright=1&searchSwitch=${encodeURIComponent(JSON.stringify(searchSwitch))}&pageSize=${limit}&text=${encodeURIComponent(str)}&pageNo=${page}&sort=0&sid=USS`,
+    {
+      headers: {
+        uiVersion: 'A_music_3.6.1',
+        deviceId: signData.deviceId,
+        timestamp: time,
+        sign: signData.sign,
+        channel: '0146921',
+        'User-Agent': JADEITE_UA,
+      },
+    },
+  ).promise
+  return body
+}
+
 export default {
   limit: 20,
   total: 0,
@@ -216,6 +242,56 @@ export default {
         allPage: this.allPage,
         limit,
         total: this.total,
+        source: 'mg',
+      }
+    })
+  },
+  searchArtist(str, page = 1, limit = 20, retryNum = 0) {
+    if (++retryNum > 3) return Promise.reject(new Error('try max num'))
+    // search_all.do 的歌手结果不带头像，改用可返回 singerPicUrl 的搜索接口
+    const searchSwitch = { song: 0, album: 0, singer: 1, tagSong: 0, mvSong: 0, songlist: 0, bestShow: 0, lyricSong: 0 }
+    return searchByJadeite(str, searchSwitch, page, limit).then(body => {
+      if (!body || body.code !== '000000') return this.searchArtist(str, page, limit, retryNum)
+      const singerData = body.singerResultData || {}
+      const rawList = singerData.result || []
+      const total = parseInt(singerData.totalCount) || 0
+      const list = rawList.map(item => ({
+        id: item.id,
+        name: item.name,
+        picUrl: item.singerPicUrl?.length ? item.singerPicUrl[0].img : '',
+        source: 'mg',
+      }))
+      return {
+        list,
+        total,
+        allPage: Math.ceil(total / limit),
+        limit,
+        source: 'mg',
+      }
+    })
+  },
+  searchAlbum(str, page = 1, limit = 20, retryNum = 0) {
+    if (++retryNum > 3) return Promise.reject(new Error('try max num'))
+    const searchSwitch = JSON.stringify({ song: 0, album: 1, singer: 0, tagSong: 0, mvSong: 0, songlist: 0, bestShow: 0 })
+    const url = `https://app.c.nf.migu.cn/MIGUM2.0/v1.0/content/search_all.do?isCopyright=1&isCorrect=1&pageNo=${page}&pageSize=${limit}&searchSwitch=${encodeURIComponent(searchSwitch)}&text=${encodeURIComponent(str)}`
+    return httpFetch(url).promise.then(({ body }) => {
+      if (!body || body.code !== '000000') return this.searchAlbum(str, page, limit, retryNum)
+      const albumData = body.albumResultData || {}
+      const rawList = albumData.result || []
+      const total = parseInt(albumData.totalCount) || 0
+      const list = rawList.map(item => ({
+        id: item.id,
+        name: item.name,
+        picUrl: item.imgItems?.[0]?.img || '',
+        artistName: item.singer || '',
+        publishTime: item.publishDate || '',
+        source: 'mg',
+      }))
+      return {
+        list,
+        total,
+        allPage: Math.ceil(total / limit),
+        limit,
         source: 'mg',
       }
     })

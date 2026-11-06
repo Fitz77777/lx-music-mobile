@@ -1,5 +1,5 @@
 // import { useEffect, useState } from 'react'
-import { View } from 'react-native'
+import { Platform, SafeAreaView, StyleSheet, View } from 'react-native'
 import { useTheme } from '@/store/theme/hook'
 import ImageBackground from '@/components/common/ImageBackground'
 import { useWindowSize } from '@/utils/hooks'
@@ -14,6 +14,11 @@ interface Props {
 }
 
 const BLUR_RADIUS = Math.max(scaleSizeAbsHR(18), 10)
+
+const ContentContainer = ({ children }: Props) => {
+  if (Platform.OS == 'ios') return <SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>
+  return <>{children}</>
+}
 
 export default ({ children }: Props) => {
   const theme = useTheme()
@@ -45,11 +50,21 @@ export default ({ children }: Props) => {
         style={{ position: 'absolute', left: 0, top: 0, height: windowSize.height, width: windowSize.width, backgroundColor: theme['c-content-background'] }}
         source={theme['bg-image']}
         resizeMode="cover"
-      >
-      </ImageBackground>
-      <View style={{ flex: 1, flexDirection: 'column', backgroundColor: theme['c-main-background'] }}>
-        {children}
-      </View>
+      />
+      <View
+        pointerEvents="none"
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: theme['c-main-background'],
+          },
+        ]}
+      />
+      <ContentContainer>
+        <View style={{ flex: 1, flexDirection: 'column' }}>
+          {children}
+        </View>
+      </ContentContainer>
     </View>
   ), [children, theme, windowSize.height, windowSize.width])
   const picComponent = useMemo(() => {
@@ -60,12 +75,22 @@ export default ({ children }: Props) => {
           source={{ uri: pic!, headers: defaultHeaders }}
           resizeMode="cover"
           blurRadius={BLUR_RADIUS}
-        >
-          <View style={{ flex: 1, flexDirection: 'column', backgroundColor: theme['c-content-background'], opacity: 0.76 }}></View>
-        </ImageBackground>
-        <View style={{ flex: 1, flexDirection: 'column' }}>
-          {children}
-        </View>
+        />
+        <View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: theme['c-content-background'],
+              opacity: 0.76,
+            },
+          ]}
+        />
+        <ContentContainer>
+          <View style={{ flex: 1, flexDirection: 'column' }}>
+            {children}
+          </View>
+        </ContentContainer>
       </View>
     )
   }, [children, pic, theme, windowSize.height, windowSize.width])

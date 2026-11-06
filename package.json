@@ -8,6 +8,8 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "sc": "react-native start --reset-cache",
+    "postinstall": "node dependencies-patch.js",
+    "lint:sound-effect-dsp": "node scripts/check-sound-effect-dsp.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "rd": "react-devtools",
@@ -103,5 +105,11 @@
     "react-native-navigation": {
       "lodash": "^4.18"
     }
-  }
+  },
+  "allowScripts": [
+    "react-native-background-timer",
+    "react-native-file-system",
+    "react-native-local-media-metadata",
+    "react-native-track-player"
+  ]
 }

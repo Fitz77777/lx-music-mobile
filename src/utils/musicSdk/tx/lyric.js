@@ -207,7 +207,7 @@ export default {
     if (songIdMap.has(songmid)) return songIdMap.get(songmid)
     if (promises.has(songmid)) return (await promises.get(songmid)).songId
     const promise = getMusicInfo(songmid)
-    promises.set(promise)
+    promises.set(songmid, promise)
     const info = await promise
     songIdMap.set(songmid, info.songId)
     promises.delete(songmid)

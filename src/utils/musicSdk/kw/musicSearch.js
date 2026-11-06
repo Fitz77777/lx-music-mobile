@@ -5,6 +5,23 @@ import { formatPlayTime, decodeName } from '../../index'
 // import { debug } from '../../utils/env'
 import { formatSinger } from './util'
 
+// 酷我搜索接口的图片地址有三种形式：hts_img（可用的 https 完整地址）、img（完整地址，但域名 img2.sycdn.kuwo.cn 已不可用）、pic（相对路径）
+const formatAlbumPic = (item) => {
+  if (item.hts_img) return item.hts_img
+  if (item.img && !/\.sycdn\.kuwo\.cn/.test(item.img)) return item.img.replace(/^http:\/\//, 'https://')
+  if (item.pic) return `https://img2.kuwo.cn/star/albumcover/${item.pic}`
+  return ''
+}
+
+// 歌手头像同理，http://img1.kuwo.cn/star/starheads/ 仍可用，只是要换成 https
+export const formatArtistPic = (item) => {
+  if (item.hts_PICPATH) return item.hts_PICPATH
+  const path = item.PICPATH || item.pic
+  if (!path) return ''
+  if (/^https?:\/\//.test(path)) return path.replace(/^http:\/\//, 'https://')
+  return `https://img1.kuwo.cn/star/starheads/${path}`
+}
+
 export default {
   regExps: {
     mInfo: /level:(\w+),bitrate:(\d+),format:(\w+),size:([\w.]+)/,
@@ -89,7 +106,7 @@ export default {
         interval: Number.isNaN(interval) ? 0 : formatPlayTime(interval),
         albumName: info.ALBUM ? decodeName(info.ALBUM) : '',
         lrc: null,
-        img: null,
+        img: info.web_albumpic_short ? `https://img2.kuwo.cn/star/albumcover/${info.web_albumpic_short}` : null,
         otherSource: null,
         types,
         _types,
@@ -121,6 +138,52 @@ export default {
         limit,
         source: 'kw',
       })
+    })
+  },
+  searchArtist(str, page = 1, limit = 20, retryNum = 0) {
+    if (++retryNum > 3) return Promise.reject(new Error('try max num'))
+    const url = `http://search.kuwo.cn/r.s?client=kt&all=${encodeURIComponent(str)}&pn=${page - 1}&rn=${limit}&ft=artist&encoding=utf8&rformat=json&mobi=1`
+    return httpFetch(url).promise.then(({ body: result }) => {
+      if (!result) return this.searchArtist(str, page, limit, retryNum)
+      const rawList = result.abslist || []
+      const list = rawList.map(item => ({
+        id: item.ARTISTID,
+        name: item.ARTIST,
+        picUrl: formatArtistPic(item),
+        source: 'kw',
+      }))
+      return {
+        list,
+        total: parseInt(result.TOTAL) || 0,
+        allPage: Math.ceil((parseInt(result.TOTAL) || 0) / limit),
+        limit,
+        source: 'kw',
+      }
+    })
+  },
+  searchAlbum(str, page = 1, limit = 20, retryNum = 0) {
+    if (++retryNum > 3) return Promise.reject(new Error('try max num'))
+    const url = `http://search.kuwo.cn/r.s?client=kt&all=${encodeURIComponent(str)}&pn=${page - 1}&rn=${limit}&ft=album&encoding=utf8&rformat=json&mobi=1`
+    return httpFetch(url).promise.then(({ body: result }) => {
+      if (!result) return this.searchAlbum(str, page, limit, retryNum)
+      const rawList = result.albumlist || []
+      const list = rawList.map(item => ({
+        id: item.albumid,
+        name: item.name,
+        // item.img 是完整地址且域名（img2.sycdn.kuwo.cn）已不可用，优先用 https 的 hts_img
+        picUrl: formatAlbumPic(item),
+        artistName: item.artist || '',
+        artistId: item.artistid || '',
+        source: 'kw',
+      }))
+      const total = parseInt(result.TOTAL) || 0
+      return {
+        list,
+        total,
+        allPage: Math.ceil((total || rawList.length) / limit),
+        limit,
+        source: 'kw',
+      }
     })
   },
 }

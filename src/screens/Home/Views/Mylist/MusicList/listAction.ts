@@ -13,6 +13,10 @@ import musicSdk from '@/utils/musicSdk'
 import { getListMusicSync } from '@/utils/listManage'
 import { clearMusicUrlByMusic } from '@/utils/data'
 
+const searchFilterRxp = /\s|'|\.|,|，|&|"|、|\(|\)|（|）|`|~|-|<|>|\||\/|\]|\[|!|！|:|：|;|；|\?|？|·/g
+const normalizeSearchText = (str: string | undefined | null) => String(str ?? '').replace(searchFilterRxp, '').toLowerCase()
+const getMusicSearchText = (musicInfo: LX.Music.MusicInfo) => `${musicInfo.name ?? ''}${musicInfo.singer ?? ''}${musicInfo.meta.albumName ?? ''}`
+
 export const handlePlay = (listId: SelectInfo['listId'], index: SelectInfo['index']) => {
   void playList(listId, index)
 }
@@ -100,7 +104,7 @@ export const searchListMusic = (list: LX.Music.MusicInfo[], text: string) => {
 
   for (const mInfo of result) {
     sortInsert(sortedList, {
-      num: similar(text, `${mInfo.name}${mInfo.singer}${mInfo.meta.albumName ? mInfo.meta.albumName : ''}`),
+      num: similar(text, normalizeSearchText(getMusicSearchText(mInfo))),
       data: mInfo,
     })
   }

@@ -24,6 +24,8 @@ export enum COMPONENT_IDS {
   home = 'home',
   playDetail = 'playDetail',
   songlistDetail = 'songlistDetail',
+  artistDetail = 'artistDetail',
+  albumDetail = 'albumDetail',
   comment = 'comment',
 }
 
@@ -78,6 +80,8 @@ export const storageDataPrefix = {
   dislikeList: '@dislike_list',
 
   userApi: '@user_api__',
+  soundEffectEQPresetList: '@sound_effect_eq_preset_list',
+  soundEffectConvolutionPresetList: '@sound_effect_convolution_preset_list',
 } as const
 
 // v0.x.x 版本的 data keys
@@ -144,7 +148,7 @@ export const DEFAULT_SETTING = {
   search: {
     temp_source: 'kw' as LX.OnlineSource,
     source: 'all' as LX.OnlineSource | 'all',
-    type: 'music' as 'music' | 'songlist',
+    type: 'music' as 'music' | 'songlist' | 'artist' | 'album',
   },
 
   viewPrevState: {

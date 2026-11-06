@@ -126,12 +126,28 @@
 	<array>
 		<string>arm64</string>
 	</array>
+	<key>UIDeviceFamily</key>
+	<array>
+		<!-- 1 = iPhone, 2 = iPad (iPad Air 6 及全系 iPad) -->
+		<integer>1</integer>
+		<integer>2</integer>
+	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- iPad 支持全向横竖屏；RequiresFullScreen 关闭分屏 Revision 需求(全屏适配而已) -->
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 <true/>
 </dict>

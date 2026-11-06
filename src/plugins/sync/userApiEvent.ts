@@ -12,6 +12,8 @@ let remoteApplyingCount = 0
 // 远端应用激活源时 setApiSource 的 apiSourceUpdated 是异步（rAF）派发的，
 // 用该标记避免把远端选择又回推给其他设备。
 let lastRemoteApiSource: string | null = null
+// 最近一次已与远端对齐（发送或接收）的状态签名，用于阻止把相同内容反复推回
+let lastSyncedSignature: string | null = null
 
 const serializeUserApiData = (data: LX.UserApi.UserApiData) => {
   // 与 server 端快照 key 的序列化方式保持一致（scripts 按 id 排序）
@@ -22,6 +24,8 @@ const serializeUserApiData = (data: LX.UserApi.UserApiData) => {
     scripts,
   })
 }
+
+const getSignature = (data: LX.UserApi.UserApiData) => toMD5(serializeUserApiData(data) + '|' + (data.apiSource ?? ''))
 
 export const getUserApiDataMD5 = async(): Promise<string> => {
   const data = await getUserApiData()
@@ -57,6 +61,10 @@ export const setLocalUserApiData = async(data: LX.UserApi.UserApiData, apiSource
     }
 
     setUserApiList(list)
+
+    // 记录应用后的本机状态，避免后续事件把相同内容再推回
+    const localData = await getUserApiData()
+    lastSyncedSignature = getSignature(localData)
   } finally {
     remoteApplyingCount--
   }
@@ -65,7 +73,12 @@ export const setLocalUserApiData = async(data: LX.UserApi.UserApiData, apiSource
 export const registerUserApiActionEvent = (sendUserApiAction: (action: LX.Sync.UserApi.ActionList) => (void | Promise<void>)) => {
   const sendLocalData = async() => {
     if (remoteApplyingCount > 0) return
-    await sendUserApiAction({ action: 'user_api_data_overwrite', data: await getUserApiData() })
+    const data = await getUserApiData()
+    const signature = getSignature(data)
+    // 与上次已同步状态一致则无需推送（可避免事件抖动/回声造成重复请求）
+    if (signature == lastSyncedSignature) return
+    lastSyncedSignature = signature
+    await sendUserApiAction({ action: 'user_api_data_overwrite', data })
   }
 
   const list_changed = async(_list: LX.UserApi.UserApiInfo[]) => {

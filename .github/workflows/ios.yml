@@ -20,7 +20,7 @@ env:
 jobs:
   Ios:
     name: iOS IPA
-    runs-on: macos-14
+    runs-on: macos-13
     steps:
       - name: Check out git repository
         uses: actions/checkout@v4

@@ -28,10 +28,15 @@ export const getLocalUserApiData = async(): Promise<LX.UserApi.UserApiData> => {
   return getUserApiData()
 }
 
-export const setLocalUserApiData = async(data: LX.UserApi.UserApiData) => {
+export const setLocalUserApiData = async(data: LX.UserApi.UserApiData, apiSource?: string | null) => {
   isRemoteApplying = true
   try {
     const list = await overwriteUserApiData(data)
+
+    // 完全覆盖类同步流程携带的激活源：目标脚本存在于同步数据中时跟随远端选择，否则保持本机选择
+    if (/^user_api/.test(apiSource ?? '') && list.some(api => api.id == apiSource)) {
+      if (apiSource != settingState.setting['common.apiSource']) setApiSource(apiSource)
+    }
 
     // 当前使用中的源被同步删除时，回退到内置源（与 setUserApi 失败路径的行为一致）
     const currentSource = settingState.setting['common.apiSource']

@@ -1,6 +1,7 @@
 import { getData, saveData, getAllKeys, removeDataMultiple, saveDataMultiple, removeData, getDataMultiple } from '@/plugins/storage'
 import { DEFAULT_SETTING, LIST_IDS, storageDataPrefix, type NAV_ID_Type } from '@/config/constant'
 import { throttle } from './common'
+import settingState from '@/store/setting/state'
 // import { gzip, ungzip } from '@/utils/nativeModules/gzip'
 // import { readFile, writeFile, temporaryDirectoryPath, unlink } from '@/utils/fs'
 // import { isNotificationsEnabled, openNotificationPermissionActivity, shareText } from '@/utils/nativeModules/utils'
@@ -547,7 +548,9 @@ export const getUserApiData = async(): Promise<LX.UserApi.UserApiData> => {
       scripts[key.replace(userApiPrefix, '')] = (value as string) ?? ''
     }
   }
-  return sanitizeUserApiData({ apis, scripts })
+  // 附加当前激活源选择（若为 user_api 源）：供完全覆盖类同步流程传递；md5/快照序列化会剔除该字段
+  const apiSource = settingState.setting['common.apiSource'] ?? null
+  return { ...sanitizeUserApiData({ apis, scripts }), apiSource: /^user_api/.test(apiSource) ? apiSource : null }
 }
 
 /**

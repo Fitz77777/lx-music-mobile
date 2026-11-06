@@ -33,7 +33,8 @@ const handler: LX.Sync.ClientSyncHandlerUserApiActions<LX.Sync.Socket> = {
 
   async user_api_sync_set_list_data(socket, data) {
     logInfo('userApi:sync:user_api_sync_set_list_data')
-    await setLocalUserApiData(data)
+    // 仅协商 set 流程（完全覆盖类）应用远端激活源；广播推送的 data 不带选择
+    await setLocalUserApiData(data, data.apiSource ?? null)
   },
 
   async user_api_sync_finished(socket) {

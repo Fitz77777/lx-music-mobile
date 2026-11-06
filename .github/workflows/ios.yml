@@ -20,8 +20,8 @@ env:
 jobs:
   Ios:
     name: iOS IPA
-    # macos-13 已从 GitHub 托管 runner 退役（2026），Intel 仅剩 macos-15-intel / macos-26-intel
-    runs-on: macos-15-intel
+    # Apple Silicon 构建（macos-13 已退役；macos-14 ARM 在此账号曾被拒，尝试 macos-15 ARM）
+    runs-on: macos-15
     steps:
       - name: Check out git repository
         uses: actions/checkout@v4

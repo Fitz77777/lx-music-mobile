@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef, useState, forwardRef, useImperativeHandle, useEffect } from 'react'
+import { memo, useCallback, useMemo, useRef, useState, forwardRef, useImperativeHandle } from 'react'
 import { Animated, FlatList, Modal, Platform, Pressable, View, TouchableOpacity, type ModalProps } from 'react-native'
 import { createStyle } from '@/utils/tools'
 import { useTheme } from '@/store/theme/hook'
@@ -29,7 +29,7 @@ const ListItem = memo(({ item, index, activeIndex, onPress }: {
     <TouchableOpacity
       style={{ ...styles.listItem, height: ITEM_HEIGHT, backgroundColor: active ? theme['c-primary-background-hover'] : 'rgba(0,0,0,0)' }}
       activeOpacity={0.5}
-      onPress={() => onPress(index)}
+      onPress={() => { onPress(index) }}
     >
       {
         active
@@ -80,6 +80,8 @@ export default forwardRef<PlayQueueModalType, {}>((props, ref) => {
   const list = useMemo(() => {
     if (!listId) return []
     return getList(listId) as LX.Music.MusicInfo[]
+  // 引入 visible 触发在抽屉打开时刷新选中列表（依赖集合如有误后续再收敛）
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listId, visible])
 
   const openDrawer = useCallback(() => {

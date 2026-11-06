@@ -56,6 +56,7 @@ export default memo(({ componentId, albumInfo }: { componentId: string, albumInf
       toast(isRefresh ? '刷新专辑信息失败' : '获取专辑信息失败')
       listRef.current?.setStatus('error')
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [albumInfo.id, albumInfo.name])
 
   useEffect(() => {
@@ -69,6 +70,8 @@ export default memo(({ componentId, albumInfo }: { componentId: string, albumInf
     void setTempList(listId, [...albumDetail.list]).then(() => {
       void playList(LIST_IDS.TEMP, index)
     })
+    // 忽略 albumInfo/api 依赖变更（仅在进入页面时加载一次数据）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [albumDetail.list, albumInfo.id])
 
   return (

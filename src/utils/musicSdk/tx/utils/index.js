@@ -9,8 +9,8 @@ export const signRequest = async(data) => {
     method: 'post',
     headers: {
       'User-Agent': 'QQMusic 14090508(android 12)',
-      'Referer': 'https://y.qq.com',
-      'Origin': 'https://y.qq.com',
+      Referer: 'https://y.qq.com',
+      Origin: 'https://y.qq.com',
     },
     body: data,
   }).promise
@@ -34,7 +34,7 @@ export const desktopSearch = async(searchType, query, page = 1, limit = 20) => {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
       'Content-Type': 'application/json',
-      'Referer': 'https://y.qq.com/',
+      Referer: 'https://y.qq.com/',
     },
     body: {
       comm: { ct: 19, cv: 2151 },
@@ -96,7 +96,7 @@ export const ucommonGet = async(data) => {
   const { body } = await httpFetch(`https://u.y.qq.com/cgi-bin/musicu.fcg?format=json&data=${encodeURIComponent(JSON.stringify(data))}`, {
     headers: {
       'User-Agent': WEB_UA,
-      'Referer': 'https://y.qq.com/',
+      Referer: 'https://y.qq.com/',
     },
   }).promise
   return body
@@ -145,7 +145,7 @@ export const getAlbumDetail = async(albummid) => {
   const { body } = await httpFetch(`https://c.y.qq.com/v8/fcg-bin/fcg_v8_album_info_cp.fcg?albummid=${encodeURIComponent(albummid)}&format=json&outCharset=utf-8`, {
     headers: {
       'User-Agent': WEB_UA,
-      'Referer': 'https://y.qq.com/',
+      Referer: 'https://y.qq.com/',
     },
   }).promise
   if (!body || body.code !== 0 || !body.data?.mid) throw new Error('获取专辑详情失败')

@@ -70,6 +70,8 @@ export default memo(({ componentId, artistInfo }: { componentId: string, artistI
       // 接口没返回的字段保留列表页带过来的信息（比如名字）
       setArtistDetail({ ...artistInfo, ...data })
     }).catch(() => {})
+    // 忽略 artistInfo/api 依赖变更（触发时机由组件初始化与刷新逻辑控制）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [componentId, artistInfo.id, artistInfo.name])
 
   const loadSongs = useCallback((sort: string, page: number, isRefresh = false) => {
@@ -95,6 +97,7 @@ export default memo(({ componentId, artistInfo }: { componentId: string, artistI
     }).finally(() => {
       loadingSongRef.current = false
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artistInfo.id, artistInfo.name, songs.hasMore])
 
   const loadAlbums = useCallback((page: number, isRefresh = false) => {
@@ -118,6 +121,7 @@ export default memo(({ componentId, artistInfo }: { componentId: string, artistI
     }).finally(() => {
       loadingAlbumRef.current = false
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artistInfo.id, artistInfo.name, albums.hasMore])
 
   useEffect(() => {
@@ -150,6 +154,7 @@ export default memo(({ componentId, artistInfo }: { componentId: string, artistI
     } else {
       loadAlbums(1, true)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, songs.sort, loadSongs, loadAlbums, artistInfo.id, artistInfo.name])
 
   const handlePlayList = useCallback((index: number) => {

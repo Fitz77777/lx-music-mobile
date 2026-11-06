@@ -207,7 +207,7 @@ export default {
       const data = formatItem(item)
       // 无头像、无专辑且作品数极少的条目基本都是用户自建的歌单/电台账号，不是歌手
       if (!data.picUrl && !data.albumSize && data.musicSize <= 4) continue
-      const key = data.name.replace(/[\s·・•.\-_/|,，、&+()（）\[\]【】]/g, '').toLowerCase()
+      const key = data.name.replace(/[\s·・•.\-_/|,，、&+()（）[\]【】]/g, '').toLowerCase()
       const score = data.albumSize * 1000 + data.musicSize + (item.Heat || 0) / 100000
       const prev = map.get(key)
       if (prev) {

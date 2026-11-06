@@ -16,11 +16,10 @@ import {
   toggleDesktopLyricTranslation,
   toggleDesktopLyricRoma,
 } from '@/core/desktopLyric'
-import { getPosition } from '@/plugins/player/utils'
+import { getPosition, updateNowPlayingTitles } from '@/plugins/player/utils'
 import playerState from '@/store/player/state'
 import { getLyricPayload } from '@/core/lyricInfo'
 import settingState from '@/store/setting/state'
-import { updateNowPlayingTitles } from '@/plugins/player/utils'
 
 const getReliableLyricPosition = async() => {
   const progressPosition = Math.max(playerState.progress.nowPlayTime, 0)

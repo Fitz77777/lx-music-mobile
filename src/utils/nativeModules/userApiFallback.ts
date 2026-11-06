@@ -156,24 +156,25 @@ class UserApiFallbackRuntime {
       this.emitLog(type, text)
     }
     return {
-      log: (...args: any[]) => send('log', args),
-      info: (...args: any[]) => send('info', args),
-      warn: (...args: any[]) => send('warn', args),
-      error: (...args: any[]) => send('error', args),
+      log: (...args: any[]) => { send('log', args) },
+      info: (...args: any[]) => { send('info', args) },
+      warn: (...args: any[]) => { send('warn', args) },
+      error: (...args: any[]) => { send('error', args) },
     }
   }
 
-  private setTimer = (callback: (...args: any[]) => void, timeout = 0, ...args: any[]) => {
+  private readonly setTimer = (callback: (...args: any[]) => void, timeout = 0, ...args: any[]) => {
     const id = this.timeoutId++
     const handle = setTimeout(() => {
       this.timeoutHandles.delete(id)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       callback(...args)
     }, Math.max(0, timeout))
     this.timeoutHandles.set(id, handle)
     return id
   }
 
-  private clearTimer = (id: number) => {
+  private readonly clearTimer = (id: number) => {
     const handle = this.timeoutHandles.get(id)
     if (!handle) return
     clearTimeout(handle)
@@ -236,7 +237,7 @@ class UserApiFallbackRuntime {
   private normalizeRequestSuccess(data: any) {
     switch (data.action) {
       case 'musicUrl':
-        if (typeof data.response != 'string' || data.response.length > 2048 || !/^https?:/.test(data.response)) throw new Error('failed')
+        if (typeof data.response != 'string' || data.response.length > 2048 || !/^https?:/.test(data.response as string)) throw new Error('failed')
         return {
           source: data.source,
           action: data.action,
@@ -252,7 +253,7 @@ class UserApiFallbackRuntime {
           data: verifyLyricInfo(data.response),
         }
       case 'pic':
-        if (typeof data.response != 'string' || data.response.length > 2048 || !/^https?:/.test(data.response)) throw new Error('failed')
+        if (typeof data.response != 'string' || data.response.length > 2048 || !/^https?:/.test(data.response as string)) throw new Error('failed')
         return {
           source: data.source,
           action: data.action,
@@ -263,7 +264,7 @@ class UserApiFallbackRuntime {
     }
   }
 
-  private handleScriptRequest = async(eventData: { requestKey: string, data: any }) => {
+  private readonly handleScriptRequest = async(eventData: { requestKey: string, data: any }) => {
     if (!this.requestHandler) {
       emit({
         action: 'response',
@@ -305,9 +306,9 @@ class UserApiFallbackRuntime {
   }
 
   private handleNativeResponse(data: any) {
-    const target = this.pendingNativeRequests.get(data.requestKey)
+    const target = this.pendingNativeRequests.get(data.requestKey as string)
     if (!target) return
-    this.pendingNativeRequests.delete(data.requestKey)
+    this.pendingNativeRequests.delete(data.requestKey as string)
     if (data.error == null) {
       target.callback(null, {
         statusCode: data.response?.statusCode,
@@ -316,7 +317,7 @@ class UserApiFallbackRuntime {
         body: data.response?.body,
       }, data.response?.body)
     } else {
-      target.callback(new Error(data.error), null, null)
+      target.callback(new Error(data.error as string), null, null)
     }
   }
 
@@ -324,7 +325,7 @@ class UserApiFallbackRuntime {
     if (this.destroyed) return false
     switch (action) {
       case 'request':
-        void this.handleScriptRequest(data)
+        void this.handleScriptRequest(data as { requestKey: string, data: any })
         return true
       case 'response':
         this.handleNativeResponse(data)
@@ -377,22 +378,22 @@ class UserApiFallbackRuntime {
           })
         }
       },
-      send: (eventName: string, data: any) => {
+      send: async(eventName: string, data: any) => {
         return new Promise<void>((resolve, reject) => {
           switch (eventName) {
             case EVENT_NAMES.inited:
-              if (this.isInited) return reject(new Error('Script is inited'))
+              if (this.isInited) { reject(new Error('Script is inited')); return }
               this.isInited = true
               try {
                 this.emitInit(true, this.buildSourceInfo(data))
                 resolve()
               } catch (error: any) {
-                this.emitInit(false, null, error?.message ?? 'Init failed')
+                this.emitInit(false, null, String(error?.message ?? 'Init failed'))
                 reject(error)
               }
               break
             case EVENT_NAMES.updateAlert:
-              if (this.isShowedUpdateAlert) return reject(new Error('The update alert can only be called once.'))
+              if (this.isShowedUpdateAlert) { reject(new Error('The update alert can only be called once.')); return }
               this.isShowedUpdateAlert = true
               emit({
                 action: 'showUpdateAlert',
@@ -409,7 +410,7 @@ class UserApiFallbackRuntime {
           }
         })
       },
-      on: (eventName: string, handler: ScriptRequestHandler) => {
+      on: async(eventName: string, handler: ScriptRequestHandler) => {
         if (eventName != EVENT_NAMES.request) return Promise.reject(new Error(`The event is not supported: ${eventName}`))
         this.requestHandler = handler
         return Promise.resolve()
@@ -447,6 +448,8 @@ class UserApiFallbackRuntime {
     sandboxGlobal.eval = blockedEval
 
     try {
+      // 沙箱入口：使用 Function 构造脚本执行环境（与原生 UserApiModule 行为一致），此处为受限沙箱而非随意 eval
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-implied-eval, no-new-func
       const runner = new Function(
         'globalThis',
         'window',
@@ -476,7 +479,7 @@ class UserApiFallbackRuntime {
         blockedEval,
       )
     } catch (error: any) {
-      this.emitInit(false, null, error?.message ?? 'Load script failed')
+      this.emitInit(false, null, String(error?.message ?? 'Load script failed'))
     }
   }
 

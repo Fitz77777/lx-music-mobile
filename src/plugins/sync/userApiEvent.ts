@@ -9,6 +9,9 @@ import { toMD5 } from '@/utils/tools'
 // 应用远端数据期间拦截 list_changed 事件的回推，避免 A/B 双端应答死循环。
 // 用计数而非布尔：并发应用多份远端数据时，先完成的一份不能提前解除抑制。
 let remoteApplyingCount = 0
+// 远端应用激活源时 setApiSource 的 apiSourceUpdated 是异步（rAF）派发的，
+// 用该标记避免把远端选择又回推给其他设备。
+let lastRemoteApiSource: string | null = null
 
 const serializeUserApiData = (data: LX.UserApi.UserApiData) => {
   // 与 server 端快照 key 的序列化方式保持一致（scripts 按 id 排序）
@@ -36,14 +39,21 @@ export const setLocalUserApiData = async(data: LX.UserApi.UserApiData, apiSource
 
     // 完全覆盖类同步流程携带的激活源：目标脚本存在于同步数据中时跟随远端选择，否则保持本机选择
     if (apiSource != null && /^user_api/.test(apiSource) && list.some(api => api.id == apiSource)) {
-      if (apiSource != settingState.setting['common.apiSource']) setApiSource(apiSource)
+      if (apiSource != settingState.setting['common.apiSource']) {
+        lastRemoteApiSource = apiSource
+        setApiSource(apiSource)
+      }
     }
 
     // 当前使用中的源被同步删除时，回退到内置源（与 setUserApi 失败路径的行为一致）
     const currentSource = settingState.setting['common.apiSource']
     if (/^user_api/.test(currentSource) && !list.some(api => api.id == currentSource)) {
       const fallback = apiSourceInfo.find(api => !api.disabled)
-      if (fallback) setApiSource(fallback.id)
+      if (fallback) {
+        // 回退也属于远端应用结果，不应回推
+        lastRemoteApiSource = fallback.id
+        setApiSource(fallback.id)
+      }
     }
 
     setUserApiList(list)
@@ -53,23 +63,36 @@ export const setLocalUserApiData = async(data: LX.UserApi.UserApiData, apiSource
 }
 
 export const registerUserApiActionEvent = (sendUserApiAction: (action: LX.Sync.UserApi.ActionList) => (void | Promise<void>)) => {
-  const list_changed = async(_list: LX.UserApi.UserApiInfo[]) => {
+  const sendLocalData = async() => {
     if (remoteApplyingCount > 0) return
-    const data = await getUserApiData()
-    // 本地变更推送不携带激活源选择，避免把本机选择传播到其他设备
-    await sendUserApiAction({ action: 'user_api_data_overwrite', data: { ...data, apiSource: null } })
+    await sendUserApiAction({ action: 'user_api_data_overwrite', data: await getUserApiData() })
+  }
+
+  const list_changed = async(_list: LX.UserApi.UserApiInfo[]) => {
+    await sendLocalData()
+  }
+  const api_source_updated = async(source: string) => {
+    // 远端应用带来的选择变更不再回推
+    if (lastRemoteApiSource != null && source == lastRemoteApiSource) {
+      lastRemoteApiSource = null
+      return
+    }
+    await sendLocalData()
   }
 
   userApiEvent.on('list_changed', list_changed)
+  global.state_event.on('apiSourceUpdated', api_source_updated)
   return () => {
     userApiEvent.off('list_changed', list_changed)
+    global.state_event.off('apiSourceUpdated', api_source_updated)
   }
 }
 
 export const handleRemoteUserApiAction = async(event: LX.Sync.UserApi.ActionList) => {
   switch (event.action) {
     case 'user_api_data_overwrite':
-      await setLocalUserApiData(event.data)
+      // 广播/推送同样应用激活源选择（脚本存在时）
+      await setLocalUserApiData(event.data, event.data.apiSource ?? null)
       break
     default:
       throw new Error('unknown user api sync action')

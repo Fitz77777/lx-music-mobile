@@ -34,7 +34,7 @@ export const setLocalUserApiData = async(data: LX.UserApi.UserApiData, apiSource
     const list = await overwriteUserApiData(data)
 
     // 完全覆盖类同步流程携带的激活源：目标脚本存在于同步数据中时跟随远端选择，否则保持本机选择
-    if (/^user_api/.test(apiSource ?? '') && list.some(api => api.id == apiSource)) {
+    if (apiSource != null && /^user_api/.test(apiSource) && list.some(api => api.id == apiSource)) {
       if (apiSource != settingState.setting['common.apiSource']) setApiSource(apiSource)
     }
 

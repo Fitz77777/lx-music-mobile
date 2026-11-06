@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - ios
+      - beta
   workflow_dispatch:
 
 concurrency:

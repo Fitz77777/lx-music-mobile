@@ -58,16 +58,30 @@ jobs:
       - name: Build Packages
         env:
           DISABLE_SVG: 1
+          KEYSTORE_STORE_FILE_BASE64: ${{ secrets.KEYSTORE_STORE_FILE_BASE64 }}
+          KEYSTORE_STORE_FILE: ${{ secrets.KEYSTORE_STORE_FILE }}
+          KEYSTORE_STORE_PASSWORD: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
+          KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+          KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
         shell: bash
         run: |
+          : "${KEYSTORE_STORE_FILE_BASE64:?secret KEYSTORE_STORE_FILE_BASE64 未配置}"
+          : "${KEYSTORE_STORE_FILE:?secret KEYSTORE_STORE_FILE 未配置}"
+          : "${KEYSTORE_STORE_PASSWORD:?secret KEYSTORE_STORE_PASSWORD 未配置}"
+          : "${KEYSTORE_KEY_ALIAS:?secret KEYSTORE_KEY_ALIAS 未配置}"
+          : "${KEYSTORE_KEY_PASSWORD:?secret KEYSTORE_KEY_PASSWORD 未配置}"
+          printf '%s' "$KEYSTORE_STORE_FILE_BASE64" | base64 --decode > "app/$KEYSTORE_STORE_FILE"
+          test -s "app/$KEYSTORE_STORE_FILE" || {
+            echo "keystore 解码后为空，请检查 KEYSTORE_STORE_FILE_BASE64 内容（应只含 base64，不要包含 'data:...' 或引号）"
+            exit 1
+          }
           cd android
-          echo ${{ secrets.KEYSTORE_STORE_FILE_BASE64 }} | base64 --decode > app/${{ secrets.KEYSTORE_STORE_FILE }}
           ./gradlew assembleRelease \
-            -PMYAPP_UPLOAD_STORE_FILE='${{ secrets.KEYSTORE_STORE_FILE }}' \
-            -PMYAPP_UPLOAD_KEY_ALIAS='${{ secrets.KEYSTORE_KEY_ALIAS }}' \
-            -PMYAPP_UPLOAD_STORE_PASSWORD='${{ secrets.KEYSTORE_PASSWORD }}' \
-            -PMYAPP_UPLOAD_KEY_PASSWORD='${{ secrets.KEYSTORE_KEY_PASSWORD }}'
-          rm -f app/${{ secrets.KEYSTORE_STORE_FILE }}
+            -PMYAPP_UPLOAD_STORE_FILE="$KEYSTORE_STORE_FILE" \
+            -PMYAPP_UPLOAD_KEY_ALIAS="$KEYSTORE_KEY_ALIAS" \
+            -PMYAPP_UPLOAD_STORE_PASSWORD="$KEYSTORE_STORE_PASSWORD" \
+            -PMYAPP_UPLOAD_KEY_PASSWORD="$KEYSTORE_KEY_PASSWORD"
+          rm -f "app/$KEYSTORE_STORE_FILE"
 
       - name: Generate file MD5
         run: |

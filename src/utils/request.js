@@ -141,7 +141,8 @@ const handleRequestData = async(url, {
     s = s.replace(s.substr(-1), '')
     s = Buffer.from(s, 'base64').toString()
     const v = process.versions.app.split('-')[0].split('.').map(n => n.length < 3 ? n.padStart(3, '0') : n).join('')
-    const v2 = process.versions.app.split('-')[1] || ''
+    // fork 构建的 `-fork.N` 后缀不参与上游请求签名，避免把 fork 标记拼进协议字段
+    const v2 = /-fork\./.test(process.versions.app) ? '' : (process.versions.app.split('-')[1] || '')
     headers[s] = !s || `${(await handleDeflateRaw(Buffer.from(JSON.stringify(`${url}${v}`.match(regx), null, 1).concat(v)).toString('base64'))).toString('hex')}&${parseInt(v)}${v2}`
     delete headers[bHh]
   }

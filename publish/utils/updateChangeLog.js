@@ -9,6 +9,10 @@ const version_bak = JSON.stringify(version, null, 2)
 const changelogPath = jp('../../CHANGELOG.md')
 const { parseChangelog } = require('./parseChangelog')
 
+const repoUrl = pkg.fork
+  ? `https://github.com/${pkg.fork.owner}/${pkg.fork.repo}`
+  : pkg.repository.url.replace(/^git\+(http.+)\.git$/, '$1')
+
 const getPrevVer = () => parseChangelog(fs.readFileSync(changelogPath, 'utf-8').toString()).then(versions => {
   if (!versions.length) throw new Error('CHANGELOG 无法解析到版本号')
   return versions[0].version
@@ -17,7 +21,7 @@ const getPrevVer = () => parseChangelog(fs.readFileSync(changelogPath, 'utf-8').
 const updateChangeLog = async(newVerNum, newChangeLog) => {
   let changeLog = fs.readFileSync(changelogPath, 'utf-8')
   const prevVer = await getPrevVer()
-  const log = `## [${newVerNum}](${pkg.repository.url.replace(/^git\+(http.+)\.git$/, '$1')}/compare/v${prevVer}...v${newVerNum}) - ${formatTime()}\n\n${newChangeLog}`
+  const log = `## [${newVerNum}](${repoUrl}/compare/v${prevVer}...v${newVerNum}) - ${formatTime()}\n\n${newChangeLog}`
   fs.writeFileSync(changelogPath, changeLog.replace(/(## [?0.1.1]?)/, log + '\n$1'), 'utf-8')
 }
 
@@ -32,7 +36,7 @@ module.exports = async newVerNum => {
   version.version = newVerNum
   version.desc = newMDChangeLog.replace(/(?:^|(\n))#{1,6} (.+)\n/g, '$1$2').trim()
   pkg.version = newVerNum
-  pkg.versionCode = pkg.versionCode + 1
+  // versionCode 统一由 scripts/fork-version.js 维护，避免和 fork 版本号重复递增
 
   console.log(chalk.blue('new version: ') + chalk.green(newVerNum))
 

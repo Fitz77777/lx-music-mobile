@@ -1,8 +1,12 @@
 {
   "name": "lx-music-mobile",
-  "version": "1.9.2",
-  "versionCode": 79,
+  "version": "1.9.2-fork.1",
+  "versionCode": 7901,
   "private": true,
+  "fork": {
+    "owner": "Fitz77777",
+    "repo": "lx-music-mobile"
+  },
   "scripts": {
     "dev": "react-native run-android --active-arch-only",
     "ios": "react-native run-ios",
@@ -22,7 +26,9 @@
     "clear": "cd android && gradlew.bat clean",
     "clear:full": "git clean -fdx -e android/keystore.properties -e android/app/*.keystore",
     "build:theme": "node src/theme/themes/createThemes.js",
-    "publish": "node publish"
+    "publish": "node publish",
+    "version:bump": "node scripts/fork-version.js bump",
+    "version:sync": "node scripts/fork-version.js sync"
   },
   "engines": {
     "node": ">= 18",

@@ -1,14 +1,18 @@
 import { Linking, Platform } from 'react-native'
 import { httpGet } from '@/utils/request'
-import { author, name } from '../../package.json'
+import pkg from '../../package.json'
 import { downloadFile, stopDownload, temporaryDirectoryPath } from '@/utils/fs'
 import { getSupportedAbis, installApk } from '@/utils/nativeModules/utils'
 import { APP_PROVIDER_NAME } from '@/config/constant'
 
+// fork 仓库地址；未配置 fork 字段时回退到 package.json 里的原仓库信息
+const owner = pkg.fork?.owner ?? pkg.author.name
+const repo = pkg.fork?.repo ?? pkg.name
+
 export const isInternalUpdateSupported = Platform.OS == 'android'
 export const openReleasePage = async(version) => Linking.openURL(version
-  ? `https://github.com/${author.name}/${name}/releases/tag/v${version}`
-  : `https://github.com/${author.name}/${name}/releases`)
+  ? `https://github.com/${owner}/${repo}/releases/tag/v${version}`
+  : `https://github.com/${owner}/${repo}/releases`)
 
 const abis = [
   'arm64-v8a',
@@ -18,15 +22,12 @@ const abis = [
   'universal',
 ]
 
+// 版本信息放在 release 分支；master 仅用于同步上游
 const address = [
-  [`https://raw.githubusercontent.com/${author.name}/${name}/master/publish/version.json`, 'direct'],
-  ['https://registry.npmjs.org/lx-music-mobile-version-info/latest', 'npm'],
-  [`https://cdn.jsdelivr.net/gh/${author.name}/${name}/publish/version.json`, 'direct'],
-  [`https://fastly.jsdelivr.net/gh/${author.name}/${name}/publish/version.json`, 'direct'],
-  [`https://gcore.jsdelivr.net/gh/${author.name}/${name}/publish/version.json`, 'direct'],
-  ['https://registry.npmmirror.com/lx-music-mobile-version-info/latest', 'npm'],
-  ['https://gitee.com/lyswhut/lx-music-mobile-versions/raw/master/version.json', 'direct'],
-  ['http://cdn.stsky.cn/lx-music/mobile/version.json', 'direct'],
+  [`https://raw.githubusercontent.com/${owner}/${repo}/release/publish/version.json`, 'direct'],
+  [`https://cdn.jsdelivr.net/gh/${owner}/${repo}@release/publish/version.json`, 'direct'],
+  [`https://fastly.jsdelivr.net/gh/${owner}/${repo}@release/publish/version.json`, 'direct'],
+  [`https://gcore.jsdelivr.net/gh/${owner}/${repo}@release/publish/version.json`, 'direct'],
 ]
 
 
@@ -96,7 +97,7 @@ export const downloadNewVersion = async(version, onDownload = noop) => {
     return
   }
   const abi = await getTargetAbi()
-  const url = `https://github.com/${author.name}/${name}/releases/download/v${version}/${name}-v${version}-${abi}.apk`
+  const url = `https://github.com/${owner}/${repo}/releases/download/v${version}/${pkg.name}-v${version}-${abi}.apk`
   let savePath = temporaryDirectoryPath + '/lx-music-mobile.apk'
 
   if (downloadJobId) stopDownload(downloadJobId)

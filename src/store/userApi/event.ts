@@ -9,6 +9,18 @@ class UserApiEvent extends Event {
   list_changed(list: LX.UserApi.UserApiInfo[]) {
     this.emit('list_changed', list)
   }
+
+  user_api_add(info: LX.UserApi.UserApiInfo, isRemote: boolean = false) {
+    this.emit('user_api_add', info, isRemote)
+  }
+
+  user_api_update(info: LX.UserApi.UserApiInfo, script?: string, isRemote: boolean = false) {
+    this.emit('user_api_update', info, script, isRemote)
+  }
+
+  user_api_remove(ids: string[], isRemote: boolean = false) {
+    this.emit('user_api_remove', ids, isRemote)
+  }
 }
 
 

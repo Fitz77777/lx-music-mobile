@@ -34,7 +34,8 @@ export const importUserApi = async(script: string) => {
 
 export const removeUserApi = async(ids: string[]) => {
   const list = await removeUserApiFromStore(ids)
-  action.setUserApiList(list)
+  action.removeUserApi(ids)
+  return list
 }
 
 export const setUserApiAllowShowUpdateAlert = async(id: string, enable: boolean) => {

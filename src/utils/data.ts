@@ -588,6 +588,33 @@ export const overwriteUserApiData = async(data: LX.UserApi.UserApiData): Promise
   return apis
 }
 
+/**
+ * 新增单个自定义源（同步/增量写入用），已存在时忽略
+ */
+export const addUserApiData = async(info: LX.UserApi.UserApiInfo, script: string): Promise<boolean> => {
+  if (userApis.some(api => api.id === info.id)) return false
+  userApis.push(info)
+  await saveDataMultiple([
+    [userApiPrefix, userApis],
+    [`${userApiPrefix}${info.id}`, script],
+  ])
+  return true
+}
+
+/**
+ * 更新单个自定义源信息/脚本（同步增量写入用）
+ * @param script 未携带时保留已有脚本
+ */
+export const updateUserApiData = async(info: LX.UserApi.UserApiInfo, script?: string): Promise<boolean> => {
+  const index = userApis.findIndex(api => api.id === info.id)
+  if (index < 0) return false
+  userApis.splice(index, 1, info)
+  const tasks: Array<Promise<any>> = [saveData(userApiPrefix, userApis)]
+  if (typeof script == 'string' && script != '') tasks.push(saveData(`${userApiPrefix}${info.id}`, script))
+  await Promise.all(tasks)
+  return true
+}
+
 
 const INFO_NAMES = {
   name: 24,
@@ -637,14 +664,13 @@ export const addUserApi = async(script: string): Promise<LX.UserApi.UserApiInfo>
   return apiInfo
 }
 export const removeUserApi = async(ids: string[]) => {
-  if (!userApis) return []
+  const idSet = new Set(ids)
   const _ids: string[] = []
   for (let index = userApis.length - 1; index > -1; index--) {
-    if (ids.includes(userApis[index].id)) {
-      _ids.push(`${userApiPrefix}${userApis[index].id}`)
-      userApis.splice(index, 1)
-      ids.splice(index, 1)
-    }
+    const id = userApis[index].id
+    if (!idSet.has(id)) continue
+    _ids.push(`${userApiPrefix}${id}`)
+    userApis.splice(index, 1)
   }
   await saveData(userApiPrefix, userApis)
   if (_ids.length) await removeDataMultiple(_ids)

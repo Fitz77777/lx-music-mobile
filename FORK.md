@@ -58,6 +58,29 @@ versionCode = max(当前 versionCode + 1, 上游 versionCode × 100)
 
 > 不要直接向 `master` 推送 fork 改动；`master` 只作为上游镜像。
 
+## CI 配置
+
+Android Release 构建需要以下仓库 secrets（Settings → Secrets and variables → Actions）：
+
+| Secret | 说明 |
+| --- | --- |
+| `KEYSTORE_STORE_FILE_BASE64` | keystore 文件的 base64 内容，用 `base64 -w0 xxx.keystore` 生成，必须是单行 |
+| `KEYSTORE_STORE_FILE` | keystore 文件名，例如 `lx-music-release.keystore`（只写文件名，不要带路径） |
+| `KEYSTORE_STORE_PASSWORD` | keystore 密码 |
+| `KEYSTORE_KEY_ALIAS` | key alias |
+| `KEYSTORE_KEY_PASSWORD` | key 密码 |
+
+生成示例：
+
+```bash
+keytool -genkeypair -v -storetype PKCS12 \
+  -keystore lx-music-release.keystore \
+  -alias lxmusic -keyalg RSA -keysize 2048 -validity 10000
+base64 -w0 lx-music-release.keystore
+```
+
+iOS 只构建未签名 IPA，使用 `macos-15` runner，不需要 secrets。
+
 ## 与上游的差异
 
 - `package.json` 增加了 `fork.owner` / `fork.repo`，更新检查和安装包下载地址都指向 fork 仓库。

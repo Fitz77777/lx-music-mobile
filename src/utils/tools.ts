@@ -25,8 +25,8 @@ export const getDeviceLanguage = async() => {
 
 
 export const isAndroid = Platform.OS === 'android'
-// @ts-expect-error
-export const osVer = Platform.constants.Release as string
+// Android: Platform.constants.Release (e.g. "14"); iOS: Platform.Version (e.g. "17.0")
+export const osVer = String(Platform.OS === 'android' ? Platform.constants.Release : Platform.Version)
 
 export const isActive = () => AppState.currentState == 'active'
 

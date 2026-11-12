@@ -15,6 +15,8 @@ import type { InitState } from '@/store/common/state'
 /**
  * iOS 主页外壳：大标题 + 内容分页 + 播放条 + 底部标签栏。
  * 不使用抽屉；页面内容仍复用 Vertical/Main 的懒加载分页逻辑。
+ * 整个外壳放在同一个 SafeAreaView 里，安全区只在最上方和最下方各生效一次，
+ * 避免顶栏/标签栏各自叠加上下内边距。
  */
 export default () => {
   const t = useI18n()
@@ -34,14 +36,12 @@ export default () => {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <SizeView />
-      <SafeAreaView style={{ backgroundColor: colors.barBackground }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.barBackground }}>
         <Header />
-      </SafeAreaView>
-      <View style={{ flex: 1 }}>
-        <Main />
-      </View>
-      <PlayerBar isHome />
-      <SafeAreaView style={{ backgroundColor: colors.barBackground }}>
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
+          <Main />
+        </View>
+        <PlayerBar isHome />
         <IOSTabBar items={items} activeId={activeId} onChange={handleChange} />
       </SafeAreaView>
     </View>

@@ -7,6 +7,7 @@ import IOSSearchBar, { type SearchBarType } from '@/components/ios/SearchBar'
 import IOSText from '@/components/ios/Text'
 import { useSourceListI18n } from '@/components/SourceSelector'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import SearchTypeSelector from '../SearchTypeSelector'
 import { type Source as MusicSource } from '@/store/search/music/state'
 import { type Source as SonglistSource } from '@/store/search/songlist/state'
 
@@ -37,7 +38,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
   onHideTipList,
   onShowTipList,
 }, ref) => {
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, accent, spacing, hairline } = useIOSTheme()
   const searchBarRef = useRef<SearchBarType>(null)
   const [text, setText] = useState('')
   const [sources, setSources] = useState<Sources>([])
@@ -86,11 +87,16 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
 
   return (
     <View style={{
-      paddingHorizontal: spacing.lg,
-      paddingBottom: spacing.sm,
-      backgroundColor: colors.background,
+      backgroundColor: colors.barBackground,
+      borderBottomWidth: hairline,
+      borderBottomColor: colors.separator,
     }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.sm,
+      }}>
         <IOSSearchBar
           ref={searchBarRef}
           value={text}
@@ -121,6 +127,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
           />
         </Pressable>
       </View>
+      <SearchTypeSelector />
     </View>
   )
 })

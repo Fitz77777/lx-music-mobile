@@ -8,15 +8,15 @@ interface Props {
 
 /**
  * iOS 页面容器：系统背景色，不渲染主题背景图。
- * 安全区由 SafeAreaView 处理；导航栏/播放条所在区域使用 bar 背景色。
+ * 整屏（含上下安全区）使用同一个背景色，避免播放页/详情页出现上下色带。
  */
 export default ({ children }: Props) => {
   const { colors } = useIOSTheme()
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.barBackground }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <SizeView />
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
         <View style={{ flex: 1, backgroundColor: colors.background }}>
           {children}
         </View>

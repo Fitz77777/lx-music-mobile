@@ -30,7 +30,7 @@ export const IOS_SETTING_GROUPS: IOSSettingGroup[] = [
     titleKey: 'setting_group_playback',
     items: [
       { id: 'player', titleKey: 'setting_player', icon: 'play', tint: '#FF3B30' },
-      { id: 'lyric_desktop', titleKey: 'setting_lyric_desktop', icon: 'lyric-on', tint: '#FF9500' },
+      // 桌面歌词仅有 Android 原生实现，iOS 不展示该入口
     ],
   },
   {

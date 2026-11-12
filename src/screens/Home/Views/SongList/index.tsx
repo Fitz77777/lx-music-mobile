@@ -2,17 +2,14 @@ import { useEffect, useRef } from 'react'
 import settingState from '@/store/setting/state'
 import Content from './Content'
 import TagList from './TagList'
-import { useTheme } from '@/store/theme/hook'
 import DrawerLayoutFixed, { type DrawerLayoutFixedType } from '@/components/common/DrawerLayoutFixed'
 import { COMPONENT_IDS } from '@/config/constant'
-import { scaleSizeW } from '@/utils/pixelRatio'
+import { useDrawerAppearance } from '../useDrawerAppearance'
 import type { InitState as CommonState } from '@/store/common/state'
-
-const MAX_WIDTH = scaleSizeW(560)
 
 export default () => {
   const drawer = useRef<DrawerLayoutFixedType>(null)
-  const theme = useTheme()
+  const { backgroundColor: drawerBackgroundColor, maxWidth, widthPercentage } = useDrawerAppearance('songlist')
 
   useEffect(() => {
     const handleFixDrawer = (id: CommonState['navActiveId']) => {
@@ -45,11 +42,11 @@ export default () => {
     <DrawerLayoutFixed
       ref={drawer}
       visibleNavNames={[COMPONENT_IDS.home]}
-      widthPercentage={0.8}
-      widthPercentageMax={MAX_WIDTH}
+      widthPercentage={widthPercentage}
+      widthPercentageMax={maxWidth}
       drawerPosition={settingState.setting['common.drawerLayoutPosition']}
       renderNavigationView={navigationView}
-      drawerBackgroundColor={theme['c-content-background']}
+      drawerBackgroundColor={drawerBackgroundColor}
       style={{ elevation: 1 }}
     >
       <Content />

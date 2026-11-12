@@ -34,7 +34,7 @@ export default () => {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <SizeView />
-      <SafeAreaView style={{ backgroundColor: colors.background }}>
+      <SafeAreaView style={{ backgroundColor: colors.barBackground }}>
         <Header />
       </SafeAreaView>
       <View style={{ flex: 1 }}>

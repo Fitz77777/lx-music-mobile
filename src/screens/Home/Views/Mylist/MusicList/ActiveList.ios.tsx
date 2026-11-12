@@ -20,8 +20,8 @@ export interface ActiveListType {
   setVisibleBar: (visible: boolean) => void
 }
 
-/** iOS 我的列表头部：当前列表名（点击打开列表抽屉）+ 搜索 */
-export default forwardRef<ActiveListType, ActiveListProps>(({ onShowSearchBar, onScrollToTop }, ref) => {
+/** iOS 我的列表头部：当前列表名（点击打开列表面板），搜索按钮在导航栏上 */
+export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, ref) => {
   const { colors, spacing, hairline } = useIOSTheme()
   const currentListId = useActiveListId()
   const fetching = useListFetching(currentListId)
@@ -82,13 +82,6 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onShowSearchBar, o
           color={colors.secondaryLabel}
           style={{ marginLeft: 4, transform: [{ rotate: '90deg' }] }}
         />
-      </Pressable>
-      <Pressable
-        onPress={onShowSearchBar}
-        hitSlop={6}
-        style={{ width: 44, height: '100%', alignItems: 'center', justifyContent: 'center' }}
-      >
-        <IOSIcon name="search-2" size={19} color={colors.label} />
       </Pressable>
     </View>
   )

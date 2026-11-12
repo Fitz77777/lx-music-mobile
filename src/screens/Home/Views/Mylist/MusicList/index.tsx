@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import listState from '@/store/list/state'
 import ListMenu, { type ListMenuType, type Position, type SelectInfo } from './ListMenu'
@@ -93,6 +93,14 @@ export default () => {
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     layoutHeightRef.current = e.nativeEvent.layout.height
   }, [])
+
+  useEffect(() => {
+    const showSearch = () => { handleShowSearch() }
+    global.app_event.on('showMylistSearchBar', showSearch)
+    return () => {
+      global.app_event.off('showMylistSearchBar', showSearch)
+    }
+  }, [handleShowSearch])
 
   const handleAddMusic = useCallback((info: SelectInfo) => {
     if (info.selectedList.length) {

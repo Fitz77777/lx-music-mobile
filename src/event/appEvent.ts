@@ -190,6 +190,11 @@ export class AppEvent extends Event {
     this.emit('changeLoveListVisible', visible)
   }
 
+  /** 打开「我的列表」当前列表的搜索栏（iOS 导航栏按钮触发） */
+  showMylistSearchBar() {
+    this.emit('showMylistSearchBar')
+  }
+
   changeHomePageScrollEnabled(enabled: boolean) {
     this.emit('changeHomePageScrollEnabled', enabled)
   }

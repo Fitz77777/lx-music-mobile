@@ -11,7 +11,7 @@ const FADE_OUT = 200
  * iOS Toast 宿主：深色药丸、底部居中、淡入淡出。
  * 挂载在页面容器里，通过 toastEvent 接收 showIOSToast 的消息。
  */
-export default memo(() => {
+export default memo(({ bottomOffset = 100 }: { bottomOffset?: number }) => {
   const { colors, spacing } = useIOSTheme()
   const [message, setMessage] = useState('')
   const [visible, setVisible] = useState(false)
@@ -55,7 +55,7 @@ export default memo(() => {
         position: 'absolute',
         left: 0,
         right: 0,
-        bottom: 100,
+        bottom: bottomOffset,
         alignItems: 'center',
         paddingHorizontal: spacing.xxl,
       }}

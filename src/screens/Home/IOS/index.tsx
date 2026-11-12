@@ -45,7 +45,7 @@ export default () => {
         <PlayerBar isHome />
         <IOSTabBar items={items} activeId={activeId} onChange={handleChange} />
       </SafeAreaView>
-      <IOSToast />
+      <IOSToast bottomOffset={170} />
     </View>
   )
 }

@@ -16,7 +16,13 @@
 | `master` | **只用于同步上游**，保持与 `lyswhut/lx-music-mobile` 一致，不提交 fork 改动，不触发发布 |
 | `release` | fork 的正式发布分支，所有构建与 Release 都由推送到该分支触发 |
 
-版本检查读取的是 `release` 分支上的 `publish/version.json`。
+版本检查按以下顺序读取版本信息，任一源失败自动切换到下一个：
+
+1. `https://github.com/Fitz77777/lx-music-mobile/releases/latest/download/version.json`（随 Release 发布，最新）
+2. `https://raw.githubusercontent.com/Fitz77777/lx-music-mobile/release/publish/version.json`
+3. jsdelivr / fastly / gcore 镜像（有 CDN 分支缓存延迟，作为最后兜底）
+
+无论走哪个源，`publish/version.json` 都必须与 `package.json` 的 `version` / `versionCode` 完全一致。
 
 ## 版本规则
 
@@ -45,6 +51,9 @@ versionCode = max(当前 versionCode + 1, 上游 versionCode × 100)
 
 这样既保证 Android 升级判断始终递增，又给每个上游版本预留 100 个 fork 版本。
 
+- `publish/version.json` 必须包含 `versionCode`，且与 `package.json` 保持一致；不一致时 `release.yml` 的 `verify` job 会直接失败。
+- 客户端按 `versionCode` 判断是否有新版本，`version` 只用于展示；远端数据缺少 `versionCode` 时才回退到版本号字符串比较。
+
 ## 发布流程
 
 1. `git fetch upstream --tags`
@@ -52,9 +61,11 @@ versionCode = max(当前 versionCode + 1, 上游 versionCode × 100)
 3. 把 `master` 合并进 `release`
 4. 合并上游版本时执行 `npm run version:sync -- <上游版本> <上游 versionCode>`
 5. fork 自己迭代时执行 `npm run version:bump`
-6. 更新 `publish/changeLog.md`，运行 `npm run publish` 写入更新日志和 `publish/version.json`
-7. 推送到 `release` 分支
-8. `.github/workflows/release.yml` 构建 Android 包，并创建 `v<version>` tag 与 GitHub Release
+6. 更新 `publish/changeLog.md`，写入本版面向用户的更新说明
+7. 运行 `npm run publish` 生成 `publish/version.json` 与 `CHANGELOG.md` 条目
+8. 运行 `npm run verify:version` 确认版本元数据一致
+9. 提交改动后推送到 `release` 分支
+10. `.github/workflows/release.yml` 先跑 `verify` job 校验版本元数据，再构建 Android/iOS 包，最后创建 `v<version>` tag 与 GitHub Release，并把 `publish/version.json` 作为 Release asset 一并上传
 
 > 不要直接向 `master` 推送 fork 改动；`master` 只作为上游镜像。
 
@@ -84,13 +95,17 @@ iOS 只构建未签名 IPA，使用 `macos-15` runner，不需要 secrets。
 ## 与上游的差异
 
 - `package.json` 增加了 `fork.owner` / `fork.repo`，更新检查和安装包下载地址都指向 fork 仓库。
-- `src/utils/version.js` 从 fork 仓库的 `release` 分支读取 `publish/version.json`，下载地址指向 fork 的 Releases。
+- `src/utils/version.js` 优先读取 Release asset 里的 `version.json`，其次 fork `release` 分支的 raw 文件，再用 jsdelivr 镜像兜底；下载地址指向 fork 的 Releases。
+- 新增 `scripts/verify-version.js`，并在 `release.yml` 里作为 `verify` job 运行，校验 `publish/version.json` 与 `package.json` 的版本元数据一致。
+- `.github/workflows/beta-pack.yml` 的 iOS 构建会去掉 `-fork.N` 后缀，避免非法 `CFBundleShortVersionString`。
 - `src/utils/request.js` 不再把 `-fork.N` 后缀拼进上游请求签名。
-- `publish-version-info.yml` 已移除（它原本会把 release 事件转发到上游的 version-info 仓库）。
+- `publish-version-info.yml` 已移除；版本信息直接随 GitHub Release 发布，不再依赖 npm 包或 version-info 仓库。
 - `publish/utils/parseChangelog.js` 支持解析带 `-fork.N` 的版本号。
-- `publish/utils/updateChangeLog.js` 不再自动递增 `versionCode`，统一由 `scripts/fork-version.js` 维护。
+- `publish/utils/updateChangeLog.js` 不再自动递增 `versionCode`，统一由 `scripts/fork-version.js` 维护，并会写入 `publish/version.json`。
 
 ## 注意
 
 - 本 fork 仍使用 `cn.toside.music.mobile` 包名，签名与上游不同，无法覆盖安装上游版本。
-- `src/core/version.ts` 的自动更新检查目前是关闭状态；如需启用，必须使用 fork 自己的 `version.json`，并按 `versionCode` 而不是 semver 字符串比较版本。
+- 应用内更新只在 Android 上生效：按设备 ABI 下载对应 APK 并交给系统安装器；iOS 只会打开 fork 的 Releases 页面。
+- Android 8+ 首次使用应用内安装需要授予"安装未知应用"权限；如果设备上装的是 debug 签名的测试包，无法直接覆盖安装正式签名包（`INSTALL_FAILED_UPDATE_INCOMPATIBLE`），需先卸载。
+- `universal` APK 的 `versionCode` 低于各 ABI 包（不叠加 ABI 偏移），手动安装时不要用它去覆盖 ABI 包。

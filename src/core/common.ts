@@ -16,6 +16,7 @@ import { getSelectedManagedFolder, saveFontSize, saveViewPrevState, setSelectedM
 import { showPactModal as handleShowPactModal } from '@/navigation'
 import { hideDesktopLyricView } from '@/utils/nativeModules/lyricDesktop'
 import { getPersistedUriList, selectManagedFolder } from '@/utils/fs'
+import { applyProxySetting } from './proxy'
 
 
 const throttleSaveSetting = throttle(() => {
@@ -38,6 +39,7 @@ export const initSetting = async() => {
 export const updateSetting = (setting: Partial<LX.AppSetting>) => {
   settingActions.updateSetting(setting)
   throttleSaveSetting()
+  if (Object.keys(setting).some(key => key.startsWith('network.proxy.'))) applyProxySetting()
 }
 
 export const setLanguage = (locale: Parameters<typeof applyLanguage>[0]) => {

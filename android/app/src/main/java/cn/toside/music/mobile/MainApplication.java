@@ -12,6 +12,8 @@ import java.util.List;
 import cn.toside.music.mobile.cache.CachePackage;
 import cn.toside.music.mobile.crypto.CryptoPackage;
 import cn.toside.music.mobile.lyric.LyricPackage;
+import cn.toside.music.mobile.proxy.ProxyManager;
+import cn.toside.music.mobile.proxy.ProxyPackage;
 import cn.toside.music.mobile.userApi.UserApiPackage;
 import cn.toside.music.mobile.utils.UtilsPackage;
 
@@ -35,6 +37,7 @@ public class MainApplication extends NavigationApplication {
           packages.add(new UtilsPackage());
           packages.add(new CryptoPackage());
           packages.add(new UserApiPackage());
+          packages.add(new ProxyPackage());
           return packages;
         }
 
@@ -61,6 +64,9 @@ public class MainApplication extends NavigationApplication {
 
   @Override
   public void onCreate() {
+    // 必须在任何网络组件初始化之前安装代理，OkHttp 在创建客户端时就会读取默认 ProxySelector
+    ProxyManager.init(this);
+
     super.onCreate();
 
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {

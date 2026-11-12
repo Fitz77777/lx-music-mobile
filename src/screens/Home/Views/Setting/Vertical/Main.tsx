@@ -2,6 +2,7 @@ import { memo } from 'react'
 import { FlatList, type FlatListProps } from 'react-native'
 
 import Basic from '../settings/Basic'
+import Network from '../settings/Network'
 import Player from '../settings/Player'
 import LyricDesktop from '../settings/LyricDesktop'
 import Search from '../settings/Search'
@@ -40,6 +41,7 @@ const ListItem = memo(({
     case 'other': return <Other />
     case 'version': return <Version />
     case 'about': return <About />
+    case 'network': return <Network />
     case 'basic': return <Basic />
   }
 }, () => true)

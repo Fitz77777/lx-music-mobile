@@ -466,6 +466,36 @@ declare global {
       'download.fileName': '歌名 - 歌手' | '歌手 - 歌名' | '歌名'
 
       /**
+       * 是否启用网络代理（仅 Android）
+       */
+      'network.proxy.enable': boolean
+
+      /**
+       * 网络代理类型，目前设置界面只提供 HTTP 代理
+       */
+      'network.proxy.type': 'http' | 'socks5'
+
+      /**
+       * 代理服务器地址
+       */
+      'network.proxy.host': string
+
+      /**
+       * 代理服务器端口
+       */
+      'network.proxy.port': string
+
+      /**
+       * 代理认证用户名，留空表示代理不需要认证
+       */
+      'network.proxy.username': string
+
+      /**
+       * 代理认证密码
+       */
+      'network.proxy.password': string
+
+      /**
        * 是否启用同步
        */
       'sync.enable': boolean

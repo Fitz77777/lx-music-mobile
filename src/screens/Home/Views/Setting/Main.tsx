@@ -1,6 +1,8 @@
 import { forwardRef, useImperativeHandle, useMemo, useState } from 'react'
+import { Platform } from 'react-native'
 
 import Basic from './settings/Basic'
+import Network from './settings/Network'
 import Player from './settings/Player'
 import LyricDesktop from './settings/LyricDesktop'
 import Search from './settings/Search'
@@ -13,6 +15,7 @@ import About from './settings/About'
 
 export const SETTING_SCREENS = [
   'basic',
+  'network',
   'player',
   'lyric_desktop',
   'search',
@@ -25,6 +28,11 @@ export const SETTING_SCREENS = [
 ] as const
 
 export type SettingScreenIds = typeof SETTING_SCREENS[number]
+
+// 网络代理目前只有 Android 实现，其它平台不展示该分组
+export const VISIBLE_SETTING_SCREENS: SettingScreenIds[] = Platform.OS == 'android'
+  ? [...SETTING_SCREENS]
+  : SETTING_SCREENS.filter(id => id != 'network')
 
 // interface MainProps {
 //   onUpdateActiveId: (id: string) => void
@@ -57,6 +65,7 @@ const Main = forwardRef<MainType, {}>((props, ref) => {
       case 'other': return <Other />
       case 'version': return <Version />
       case 'about': return <About />
+      case 'network': return <Network />
       case 'basic':
       default: return <Basic />
     }

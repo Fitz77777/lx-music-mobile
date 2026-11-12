@@ -7,7 +7,7 @@ import { useTheme } from '@/store/theme/hook'
 import { createStyle } from '@/utils/tools'
 import Text from '@/components/common/Text'
 import { scaleSizeH } from '@/utils/pixelRatio'
-import { SETTING_SCREENS, type SettingScreenIds } from '../Main'
+import { VISIBLE_SETTING_SCREENS, type SettingScreenIds } from '../Main'
 import { useI18n } from '@/lang'
 
 type FlatListType = FlatListProps<SettingScreenIds>
@@ -77,7 +77,7 @@ export default ({ onChangeId }: {
     <FlatList
       ref={flatListRef}
       style={styles.container}
-      data={SETTING_SCREENS}
+      data={VISIBLE_SETTING_SCREENS}
       maxToRenderPerBatch={9}
       // updateCellsBatchingPeriod={80}
       windowSize={9}

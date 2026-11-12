@@ -9,6 +9,7 @@ import initSync from './sync'
 import initCommonState from './common'
 import { initDeeplink } from './deeplink'
 import { setApiSource } from '@/core/apiSource'
+import { applyProxySetting } from '@/core/proxy'
 import commonActions from '@/store/common/action'
 import settingState from '@/store/setting/state'
 import { checkUpdate } from '@/core/version'
@@ -39,6 +40,10 @@ export default async() => {
   const setting = await initSetting()
   bootLog('Setting inited.')
   // console.log(setting)
+
+  // 尽早把代理配置同步给原生层，后续的网络请求才会走代理
+  applyProxySetting(setting)
+  bootLog('Proxy inited.')
 
   await initTheme(setting)
   bootLog('Theme inited.')

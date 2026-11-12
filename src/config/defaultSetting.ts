@@ -91,6 +91,13 @@ const defaultSetting: LX.AppSetting = {
 
   'download.fileName': '歌名 - 歌手',
 
+  'network.proxy.enable': false,
+  'network.proxy.type': 'http',
+  'network.proxy.host': '',
+  'network.proxy.port': '',
+  'network.proxy.username': '',
+  'network.proxy.password': '',
+
   'sync.enable': false,
 
   // 'theme.id': 'blue_plus',

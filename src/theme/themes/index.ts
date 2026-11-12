@@ -5,7 +5,7 @@ import settingState from '@/store/setting/state'
 import themeState from '@/store/theme/state'
 import { isUrl } from '@/utils'
 import { privateStorageDirectoryPath } from '@/utils/fs'
-import { type ImageSourcePropType } from 'react-native'
+import { Platform, type ImageSourcePropType } from 'react-native'
 
 export const BG_IMAGES = {
   'china_ink.jpg': require('./images/china_ink.jpg') as ImageSourcePropType,
@@ -108,6 +108,20 @@ export const buildActiveThemeColors = (theme: LX.Theme): LX.ActiveTheme => {
 //   }
 // }
 // type IDS = LocalTheme['id']
+
+/**
+ * 同步查找某个主题（含已加载的自定义主题）。
+ * 用于 iOS 在基础主题被强制切换后，仍能取到用户所选主题的强调色。
+ */
+export const getThemeById = (id: string) => {
+  return themes.find(theme => theme.id == id) ?? userThemes?.find(theme => theme.id == id)
+}
+
+/** 用户当前选择主题的主色（用于 iOS 强调色） */
+export const getSelectedThemePrimary = () => {
+  return getThemeById(settingState.setting['theme.id'])?.config.themeColors['c-primary']
+}
+
 export const getTheme = async() => {
   // fs.promises.readdir()
   const shouldUseDarkColors = themeState.shouldUseDarkColors
@@ -117,9 +131,21 @@ export const getTheme = async() => {
   //     : settingState.setting['theme.lightId']
   //   // : 'china_ink'
   //   : settingState.setting['theme.id']
-  let themeId = settingState.setting['common.isAutoTheme'] && shouldUseDarkColors
-    ? 'black'
-    : settingState.setting['theme.id']
+  let themeId: string
+  if (Platform.OS == 'ios') {
+    // iOS 忽略用户色板：深色固定使用内置深色主题，浅色沿用用户选择的浅色主题。
+    // 这样共享组件（输入框、列表行、弹窗等）在系统深色下也能保持可读。
+    if (shouldUseDarkColors) {
+      themeId = 'black'
+    } else {
+      const selectedTheme = getThemeById(settingState.setting['theme.id'])
+      themeId = selectedTheme?.isDark ? 'green' : settingState.setting['theme.id']
+    }
+  } else {
+    themeId = settingState.setting['common.isAutoTheme'] && shouldUseDarkColors
+      ? 'black'
+      : settingState.setting['theme.id']
+  }
   // themeId = 'naruto'
   // themeId = 'pink'
   // themeId = 'black'
@@ -131,6 +157,11 @@ export const getTheme = async() => {
       themeId = settingState.setting['theme.id'] == 'auto' && shouldUseDarkColors ? 'black' : 'green'
       theme = themes.find(theme => theme.id == themeId) as LX.Theme
     }
+  }
+
+  // 兜底：iOS 下基础主题的亮暗必须与系统一致，避免自定义深色主题在浅色模式下被使用
+  if (Platform.OS == 'ios' && theme.isDark != shouldUseDarkColors) {
+    theme = themes.find(theme => theme.id == (shouldUseDarkColors ? 'black' : 'green')) as LX.Theme
   }
 
   return theme

@@ -1,6 +1,7 @@
 import { Appearance } from 'react-native'
 import { type Options } from 'react-native-navigation'
 import { getIOSColors, resolveIOSAccent } from '@/theme/ios/tokens'
+import { getSelectedThemePrimary } from '@/theme/themes'
 
 /**
  * iOS 原生导航栏选项：大标题 + 毛玻璃背景 + 系统返回按钮。
@@ -10,7 +11,7 @@ import { getIOSColors, resolveIOSAccent } from '@/theme/ios/tokens'
 export const getIOSNavigationOptions = (theme: LX.ActiveTheme, title?: string): Options => {
   const isDark = Appearance.getColorScheme() == 'dark'
   const colors = getIOSColors(isDark)
-  const accent = resolveIOSAccent(theme['c-primary'], isDark)
+  const accent = resolveIOSAccent(getSelectedThemePrimary() ?? theme['c-primary'], isDark)
 
   return {
     topBar: {

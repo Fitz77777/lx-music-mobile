@@ -1,3 +1,4 @@
+import { Appearance, Platform } from 'react-native'
 import { Navigation } from 'react-native-navigation'
 import {
   VERSION_MODAL,
@@ -7,7 +8,11 @@ import {
 import themeState from '@/store/theme/state'
 
 
-export const getStatusBarStyle = (isDark: boolean) => isDark ? 'light' : 'dark'
+export const getStatusBarStyle = (isDark: boolean) => {
+  // iOS 的状态栏跟随系统外观，而不是 LX 主题的亮暗标记
+  if (Platform.OS == 'ios') return Appearance.getColorScheme() == 'dark' ? 'light' : 'dark'
+  return isDark ? 'light' : 'dark'
+}
 
 export const dismissOverlay = async(compId: string) => Navigation.dismissOverlay(compId)
 

@@ -1,4 +1,5 @@
 
+import { Appearance } from 'react-native'
 import { getAppearance, getIsSupportedAutoTheme, isAndroid, onAppearanceChange } from '@/utils/tools'
 import { setShouldUseDarkColors, applyTheme } from '@/core/theme'
 import { getTheme } from '@/theme/themes/index'
@@ -14,8 +15,9 @@ const updateStatusBarStyle = (isDark: boolean) => {
     return
   }
   // iOS 下 RN 的 StatusBar 模块受 UIViewControllerBasedStatusBarAppearance 限制，
-  // 需要通过 react-native-navigation 的 statusBar 选项更新已挂载页面的状态栏样式
-  const style = isDark ? 'light' : 'dark'
+  // 需要通过 react-native-navigation 的 statusBar 选项更新已挂载页面的状态栏样式。
+  // 样式跟随系统外观，忽略 LX 主题的 isDark 标记。
+  const style = Appearance.getColorScheme() == 'dark' ? 'light' : 'dark'
   for (const componentId of Object.values(commonState.componentIds)) {
     if (componentId) Navigation.mergeOptions(componentId, { statusBar: { style } })
   }
@@ -31,7 +33,9 @@ export default async(setting: LX.AppSetting) => {
       if (isAndroid) {
         if (settingState.setting['common.isAutoTheme']) void getTheme().then(applyTheme)
       } else {
-        // iOS 始终跟随系统外观，主题调色板不变，只需同步状态栏样式
+        // iOS 的基础主题始终跟随系统亮暗（深色用内置深色主题），
+        // 外观变化时无条件重新应用主题，保证共享组件配色正确。
+        void getTheme().then(applyTheme)
         updateStatusBarStyle(isDark)
       }
     })

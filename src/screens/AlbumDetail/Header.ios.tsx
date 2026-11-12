@@ -84,7 +84,7 @@ export default memo(({ albumInfo, componentId }: Props) => {
           </View>
           <IOSText variant="footnote" color={colors.secondaryLabel} style={{ marginTop: spacing.xs }}>
             {albumInfo.publishTime ? dateFormat(albumInfo.publishTime, 'Y.M.D') : ''}
-            {albumInfo.size ? ` • ${albumInfo.size} tracks` : ''}
+            {albumInfo.size ? ` • ${global.i18n.t('album_song_count', { num: albumInfo.size })}` : ''}
           </IOSText>
         </View>
       </View>

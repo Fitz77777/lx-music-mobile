@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import { useColorScheme } from 'react-native'
 import { useTheme } from '@/store/theme/hook'
+import { useSettingValue } from '@/store/setting/hook'
+import { getSelectedThemePrimary } from '@/theme/themes'
 import {
   getIOSColors,
   iosBarHeight,
@@ -41,7 +43,14 @@ export const useIOSTheme = (): IOSTheme => {
   const scheme = useColorScheme()
   const isDark = scheme == 'dark'
   const colors = useMemo(() => getIOSColors(isDark), [isDark])
-  const accent = useMemo(() => resolveIOSAccent(theme['c-primary'], isDark), [theme, isDark])
+  // 订阅主题选择：iOS 深色下基础主题被强制为内置深色主题，
+  // 强调色仍需取用户真正选择的主题主色。
+  const selectedThemeId = useSettingValue('theme.id')
+  const accent = useMemo(
+    () => resolveIOSAccent(getSelectedThemePrimary() ?? theme['c-primary'], isDark),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [theme, isDark, selectedThemeId],
+  )
 
   return useMemo(() => ({
     theme,

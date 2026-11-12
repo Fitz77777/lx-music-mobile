@@ -36,16 +36,19 @@ export default memo(({ musicInfo }: {
           hitSlop={8}
           accessibilityRole="button"
           accessibilityLabel={t('back')}
-          style={{ flexDirection: 'row', alignItems: 'center' }}
+          style={{ flexDirection: 'row', alignItems: 'center', zIndex: 1 }}
         >
           <IOSIcon name="chevron-left" size={22} color={accent} />
           <IOSText variant="body" color={accent}>{t('back')}</IOSText>
         </Pressable>
-        <IOSText
-          variant="headline"
-          numberOfLines={1}
-          style={{ flex: 1, marginLeft: spacing.sm, marginRight: 44 + spacing.sm }}
-        >{t('comment_title', { name: musicInfo.name, singer: musicInfo.singer })}</IOSText>
+        <View
+          pointerEvents="none"
+          style={{ position: 'absolute', left: 72, right: 72, alignItems: 'center' }}
+        >
+          <IOSText variant="headline" numberOfLines={1}>
+            {t('comment_title', { name: musicInfo.name, singer: musicInfo.singer })}
+          </IOSText>
+        </View>
       </View>
     </View>
   )

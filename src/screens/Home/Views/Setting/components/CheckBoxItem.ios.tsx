@@ -22,6 +22,7 @@ export default memo(({
   disabled = false,
   need = false,
   size = 1,
+  marginRight = 0,
   marginBottom = 0,
 }: CheckBoxProps) => {
   const { colors, spacing } = useIOSTheme()
@@ -75,7 +76,7 @@ export default memo(({
         disabled={disabled || isDisabled}
         style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
       >
-        <View style={{ flex: 1, paddingRight: spacing.sm }}>{title}</View>
+        <View style={{ flex: 1, paddingRight: spacing.sm, marginRight }}>{title}</View>
         {helpComponent}
       </Pressable>
       <View style={{ marginLeft: spacing.sm }}>

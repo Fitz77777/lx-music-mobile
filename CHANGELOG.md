@@ -6,6 +6,17 @@ Project versioning adheres to [Semantic Versioning](http://semver.org/).
 Commit convention is based on [Conventional Commits](http://conventionalcommits.org).
 Change log format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [1.9.2-fork.3](https://github.com/Fitz77777/lx-music-mobile/compare/v1.9.2-fork.2...v1.9.2-fork.3) - 2026-11-11
+
+### 新增
+
+- Android 新增网络代理支持，可在「设置 → 网络设置」中启用，支持用户名/密码认证与连接测试
+- 代理对网络请求、图片加载、歌曲下载与播放、同步连接生效，本机与局域网地址自动直连
+
+### 优化
+
+- 将「网络设置」分组放在「数据同步」之后
+
 ## [1.9.2-fork.2](https://github.com/Fitz77777/lx-music-mobile/compare/v1.9.2-fork.1...v1.9.2-fork.2) - 2026-11-11
 
 ### 新增

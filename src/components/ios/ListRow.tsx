@@ -1,6 +1,7 @@
 import { memo, type ReactNode } from 'react'
 import { Pressable, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import CheckMark from './CheckMark'
 import IOSIcon from './Icon'
 import IOSText from './Text'
 
@@ -66,7 +67,7 @@ export default memo(({
       {accessory == 'chevron'
         ? <IOSIcon name="chevron-right" size={13} color={colors.tertiaryLabel} style={{ marginLeft: spacing.sm }} />
         : accessory == 'checkmark'
-          ? <IOSIcon name="check" size={17} color={colors.systemBlue} style={{ marginLeft: spacing.sm }} />
+          ? <CheckMark size={13} color={colors.systemBlue} style={{ marginLeft: spacing.sm }} />
           : null}
       {!isLast && showSeparator
         ? (

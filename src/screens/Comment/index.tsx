@@ -1,41 +1,19 @@
 import { memo, useMemo, useEffect, useRef, useState, useCallback } from 'react'
-import { View, TouchableOpacity } from 'react-native'
+import { View } from 'react-native'
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view'
 import Header from './components/Header'
-import { Icon } from '@/components/common/Icon'
+import TabBar from './components/TabBar'
 import CommentHot from './CommentHot'
 import CommentNew from './CommentNew'
 import { createStyle, toast } from '@/utils/tools'
-import { useTheme } from '@/store/theme/hook'
 import Text from '@/components/common/Text'
 import { useI18n } from '@/lang'
 import { COMPONENT_IDS } from '@/config/constant'
 import { setComponentId } from '@/core/common'
 import PageContent from '@/components/PageContent'
 import playerState from '@/store/player/state'
-import { scaleSizeH } from '@/utils/pixelRatio'
-import { BorderWidths } from '@/theme'
 
 type ActiveId = 'hot' | 'new'
-
-const BAR_HEIGHT = scaleSizeH(34)
-
-const HeaderItem = ({ id, label, isActive, onPress }: {
-  id: ActiveId
-  label: string
-  isActive: boolean
-  onPress: (id: ActiveId) => void
-}) => {
-  const theme = useTheme()
-  // console.log(theme)
-  const components = useMemo(() => (
-    <TouchableOpacity style={styles.tabBtn} onPress={() => { !isActive && onPress(id) }}>
-      <Text color={isActive ? theme['c-primary-font-active'] : theme['c-font']}>{label}</Text>
-    </TouchableOpacity>
-  ), [isActive, theme, label, onPress, id])
-
-  return components
-}
 
 const HotCommentPage = memo(({ activeId, musicInfo, onUpdateTotal }: {
   activeId: ActiveId
@@ -84,7 +62,6 @@ export default memo(({ componentId }: {
   const [activeId, setActiveId] = useState<ActiveId>('hot')
   const [musicInfo, setMusicInfo] = useState<LX.Music.MusicInfo | null>(getMusicInfo(playerState.playMusicInfo.musicInfo))
   const t = useI18n()
-  const theme = useTheme()
   const [total, setTotal] = useState({ hot: 0, new: 0 })
 
   useEffect(() => {
@@ -130,16 +107,12 @@ export default memo(({ componentId }: {
   const commentComponent = useMemo(() => {
     return (
       <View style={styles.container}>
-        <View style={{ ...styles.tabHeader, borderBottomColor: theme['c-border-background'], height: BAR_HEIGHT }}>
-          <View style={styles.left}>
-            {tabs.map(({ id, label }) => <HeaderItem id={id} label={label} key={id} isActive={activeId == id} onPress={toggleTab} />)}
-          </View>
-          <View>
-            <TouchableOpacity onPress={refreshComment} style={{ ...styles.btn, width: BAR_HEIGHT }}>
-              <Icon name="available_updates" size={20} color={theme['c-600']} />
-            </TouchableOpacity>
-          </View>
-        </View>
+        <TabBar
+          tabs={tabs}
+          activeId={activeId}
+          onTabChange={toggleTab}
+          onRefresh={refreshComment}
+        />
         <PagerView
           ref={pagerViewRef}
           onPageSelected={onPageSelected}
@@ -155,7 +128,7 @@ export default memo(({ componentId }: {
         </PagerView>
       </View>
     )
-  }, [activeId, musicInfo, onPageSelected, refreshComment, setHotTotal, setNewTotal, tabs, theme, toggleTab])
+  }, [activeId, musicInfo, onPageSelected, refreshComment, setHotTotal, setNewTotal, tabs, toggleTab])
 
   return (
     <PageContent>
@@ -183,32 +156,6 @@ export default memo(({ componentId }: {
 const styles = createStyle({
   container: {
     flex: 1,
-  },
-  tabHeader: {
-    flexDirection: 'row',
-    // paddingLeft: 10,
-    paddingRight: 10,
-    // justifyContent: 'center',
-    borderBottomWidth: BorderWidths.normal,
-  },
-  left: {
-    flex: 1,
-    flexDirection: 'row',
-    paddingLeft: 5,
-  },
-  tabBtn: {
-    // flex: 1,
-    paddingLeft: 10,
-    paddingRight: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-  },
-  btn: {
-    // flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
   },
   pagerView: {
     flex: 1,

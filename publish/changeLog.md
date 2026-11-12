@@ -1,8 +1,8 @@
+### 新增
+
+- 恢复应用内更新检查，版本比较改用 versionCode，避免 fork 版本号被误判
+- 版本信息（version.json）随 GitHub Release 一同发布，发布前自动校验版本元数据
+
 ### 修复
 
-- 修复无法打开 kg 歌单的问题
-- 修复打开某些 kg 歌单时歌曲丢失的问题
-
-### 变更
-
-- 默认禁用音频卸载
+- 修复 iOS 构建时版本号带 -fork.N 后缀导致 CFBundleShortVersionString 非法的问题

@@ -6,6 +6,17 @@ Project versioning adheres to [Semantic Versioning](http://semver.org/).
 Commit convention is based on [Conventional Commits](http://conventionalcommits.org).
 Change log format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [1.9.2-fork.2](https://github.com/Fitz77777/lx-music-mobile/compare/v1.9.2-fork.1...v1.9.2-fork.2) - 2026-11-11
+
+### 新增
+
+- 恢复应用内更新检查，版本比较改用 versionCode，避免 fork 版本号被误判
+- 版本信息（version.json）随 GitHub Release 一同发布，发布前自动校验版本元数据
+
+### 修复
+
+- 修复 iOS 构建时版本号带 -fork.N 后缀导致 CFBundleShortVersionString 非法的问题
+
 ## [1.9.2](https://github.com/lyswhut/lx-music-mobile/compare/v1.9.1...v1.9.2) - 2026-10-30
 
 ### 修复

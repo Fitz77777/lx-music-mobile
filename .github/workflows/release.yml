@@ -20,10 +20,23 @@ env:
   DERIVED_DATA_PATH: build/DerivedData
 
 jobs:
+  # 版本元数据校验：publish/version.json 与 package.json 不一致时直接拦截，
+  # 避免发行出用户收不到更新提示的版本
+  verify:
+    name: Verify version metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v4
+
+      - name: Verify version metadata
+        run: node scripts/verify-version.js
+
   # Android 多 ABI 编译：单次 gradle 构建同时产出
   # arm64-v8a / armeabi-v7a / x86_64 / x86 / universal
   android:
     name: Android (multi-ABI)
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - name: Check out git repository
@@ -78,6 +91,7 @@ jobs:
 
   ios:
     name: iOS IPA
+    needs: verify
     runs-on: macos-15
     env:
       # IOS_P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
@@ -297,6 +311,7 @@ jobs:
           tag_name: v${{ env.PACKAGE_VERSION }}
           # 由 release 分支触发，tag 需要显式指向本次构建的提交
           target_commitish: ${{ github.sha }}
+          # 版本信息随 Release 发布，客户端优先读取 releases/latest/download/version.json
           files: |
             artifacts/lx-music-mobile-v${{ env.PACKAGE_VERSION }}-arm64-v8a.apk
             artifacts/lx-music-mobile-v${{ env.PACKAGE_VERSION }}-armeabi-v7a.apk
@@ -304,5 +319,6 @@ jobs:
             artifacts/lx-music-mobile-v${{ env.PACKAGE_VERSION }}-x86.apk
             artifacts/lx-music-mobile-v${{ env.PACKAGE_VERSION }}-universal.apk
             artifacts/lx-music-mobile-v${{ env.PACKAGE_VERSION }}-ios-unsigned.ipa
+            publish/version.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

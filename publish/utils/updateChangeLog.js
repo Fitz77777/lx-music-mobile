@@ -32,8 +32,10 @@ module.exports = async newVerNum => {
   version.history.unshift({
     version: version.version,
     desc: version.desc,
+    versionCode: version.versionCode,
   })
   version.version = newVerNum
+  version.versionCode = pkg.versionCode
   version.desc = newMDChangeLog.replace(/(?:^|(\n))#{1,6} (.+)\n/g, '$1$2').trim()
   pkg.version = newVerNum
   // versionCode 统一由 scripts/fork-version.js 维护，避免和 fork 版本号重复递增

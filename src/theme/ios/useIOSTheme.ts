@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useColorScheme } from 'react-native'
 import { useTheme } from '@/store/theme/hook'
 import {
   getIOSColors,
@@ -35,7 +36,10 @@ export interface IOSTheme {
 
 export const useIOSTheme = (): IOSTheme => {
   const theme = useTheme()
-  const isDark = theme.isDark
+  // iOS 始终跟随系统外观：不使用 LX 主题里的亮暗标记，也不依赖「自动主题」开关。
+  // LX 主题在这里只提供强调色。
+  const scheme = useColorScheme()
+  const isDark = scheme == 'dark'
   const colors = useMemo(() => getIOSColors(isDark), [isDark])
   const accent = useMemo(() => resolveIOSAccent(theme['c-primary'], isDark), [theme, isDark])
 

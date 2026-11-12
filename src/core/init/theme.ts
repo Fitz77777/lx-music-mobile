@@ -26,8 +26,14 @@ export default async(setting: LX.AppSetting) => {
     setShouldUseDarkColors(getAppearance() == 'dark')
 
     onAppearanceChange(color => {
-      setShouldUseDarkColors((color ?? 'light') == 'dark')
-      if (settingState.setting['common.isAutoTheme']) void getTheme().then(applyTheme)
+      const isDark = (color ?? 'light') == 'dark'
+      setShouldUseDarkColors(isDark)
+      if (isAndroid) {
+        if (settingState.setting['common.isAutoTheme']) void getTheme().then(applyTheme)
+      } else {
+        // iOS 始终跟随系统外观，主题调色板不变，只需同步状态栏样式
+        updateStatusBarStyle(isDark)
+      }
     })
   }
 

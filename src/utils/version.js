@@ -23,7 +23,9 @@ const abis = [
 ]
 
 // 版本信息放在 release 分支；master 仅用于同步上游
+// 优先读 Release asset：github.com 域名比 raw 更易访问，且发布后没有 CDN 分支缓存延迟
 const address = [
+  [`https://github.com/${owner}/${repo}/releases/latest/download/version.json`, 'direct'],
   [`https://raw.githubusercontent.com/${owner}/${repo}/release/publish/version.json`, 'direct'],
   [`https://cdn.jsdelivr.net/gh/${owner}/${repo}@release/publish/version.json`, 'direct'],
   [`https://fastly.jsdelivr.net/gh/${owner}/${repo}@release/publish/version.json`, 'direct'],

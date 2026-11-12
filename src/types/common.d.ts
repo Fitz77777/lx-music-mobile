@@ -12,5 +12,6 @@ declare namespace LX {
   interface VersionInfo {
     version: string
     desc: string
+    versionCode?: number
   }
 }

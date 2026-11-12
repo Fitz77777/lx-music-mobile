@@ -31,9 +31,10 @@ const Content = memo(({ title, newVersionInfo }: {
 
   const history = useMemo(() => {
     if (!newVersionInfo?.history) return []
-    let arr = []
+    const arr = []
     for (const ver of newVersionInfo?.history) {
-      if (compareVer(currentVer, ver.version) < 0) arr.push(ver)
+      // fork 版本号形如 1.9.2-fork.1，比较历史版本时只看基础版本
+      if (compareVer(baseVer(currentVer), baseVer(ver.version)) < 0) arr.push(ver)
     }
     return arr
   }, [newVersionInfo])
@@ -74,6 +75,10 @@ const Content = memo(({ title, newVersionInfo }: {
 })
 
 const currentVer = process.versions.app
+
+// 去掉 fork 版本号后缀，用于跨 fork 版本比较历史记录
+const baseVer = (v: string) => v.replace(/-fork\.\d+$/, '')
+
 const VersionModal = ({ componentId }: { componentId: string }) => {
   const theme = useTheme()
   const t = useI18n()

@@ -8,6 +8,7 @@ export interface ProgressInfo {
 export interface VersionInfo {
   version: string
   desc: string
+  versionCode?: number
   history?: LX.VersionInfo[]
 }
 
@@ -30,16 +31,12 @@ const state: InitState = {
   showModal: false,
   versionInfo: {
     version,
-    newVersion: {
-      version,
-      desc: '',
-      history: [],
-    },
+    newVersion: null,
     showModal: false,
     reCheck: false,
     isUnknown: false,
-    isLatest: true,
-    status: 'idle',
+    isLatest: false,
+    status: 'checking',
   },
   ignoreVersion: null,
   progress: {

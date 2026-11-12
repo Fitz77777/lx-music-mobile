@@ -137,6 +137,8 @@ jobs:
           set -o pipefail
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           PACKAGE_VERSION_CODE=$(node -p "require('./package.json').versionCode")
+          # CFBundleShortVersionString 只允许 1-3 段数字，去掉 -fork.N 后缀
+          IOS_MARKETING_VERSION="${PACKAGE_VERSION%%-*}"
           xcodebuild \
             -workspace "$IOS_WORKSPACE" \
             -scheme "$IOS_SCHEME" \
@@ -145,7 +147,7 @@ jobs:
             -destination 'generic/platform=iOS' \
             -derivedDataPath "$DERIVED_DATA_PATH" \
             PRODUCT_BUNDLE_IDENTIFIER="$IOS_BUNDLE_IDENTIFIER" \
-            MARKETING_VERSION="$PACKAGE_VERSION" \
+            MARKETING_VERSION="$IOS_MARKETING_VERSION" \
             CURRENT_PROJECT_VERSION="$PACKAGE_VERSION_CODE" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \

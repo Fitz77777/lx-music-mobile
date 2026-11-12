@@ -58,12 +58,12 @@ export default memo(({
   }, [helpTitle, helpDesc, colors, spacing])
 
   const title = label
-    ? <IOSText variant="body" size={size == 1 ? undefined : 17 * size} numberOfLines={2}>{label}</IOSText>
+    ? <IOSText variant="callout" size={size == 1 ? undefined : 17 * size} numberOfLines={2}>{label}</IOSText>
     : children
 
   return (
     <View style={{
-      minHeight: 44,
+      minHeight: 48,
       paddingHorizontal: spacing.lg,
       paddingVertical: spacing.sm + 2,
       marginBottom,

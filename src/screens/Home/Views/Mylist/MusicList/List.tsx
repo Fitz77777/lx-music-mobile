@@ -1,6 +1,6 @@
 import { playList } from '@/core/player/player'
 import { useMemo, useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { FlatList, type NativeScrollEvent, type NativeSyntheticEvent, type FlatListProps } from 'react-native'
+import { FlatList, Platform, type NativeScrollEvent, type NativeSyntheticEvent, type FlatListProps } from 'react-native'
 
 import listState from '@/store/list/state'
 import playerState from '@/store/player/state'
@@ -14,6 +14,7 @@ import type { Position } from './ListMenu'
 import type { SelectMode } from './MultipleModeBar'
 import { useActiveListId } from '@/store/list/hook'
 import { useSettingValue } from '@/store/setting/hook'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 
 type FlatListType = FlatListProps<LX.Music.MusicInfo>
 
@@ -47,6 +48,7 @@ const usePlayIndex = () => {
 const List = forwardRef<ListType, ListProps>(({ onShowMenu, onMuiltSelectMode, onSelectAll }, ref) => {
   // const t = useI18n()
   const flatListRef = useRef<FlatList>(null)
+  const iosTheme = useIOSTheme()
   const [currentList, setList] = useState<LX.List.ListMusics>([])
   const listFirstScrollRef = useRef(false)
   const isMultiSelectModeRef = useRef(false)
@@ -261,6 +263,7 @@ const List = forwardRef<ListType, ListProps>(({ onShowMenu, onMuiltSelectMode, o
       rowInfo={rowInfo.current}
       isShowAlbumName={isShowAlbumName}
       isShowInterval={isShowInterval}
+      isLast={index == currentList.length - 1}
     />
   )
   const getkey: FlatListType['keyExtractor'] = item => item.id
@@ -268,11 +271,21 @@ const List = forwardRef<ListType, ListProps>(({ onShowMenu, onMuiltSelectMode, o
     return { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
   }
 
+  const listCardStyle = Platform.OS == 'ios' && currentList.length
+    ? {
+        marginHorizontal: 16,
+        marginTop: 8,
+        borderRadius: 12,
+        overflow: 'hidden' as const,
+        backgroundColor: iosTheme.colors.secondaryGroupedBackground,
+      }
+    : null
+
   return (
     <FlatList
       ref={flatListRef}
       onScroll={handleScroll}
-      style={styles.list}
+      style={[styles.list, listCardStyle]}
       data={currentList}
       maxToRenderPerBatch={4}
       numColumns={rowInfo.current.rowNum}

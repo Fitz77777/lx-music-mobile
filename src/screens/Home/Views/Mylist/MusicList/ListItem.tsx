@@ -15,7 +15,7 @@ export const ITEM_HEIGHT = scaleSizeH(LIST_ITEM_HEIGHT)
 const PIC_SIZE = scaleSizeH(40)
 
 
-export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval }: {
+export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval, isLast }: {
   item: LX.Music.MusicInfo
   index: number
   activeIndex: number
@@ -26,6 +26,8 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
   rowInfo: RowInfo
   isShowAlbumName: boolean
   isShowInterval: boolean
+  /** iOS 用于隐藏最后一行分隔线，Android 忽略 */
+  isLast?: boolean
 }) => {
   const theme = useTheme()
 

@@ -31,7 +31,7 @@ const useQualityTag = (musicInfo: LX.Music.MusicInfoOnline) => {
   return info
 }
 
-export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu, selectedList, rowInfo, isShowAlbumName, isShowInterval }: {
+export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu, selectedList, rowInfo, isShowAlbumName, isShowInterval, isLast }: {
   item: LX.Music.MusicInfoOnline
   index: number
   showSource?: boolean
@@ -42,6 +42,8 @@ export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu
   rowInfo: RowInfo
   isShowAlbumName: boolean
   isShowInterval: boolean
+  /** iOS 用于隐藏最后一行分隔线，Android 忽略 */
+  isLast?: boolean
 }) => {
   const theme = useTheme()
 

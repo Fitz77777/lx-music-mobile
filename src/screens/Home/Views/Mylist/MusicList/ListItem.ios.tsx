@@ -1,23 +1,29 @@
 import { memo, useRef } from 'react'
 import { View, TouchableOpacity } from 'react-native'
 
-import Badge from '@/components/common/Badge'
 import { Icon } from '@/components/common/Icon'
 import Image from '@/components/common/Image'
+import IOSBadge from '@/components/ios/Badge'
 import IOSText from '@/components/ios/Text'
 import { useAssertApiSupport } from '@/store/common/hook'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import type { RowInfo } from '@/utils/tools'
 
-/** iOS 音乐行高（pt） */
-export const ITEM_HEIGHT = 64
-const PIC_SIZE = 44
+/** iOS 音乐行高（pt，原型 68pt / 封面 56pt） */
+export const ITEM_HEIGHT = 68
+const PIC_SIZE = 56
+const ROW_PADDING = 14
+const INDEX_WIDTH = 22
+const COVER_MARGIN = 8
+const TEXT_GAP = 12
+/** 分隔线内缩到文字起点 */
+const SEPARATOR_INSET = ROW_PADDING + INDEX_WIDTH + COVER_MARGIN + PIC_SIZE + TEXT_GAP
 
 /**
  * iOS「我的列表」歌曲行：序号/播放标记 + 封面 + 标题 + 音源/歌手 + 时长 + 更多。
  * 与 Android 版共用 props 与 memo 比较逻辑。
  */
-export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval }: {
+export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval, isLast = false }: {
   item: LX.Music.MusicInfo
   index: number
   activeIndex: number
@@ -28,11 +34,13 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
   rowInfo: RowInfo
   isShowAlbumName: boolean
   isShowInterval: boolean
+  isLast?: boolean
 }) => {
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, accent, hairline, withAlpha } = useIOSTheme()
+  const isSupported = useAssertApiSupport(item.source)
 
   const isSelected = selectedList.includes(item)
-  const isSupported = useAssertApiSupport(item.source)
+
   const moreButtonRef = useRef<TouchableOpacity>(null)
   const handleShowMenu = () => {
     if (moreButtonRef.current?.measure) {
@@ -51,20 +59,20 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
       height: ITEM_HEIGHT,
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: isSelected ? colors.secondaryFill : 'transparent',
+      backgroundColor: isSelected ? withAlpha(accent, 0.12) : 'transparent',
       opacity: isSupported ? 1 : 0.5,
     }}>
       <TouchableOpacity
-        style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.lg }}
+        style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingLeft: ROW_PADDING }}
         activeOpacity={0.5}
         onPress={() => { onPress(item, index) }}
         onLongPress={() => { onLongPress(item, index) }}
       >
-        <View style={{ width: 22, alignItems: 'center' }}>
+        <View style={{ width: INDEX_WIDTH, alignItems: 'center' }}>
           {
             active
               ? <Icon name="play-outline" size={14} color={accent} />
-              : <IOSText variant="footnote" color={colors.secondaryLabel}>{index + 1}</IOSText>
+              : <IOSText size={13} color={colors.secondaryLabel}>{index + 1}</IOSText>
           }
         </View>
         <Image
@@ -72,30 +80,31 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
           style={{
             width: PIC_SIZE,
             height: PIC_SIZE,
-            borderRadius: 6,
-            marginLeft: spacing.sm,
+            borderRadius: 8,
+            marginLeft: COVER_MARGIN,
             backgroundColor: colors.tertiaryFill,
           }}
         />
-        <View style={{ flex: 1, marginLeft: spacing.md, justifyContent: 'center' }}>
+        <View style={{ flex: 1, marginLeft: TEXT_GAP, justifyContent: 'center' }}>
           <IOSText
-            variant="body"
+            size={16}
+            weight="500"
             color={active ? accent : colors.label}
             numberOfLines={1}
           >{item.name}</IOSText>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-            <Badge>{item.source.toUpperCase()}</Badge>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 6 }}>
+            <IOSBadge variant="source">{item.source.toUpperCase()}</IOSBadge>
             <IOSText
-              variant="footnote"
+              size={13}
               color={colors.secondaryLabel}
               numberOfLines={1}
-              style={{ flexShrink: 1, marginLeft: 4 }}
+              style={{ flexShrink: 1 }}
             >{singer}</IOSText>
           </View>
         </View>
         {
           isShowInterval
-            ? <IOSText variant="footnote" color={colors.secondaryLabel} numberOfLines={1}>{item.interval}</IOSText>
+            ? <IOSText size={15} color={colors.secondaryLabel} numberOfLines={1}>{item.interval}</IOSText>
             : null
         }
       </TouchableOpacity>
@@ -103,10 +112,29 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         onPress={handleShowMenu}
         ref={moreButtonRef}
         hitSlop={6}
-        style={{ width: 44, height: '100%', alignItems: 'center', justifyContent: 'center' }}
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: 16,
+          marginHorizontal: 6,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
         <Icon name="dots-vertical" color={colors.secondaryLabel} rawSize={18} />
       </TouchableOpacity>
+      {!isLast
+        ? (
+            <View style={{
+              position: 'absolute',
+              left: SEPARATOR_INSET,
+              right: 0,
+              bottom: 0,
+              height: hairline,
+              backgroundColor: colors.rowSeparator,
+            }} />
+          )
+        : null}
     </View>
   )
 }, (prevProps, nextProps) => {
@@ -114,6 +142,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
     prevProps.index === nextProps.index &&
     prevProps.isShowAlbumName === nextProps.isShowAlbumName &&
     prevProps.isShowInterval === nextProps.isShowInterval &&
+    prevProps.isLast === nextProps.isLast &&
     prevProps.activeIndex != nextProps.index &&
     nextProps.activeIndex != nextProps.index &&
     nextProps.selectedList.includes(nextProps.item) == prevProps.selectedList.includes(prevProps.item)

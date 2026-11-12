@@ -1,42 +1,45 @@
 import { memo, useRef } from 'react'
 import { View, TouchableOpacity } from 'react-native'
 
-import Badge, { type BadgeType } from '@/components/common/Badge'
 import { Icon } from '@/components/common/Icon'
 import Image from '@/components/common/Image'
+import IOSBadge from '@/components/ios/Badge'
 import IOSText from '@/components/ios/Text'
 import { useI18n } from '@/lang'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import type { RowInfo } from '@/utils/tools'
 
-/** iOS 音乐行高（pt） */
-export const ITEM_HEIGHT = 64
-const PIC_SIZE = 44
+/** iOS 歌曲行高（pt，原型 68pt / 封面 56pt） */
+export const ITEM_HEIGHT = 68
+const PIC_SIZE = 56
+const ROW_PADDING = 14
+/** 分隔线内缩到文字起点：左内边距 + 封面 + 间距 */
+const SEPARATOR_INSET = ROW_PADDING + PIC_SIZE + 12
 
 const useQualityTag = (musicInfo: LX.Music.MusicInfoOnline) => {
   const t = useI18n()
-  const info: { type: BadgeType | null, text: string } = { type: null, text: '' }
+  const info: { variant: 'sq' | 'hq' | 'bit' | null, text: string } = { variant: null, text: '' }
   if (musicInfo.meta._qualitys.flac24bit) {
-    info.type = 'secondary'
+    info.variant = 'bit'
     info.text = t('quality_lossless_24bit')
   } else if (musicInfo.meta._qualitys.flac ?? musicInfo.meta._qualitys.ape) {
-    info.type = 'secondary'
+    info.variant = 'sq'
     info.text = t('quality_lossless')
   } else if (musicInfo.meta._qualitys['320k']) {
-    info.type = 'tertiary'
+    info.variant = 'hq'
     info.text = t('quality_high_quality')
   }
-
   return info
 }
 
 /**
- * iOS 音乐列表行：封面 + 标题 + 歌手/专辑 + 时长 + 更多。
+ * iOS 在线歌曲行：封面 56 + 标题 + 音质徽标/音源/歌手 + 时长 + 更多。
  * 与 Android 版共用 props 与 memo 比较逻辑。
  */
-export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu, selectedList, rowInfo, isShowAlbumName, isShowInterval }: {
+export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval, showSource, isLast = false }: {
   item: LX.Music.MusicInfoOnline
   index: number
+  activeIndex: number
   showSource?: boolean
   onPress: (item: LX.Music.MusicInfoOnline, index: number) => void
   onLongPress: (item: LX.Music.MusicInfoOnline, index: number) => void
@@ -45,8 +48,9 @@ export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu
   rowInfo: RowInfo
   isShowAlbumName: boolean
   isShowInterval: boolean
+  isLast?: boolean
 }) => {
-  const { colors, spacing } = useIOSTheme()
+  const { colors, accent, spacing, hairline, withAlpha } = useIOSTheme()
 
   const isSelected = selectedList.includes(item)
 
@@ -68,10 +72,10 @@ export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu
       height: ITEM_HEIGHT,
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: isSelected ? colors.secondaryFill : 'transparent',
+      backgroundColor: isSelected ? withAlpha(accent, 0.12) : 'transparent',
     }}>
       <TouchableOpacity
-        style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.lg }}
+        style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingLeft: ROW_PADDING }}
         activeOpacity={0.5}
         onPress={() => { onPress(item, index) }}
         onLongPress={() => { onLongPress(item, index) }}
@@ -81,26 +85,26 @@ export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu
           style={{
             width: PIC_SIZE,
             height: PIC_SIZE,
-            borderRadius: 6,
+            borderRadius: 8,
             backgroundColor: colors.tertiaryFill,
           }}
         />
         <View style={{ flex: 1, marginLeft: spacing.md, justifyContent: 'center' }}>
-          <IOSText variant="body" numberOfLines={1}>{item.name}</IOSText>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-            {tagInfo.type ? <Badge type={tagInfo.type}>{tagInfo.text}</Badge> : null}
-            {showSource ? <Badge type="tertiary">{item.source}</Badge> : null}
+          <IOSText size={16} weight="500" numberOfLines={1}>{item.name}</IOSText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 6 }}>
+            {tagInfo.variant ? <IOSBadge variant={tagInfo.variant}>{tagInfo.text}</IOSBadge> : null}
+            {showSource ? <IOSBadge variant="source">{item.source}</IOSBadge> : null}
             <IOSText
-              variant="footnote"
+              size={13}
               color={colors.secondaryLabel}
               numberOfLines={1}
-              style={{ flexShrink: 1, marginLeft: tagInfo.type != null || showSource ? 4 : 0 }}
+              style={{ flexShrink: 1 }}
             >{singer}</IOSText>
           </View>
         </View>
         {
           isShowInterval
-            ? <IOSText variant="footnote" color={colors.secondaryLabel} numberOfLines={1}>{item.interval}</IOSText>
+            ? <IOSText size={15} color={colors.secondaryLabel} numberOfLines={1}>{item.interval}</IOSText>
             : null
         }
       </TouchableOpacity>
@@ -108,10 +112,29 @@ export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu
         onPress={handleShowMenu}
         ref={moreButtonRef}
         hitSlop={6}
-        style={{ width: 44, height: '100%', alignItems: 'center', justifyContent: 'center' }}
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: 16,
+          marginHorizontal: 6,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
         <Icon name="dots-vertical" color={colors.secondaryLabel} rawSize={18} />
       </TouchableOpacity>
+      {!isLast
+        ? (
+            <View style={{
+              position: 'absolute',
+              left: SEPARATOR_INSET,
+              right: 0,
+              bottom: 0,
+              height: hairline,
+              backgroundColor: colors.rowSeparator,
+            }} />
+          )
+        : null}
     </View>
   )
 }, (prevProps, nextProps) => {
@@ -119,6 +142,7 @@ export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu
     prevProps.index === nextProps.index &&
     prevProps.isShowAlbumName === nextProps.isShowAlbumName &&
     prevProps.isShowInterval === nextProps.isShowInterval &&
+    prevProps.isLast === nextProps.isLast &&
     nextProps.selectedList.includes(nextProps.item) == prevProps.selectedList.includes(prevProps.item)
   )
 })

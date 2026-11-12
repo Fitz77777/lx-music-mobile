@@ -19,7 +19,7 @@ export interface HeaderBarType {
 
 /** iOS 排行榜头部：音源按钮 + 当前榜单（点击打开榜单抽屉） */
 export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourceChange }, ref) => {
-  const { colors, accent, spacing, hairline } = useIOSTheme()
+  const { colors, accent, spacing } = useIOSTheme()
   const [source, setSource] = useState<Source>('kw')
   const [boardName, setBoardName] = useState('')
 
@@ -48,9 +48,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
       alignItems: 'center',
       height: 44,
       paddingHorizontal: spacing.lg,
-      borderBottomWidth: hairline,
-      borderBottomColor: colors.separator,
-      backgroundColor: colors.background,
+      backgroundColor: colors.groupedBackground,
     }}>
       <Pressable
         onPress={() => { void handleShowSourceMenu() }}

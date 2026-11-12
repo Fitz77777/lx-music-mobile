@@ -17,8 +17,8 @@ export default memo(({ value, onValueChange, disabled }: IOSSwitchProps) => {
       value={value}
       disabled={disabled}
       onValueChange={onValueChange}
-      trackColor={{ false: colors.fill, true: accent }}
-      ios_backgroundColor={colors.fill}
+      trackColor={{ false: colors.switchTrackOff, true: accent }}
+      ios_backgroundColor={colors.switchTrackOff}
     />
   )
 })

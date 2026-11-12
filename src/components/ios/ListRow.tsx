@@ -52,7 +52,7 @@ export default memo(({
       {leading ? <View style={{ marginRight: spacing.md }}>{leading}</View> : null}
       <View style={{ flex: 1, justifyContent: 'center' }}>
         <IOSText
-          variant="body"
+          variant="callout"
           color={titleColor}
           numberOfLines={1}
           style={titleStyle}
@@ -77,7 +77,7 @@ export default memo(({
               right: 0,
               bottom: 0,
               height: hairline,
-              backgroundColor: colors.separator,
+              backgroundColor: colors.rowSeparator,
             }} />
           )
         : null}
@@ -85,7 +85,7 @@ export default memo(({
   )
 
   const rowStyle: StyleProp<ViewStyle> = [{
-    minHeight: minHeight ?? 44,
+    minHeight: minHeight ?? 48,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md - 1,
     flexDirection: 'row',

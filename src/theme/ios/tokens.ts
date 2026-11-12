@@ -11,9 +11,16 @@ export interface IOSColors {
   background: string
   secondaryBackground: string
   tertiaryBackground: string
+  /**
+   * 页面底色（原型 --bg，分组灰）。
+   * 亮色 #F2F2F7 / 暗色 #000000，卡片用 secondaryGroupedBackground。
+   */
   groupedBackground: string
+  /** 卡片底色（原型 --card） */
   secondaryGroupedBackground: string
   tertiaryGroupedBackground: string
+  /** 卡片内行按下时的底色 */
+  cardPressed: string
 
   // 文本
   label: string
@@ -25,6 +32,8 @@ export interface IOSColors {
   // 分隔线
   separator: string
   opaqueSeparator: string
+  /** 卡片内的行分隔线（原型 --separator） */
+  rowSeparator: string
 
   // 填充
   fill: string
@@ -38,7 +47,16 @@ export interface IOSColors {
   systemRed: string
   systemOrange: string
   systemYellow: string
+  systemPurple: string
   systemGray: string
+
+  // 设置图标 / 开关
+  /** 设置行图标底色（中性灰） */
+  iconTileBackground: string
+  /** 设置行图标颜色 */
+  iconTileForeground: string
+  /** 开关关闭态轨道色 */
+  switchTrackOff: string
 
   // 导航栏 / 标签栏
   barBackground: string
@@ -47,6 +65,10 @@ export interface IOSColors {
   // 遮罩 / 阴影
   overlay: string
   shadow: string
+
+  // Toast
+  toastBackground: string
+  toastLabel: string
 }
 
 export const iosColorsLight: IOSColors = {
@@ -56,6 +78,7 @@ export const iosColorsLight: IOSColors = {
   groupedBackground: '#F2F2F7',
   secondaryGroupedBackground: '#FFFFFF',
   tertiaryGroupedBackground: '#F2F2F7',
+  cardPressed: '#F2F2F7',
 
   label: '#000000',
   secondaryLabel: 'rgba(60, 60, 67, 0.6)',
@@ -65,6 +88,7 @@ export const iosColorsLight: IOSColors = {
 
   separator: 'rgba(60, 60, 67, 0.29)',
   opaqueSeparator: '#C6C6C8',
+  rowSeparator: 'rgba(60, 60, 67, 0.12)',
 
   fill: 'rgba(120, 120, 128, 0.2)',
   secondaryFill: 'rgba(120, 120, 128, 0.16)',
@@ -76,13 +100,21 @@ export const iosColorsLight: IOSColors = {
   systemRed: '#FF3B30',
   systemOrange: '#FF9500',
   systemYellow: '#FFCC00',
+  systemPurple: '#AF52DE',
   systemGray: '#8E8E93',
+
+  iconTileBackground: 'rgba(120, 120, 128, 0.13)',
+  iconTileForeground: '#6E6E73',
+  switchTrackOff: '#E9E9EB',
 
   barBackground: 'rgba(249, 249, 249, 0.94)',
   barBackgroundOpaque: '#F9F9F9',
 
   overlay: 'rgba(0, 0, 0, 0.3)',
   shadow: 'rgba(0, 0, 0, 0.12)',
+
+  toastBackground: 'rgba(28, 28, 30, 0.92)',
+  toastLabel: '#FFFFFF',
 }
 
 export const iosColorsDark: IOSColors = {
@@ -92,6 +124,7 @@ export const iosColorsDark: IOSColors = {
   groupedBackground: '#000000',
   secondaryGroupedBackground: '#1C1C1E',
   tertiaryGroupedBackground: '#2C2C2E',
+  cardPressed: '#2C2C2E',
 
   label: '#FFFFFF',
   secondaryLabel: 'rgba(235, 235, 245, 0.6)',
@@ -101,6 +134,7 @@ export const iosColorsDark: IOSColors = {
 
   separator: 'rgba(84, 84, 88, 0.6)',
   opaqueSeparator: '#38383A',
+  rowSeparator: 'rgba(84, 84, 88, 0.65)',
 
   fill: 'rgba(120, 120, 128, 0.36)',
   secondaryFill: 'rgba(120, 120, 128, 0.32)',
@@ -112,13 +146,21 @@ export const iosColorsDark: IOSColors = {
   systemRed: '#FF453A',
   systemOrange: '#FF9F0A',
   systemYellow: '#FFD60A',
+  systemPurple: '#BF5AF2',
   systemGray: '#8E8E93',
+
+  iconTileBackground: 'rgba(120, 120, 128, 0.24)',
+  iconTileForeground: '#AEAEB2',
+  switchTrackOff: 'rgba(120, 120, 128, 0.32)',
 
   barBackground: 'rgba(22, 22, 24, 0.94)',
   barBackgroundOpaque: '#161618',
 
   overlay: 'rgba(0, 0, 0, 0.5)',
   shadow: 'rgba(0, 0, 0, 0.5)',
+
+  toastBackground: 'rgba(58, 58, 60, 0.94)',
+  toastLabel: '#FFFFFF',
 }
 
 export const getIOSColors = (isDark: boolean): IOSColors => isDark ? iosColorsDark : iosColorsLight
@@ -174,7 +216,15 @@ export const iosRadius = {
   small: 6,
   medium: 10,
   large: 14,
-  sheet: 10,
+  /** 列表卡片 */
+  card: 12,
+  /** 歌曲行封面 */
+  cover: 8,
+  /** 歌单网格封面 */
+  coverLarge: 14,
+  sheet: 22,
+  popover: 14,
+  miniPlayer: 16,
   pill: 999,
 } as const
 
@@ -188,15 +238,21 @@ export const iosRowHeight = {
   subtitle: 52,
   /** 标题 + 副标题 + 封面 */
   artwork: 60,
+  /** 歌曲行（原型 68pt / 封面 56pt） */
+  song: 68,
+  /** 设置行（原型 48pt） */
+  setting: 48,
 } as const
 
 export const iosBarHeight = {
   navBar: 44,
   largeTitle: 52,
-  tabBar: 49,
+  tabBar: 56,
   searchBar: 36,
   segmented: 32,
   playerBar: 56,
+  /** 浮动迷你播放器卡片 */
+  miniPlayer: 60,
 } as const
 
 export const iosMotion = {

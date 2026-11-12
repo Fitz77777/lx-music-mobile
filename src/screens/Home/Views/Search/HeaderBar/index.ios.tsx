@@ -38,7 +38,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
   onHideTipList,
   onShowTipList,
 }, ref) => {
-  const { colors, accent, spacing, hairline } = useIOSTheme()
+  const { colors, accent, spacing } = useIOSTheme()
   const searchBarRef = useRef<SearchBarType>(null)
   const [text, setText] = useState('')
   const [sources, setSources] = useState<Sources>([])
@@ -86,11 +86,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
   }
 
   return (
-    <View style={{
-      backgroundColor: colors.barBackground,
-      borderBottomWidth: hairline,
-      borderBottomColor: colors.separator,
-    }}>
+    <View style={{ backgroundColor: colors.groupedBackground }}>
       <View style={{
         flexDirection: 'row',
         alignItems: 'center',

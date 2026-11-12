@@ -22,7 +22,7 @@ export interface ActiveListType {
 
 /** iOS 我的列表头部：当前列表名（点击打开列表面板），搜索按钮在导航栏上 */
 export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, ref) => {
-  const { colors, spacing, hairline } = useIOSTheme()
+  const { colors, spacing } = useIOSTheme()
   const currentListId = useActiveListId()
   const fetching = useListFetching(currentListId)
   const langId = useSettingValue('common.langId')
@@ -63,9 +63,7 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
       alignItems: 'center',
       height: 44,
       paddingLeft: spacing.lg,
-      borderBottomWidth: hairline,
-      borderBottomColor: colors.separator,
-      backgroundColor: colors.background,
+      backgroundColor: colors.groupedBackground,
       opacity: visibleBar ? 1 : 0,
     }}>
       <Pressable

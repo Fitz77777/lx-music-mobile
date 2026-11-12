@@ -23,7 +23,7 @@ export interface HeaderBarType {
 
 /** iOS 歌单广场头部：排序胶囊 + 标签 + 打开歌单 + 音源 */
 export default forwardRef<HeaderBarType, HeaderBarProps>(({ onSortChange, onTagChange, onSourceChange }, ref) => {
-  const { colors, hairline } = useIOSTheme()
+  const { colors } = useIOSTheme()
   const sortTabRef = useRef<SortTabType>(null)
   const tagRef = useRef<TagType>(null)
   const openListRef = useRef<OpenListType>(null)
@@ -43,9 +43,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onSortChange, onTagC
       flexDirection: 'row',
       alignItems: 'center',
       height: 48,
-      borderBottomWidth: hairline,
-      borderBottomColor: colors.separator,
-      backgroundColor: colors.background,
+      backgroundColor: colors.groupedBackground,
     }}>
       <SortTab ref={sortTabRef} onSortChange={onSortChange} />
       <Tag ref={tagRef} onTagChange={onTagChange} />

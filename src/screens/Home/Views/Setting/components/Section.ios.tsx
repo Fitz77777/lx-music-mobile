@@ -23,14 +23,14 @@ export default memo(({ title, children }: Props) => {
         variant="footnote"
         color={colors.secondaryLabel}
         style={{
-          marginHorizontal: spacing.lg + spacing.lg,
+          marginHorizontal: spacing.lg + spacing.xs,
           marginBottom: spacing.sm - 2,
           textTransform: 'uppercase',
         }}
       >{title}</IOSText>
       <View style={{
         marginHorizontal: spacing.lg,
-        borderRadius: 10,
+        borderRadius: 12,
         overflow: 'hidden',
         backgroundColor: colors.secondaryGroupedBackground,
       }}>
@@ -43,7 +43,7 @@ export default memo(({ title, children }: Props) => {
                     <View style={{
                       height: hairline,
                       marginLeft: spacing.lg,
-                      backgroundColor: colors.separator,
+                      backgroundColor: colors.rowSeparator,
                     }} />
                   )
                 : null}

@@ -18,8 +18,9 @@ export interface TabBarProps {
 }
 
 /**
- * iOS 底部标签栏（49pt，底部安全区由外层 SafeAreaView 提供）。
+ * iOS 底部标签栏（56pt 内容高度，底部安全区由外层 SafeAreaView 提供）。
  * 注意：这里不使用 SafeAreaView，避免和页面容器的安全区重复计算。
+ * 原型为 88pt 毛玻璃；项目未引入原生模糊库，这里用半透明栏底色近似。
  */
 export default memo(({ items, activeId, onChange, style }: TabBarProps) => {
   const { colors, accent, hairline, barHeight } = useIOSTheme()
@@ -46,13 +47,13 @@ export default memo(({ items, activeId, onChange, style }: TabBarProps) => {
               onPress={() => { onChange(item.id) }}
               style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
             >
-              <IOSIcon name={item.icon} size={24} color={color} />
+              <IOSIcon name={item.icon} size={25} color={color} />
               <IOSText
                 variant="caption2"
                 size={10}
                 color={color}
                 numberOfLines={1}
-                style={{ marginTop: 2 }}
+                style={{ marginTop: 3 }}
               >{item.label}</IOSText>
             </Pressable>
           )

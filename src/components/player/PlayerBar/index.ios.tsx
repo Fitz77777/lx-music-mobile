@@ -1,8 +1,7 @@
-import { memo, useRef, useState } from 'react'
-import { Pressable, View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native'
+import { memo, useRef } from 'react'
+import { Pressable, View } from 'react-native'
 import { navigations } from '@/navigation'
-import { usePlayerMusicInfo, useIsPlay, useProgress } from '@/store/player/hook'
-import { useBufferProgress } from '@/plugins/player'
+import { usePlayerMusicInfo, useIsPlay } from '@/store/player/hook'
 import { playNext, togglePlay } from '@/core/player/player'
 import { markTimeoutExitInteraction } from '@/core/player/timeoutExit'
 import commonState from '@/store/common/state'
@@ -17,21 +16,22 @@ import { useSettingValue } from '@/store/setting/hook'
 import { useKeyboard } from '@/utils/hooks'
 import PlayQueueModal, { type PlayQueueModalType } from '@/components/player/PlayQueueModal'
 
-const BTN_SIZE = 40
-const PIC_SIZE = 40
+const BTN_SIZE = 32
+const PIC_SIZE = 44
+const CARD_HEIGHT = 60
 
-/** iOS 底部播放条：56pt、半透明背景、细进度条 */
+/**
+ * iOS 迷你播放器：浮动圆角卡片（原型 .mini-player）。
+ * 左右 16pt、圆角 16、封面 44，右侧三个按钮（播放/暂停、下一首、播放列表）。
+ */
 export default memo(({ isHome = false }: { isHome?: boolean }) => {
-  const { colors, accent, hairline, spacing, barHeight } = useIOSTheme()
+  const { colors, spacing, hairline, isDark } = useIOSTheme()
   const musicInfo = usePlayerMusicInfo()
   const isPlay = useIsPlay()
-  const { progress, maxPlayTime } = useProgress()
-  const buffered = useBufferProgress()
   const autoHidePlayBar = useSettingValue('common.autoHidePlayBar')
   const downloadFileName = useSettingValue('download.fileName')
   const { keyboardShown } = useKeyboard()
   const queueRef = useRef<PlayQueueModalType>(null)
-  const [barWidth, setBarWidth] = useState(0)
 
   const title = musicInfo.id
     ? musicInfo.singer
@@ -51,31 +51,29 @@ export default memo(({ isHome = false }: { isHome?: boolean }) => {
     global.app_event.jumpListPosition()
   }
 
-  const handleSeek = (e: GestureResponderEvent) => {
-    if (!maxPlayTime || !barWidth) return
-    const ratio = Math.min(Math.max(e.nativeEvent.locationX / barWidth, 0), 1)
-    markTimeoutExitInteraction()
-    global.app_event.setProgress(ratio * maxPlayTime)
-  }
-
-  const handleBarLayout = (e: LayoutChangeEvent) => {
-    setBarWidth(e.nativeEvent.layout.width)
-  }
-
   if (autoHidePlayBar && keyboardShown) return null
 
   return (
     <View style={{
-      backgroundColor: colors.barBackground,
-      borderTopWidth: hairline,
-      borderTopColor: colors.separator,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.xs,
+      paddingBottom: spacing.sm,
+      backgroundColor: 'transparent',
     }}>
       <View style={{
-        height: barHeight.playerBar,
+        height: CARD_HEIGHT,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingLeft: spacing.md,
+        paddingLeft: spacing.sm,
         paddingRight: spacing.xs,
+        borderRadius: 16,
+        backgroundColor: colors.secondaryGroupedBackground,
+        borderWidth: isDark ? hairline : 0,
+        borderColor: colors.separator,
+        shadowColor: '#000000',
+        shadowOpacity: isDark ? 0 : 0.08,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 1 },
       }}>
         <Pressable
           onPress={openDetail}
@@ -87,13 +85,13 @@ export default memo(({ isHome = false }: { isHome?: boolean }) => {
             style={{
               width: PIC_SIZE,
               height: PIC_SIZE,
-              borderRadius: 6,
+              borderRadius: 8,
               backgroundColor: colors.tertiaryFill,
             }}
           />
           <View style={{ flex: 1, marginLeft: spacing.md, justifyContent: 'center' }}>
-            <IOSText variant="subheadline" weight="600" numberOfLines={1}>{title}</IOSText>
-            <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1} style={{ marginTop: 1 }}>
+            <IOSText variant="subheadline" weight="500" numberOfLines={1}>{title}</IOSText>
+            <IOSText variant="footnote" color={colors.secondaryLabel} numberOfLines={1} style={{ marginTop: 2 }}>
               {musicInfo.singer ?? ''}
             </IOSText>
           </View>
@@ -103,42 +101,23 @@ export default memo(({ isHome = false }: { isHome?: boolean }) => {
           hitSlop={6}
           style={{ width: BTN_SIZE, height: BTN_SIZE, alignItems: 'center', justifyContent: 'center' }}
         >
-          <IOSIcon name={isPlay ? 'pause' : 'play'} size={22} color={colors.label} />
+          <IOSIcon name={isPlay ? 'pause' : 'play'} size={26} color={colors.label} />
         </Pressable>
         <Pressable
           onPress={() => { markTimeoutExitInteraction(); void playNext() }}
           hitSlop={6}
-          style={{ width: BTN_SIZE, height: BTN_SIZE, alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: BTN_SIZE, height: BTN_SIZE, alignItems: 'center', justifyContent: 'center', marginLeft: 10 }}
         >
-          <IOSIcon name="nextMusic" size={20} color={colors.label} />
+          <IOSIcon name="nextMusic" size={24} color={colors.label} />
         </Pressable>
         <Pressable
           onPress={() => { queueRef.current?.show() }}
           hitSlop={6}
-          style={{ width: BTN_SIZE, height: BTN_SIZE, alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: BTN_SIZE, height: BTN_SIZE, alignItems: 'center', justifyContent: 'center', marginLeft: 10 }}
         >
-          <IOSIcon name="list-order" size={20} color={colors.label} />
+          <IOSIcon name="list-order" size={24} color={colors.label} />
         </Pressable>
       </View>
-      <Pressable
-        onLayout={handleBarLayout}
-        onPress={handleSeek}
-        style={{ height: 12, justifyContent: 'center' }}
-      >
-        <View style={{ height: 2, backgroundColor: colors.quaternaryFill }}>
-          <View style={{
-            position: 'absolute',
-            height: 2,
-            width: `${Math.min(Math.max(buffered, 0), 1) * 100}%`,
-            backgroundColor: colors.tertiaryFill,
-          }} />
-          <View style={{
-            height: 2,
-            width: `${Math.min(Math.max(progress, 0), 1) * 100}%`,
-            backgroundColor: accent,
-          }} />
-        </View>
-      </Pressable>
       <PlayQueueModal ref={queueRef} />
     </View>
   )

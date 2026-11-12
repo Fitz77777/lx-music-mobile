@@ -6,6 +6,7 @@ import { setNavActiveId } from '@/core/common'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { type TabBarItem } from '@/components/ios/TabBar'
 import IOSTabBar from '@/components/ios/TabBar'
+import IOSToast from '@/components/ios/Toast'
 import SizeView from '@/components/SizeView'
 import PlayerBar from '@/components/player/PlayerBar'
 import Main from '../Vertical/Main'
@@ -13,7 +14,7 @@ import Header from './Header'
 import type { InitState } from '@/store/common/state'
 
 /**
- * iOS 主页外壳：大标题 + 内容分页 + 播放条 + 底部标签栏。
+ * iOS 主页外壳：大标题 + 内容分页 + 浮动播放卡片 + 底部标签栏。
  * 不使用抽屉；页面内容仍复用 Vertical/Main 的懒加载分页逻辑。
  * 整个外壳放在同一个 SafeAreaView 里，安全区只在最上方和最下方各生效一次，
  * 避免顶栏/标签栏各自叠加上下内边距。
@@ -34,16 +35,17 @@ export default () => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
       <SizeView />
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.barBackground }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
         <Header />
-        <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
           <Main />
         </View>
         <PlayerBar isHome />
         <IOSTabBar items={items} activeId={activeId} onChange={handleChange} />
       </SafeAreaView>
+      <IOSToast />
     </View>
   )
 }

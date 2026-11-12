@@ -12,16 +12,17 @@ import themeState from '@/store/theme/state'
 import { IOS_SETTING_GROUPS, type IOSSettingSection } from './iosSections'
 
 const IconTile = memo(({ section }: { section: IOSSettingSection }) => {
+  const { colors } = useIOSTheme()
   return (
     <View style={{
       width: 29,
       height: 29,
       borderRadius: 7,
-      backgroundColor: section.tint,
+      backgroundColor: colors.iconTileBackground,
       alignItems: 'center',
       justifyContent: 'center',
     }}>
-      <IOSIcon name={section.icon} size={17} color="#FFFFFF" />
+      <IOSIcon name={section.icon} size={17} color={colors.iconTileForeground} />
     </View>
   )
 })
@@ -62,7 +63,7 @@ export default () => {
                   title={t(section.titleKey)}
                   leading={<IconTile section={section} />}
                   accessory="chevron"
-                  minHeight={44}
+                  minHeight={48}
                   onPress={() => { handlePress(section) }}
                 />
               ))

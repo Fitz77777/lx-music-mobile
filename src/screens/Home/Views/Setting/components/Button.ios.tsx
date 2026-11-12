@@ -19,7 +19,7 @@ export default memo(({ disabled, onPress, children }: ButtonProps) => {
       onPress={onPress}
       disabled={disabled}
       style={({ pressed }) => ({
-        minHeight: 44,
+        minHeight: 48,
         paddingHorizontal: spacing.lg,
         paddingVertical: spacing.sm + 2,
         flexDirection: 'row',

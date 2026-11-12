@@ -29,7 +29,7 @@ export default memo(({ title, footer, children, style }: ListSectionProps) => {
               style={{
                 marginTop: spacing.xl,
                 marginBottom: spacing.sm,
-                marginHorizontal: spacing.lg + spacing.lg,
+                marginHorizontal: spacing.lg + spacing.xs,
                 textTransform: 'uppercase',
               }}
             >{title}</IOSText>
@@ -37,7 +37,7 @@ export default memo(({ title, footer, children, style }: ListSectionProps) => {
         : null}
       <View style={{
         marginHorizontal: spacing.lg,
-        borderRadius: 10,
+        borderRadius: 12,
         overflow: 'hidden',
         backgroundColor: colors.secondaryGroupedBackground,
       }}>

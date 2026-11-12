@@ -21,7 +21,7 @@ export default memo(({ musicInfo }: {
   }
 
   return (
-    <View style={{ backgroundColor: colors.background }}>
+    <View style={{ backgroundColor: colors.groupedBackground }}>
       <StatusBar />
       <View style={{
         height: 44,

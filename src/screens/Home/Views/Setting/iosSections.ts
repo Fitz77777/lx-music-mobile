@@ -6,8 +6,6 @@ export interface IOSSettingSection {
   titleKey: keyof Message
   /** icomoon 图标名 */
   icon: string
-  /** iOS 设置风格的彩色图标底色 */
-  tint: string
 }
 
 export interface IOSSettingGroup {
@@ -18,41 +16,42 @@ export interface IOSSettingGroup {
 /**
  * iOS 设置首页的分组结构。
  * 网络代理目前只有 Android 实现，因此 iOS 不展示 network 分组。
+ * 图标统一使用中性灰底 + 线性图标（原型规范），不再使用彩色方块。
  */
 export const IOS_SETTING_GROUPS: IOSSettingGroup[] = [
   {
     titleKey: 'setting_group_general',
     items: [
-      { id: 'basic', titleKey: 'setting_basic', icon: 'setting', tint: '#8E8E93' },
+      { id: 'basic', titleKey: 'setting_basic', icon: 'setting' },
     ],
   },
   {
     titleKey: 'setting_group_playback',
     items: [
-      { id: 'player', titleKey: 'setting_player', icon: 'play', tint: '#FF3B30' },
+      { id: 'player', titleKey: 'setting_player', icon: 'play' },
       // 桌面歌词仅有 Android 原生实现，iOS 不展示该入口
     ],
   },
   {
     titleKey: 'setting_group_content',
     items: [
-      { id: 'search', titleKey: 'setting_search', icon: 'search-2', tint: '#007AFF' },
-      { id: 'list', titleKey: 'setting_list', icon: 'list-order', tint: '#34C759' },
+      { id: 'search', titleKey: 'setting_search', icon: 'search-2' },
+      { id: 'list', titleKey: 'setting_list', icon: 'list-order' },
     ],
   },
   {
     titleKey: 'setting_group_data',
     items: [
-      { id: 'sync', titleKey: 'setting_sync', icon: 'share', tint: '#5AC8FA' },
-      { id: 'backup', titleKey: 'setting_backup', icon: 'sd-card', tint: '#AF52DE' },
+      { id: 'sync', titleKey: 'setting_sync', icon: 'share' },
+      { id: 'backup', titleKey: 'setting_backup', icon: 'sd-card' },
     ],
   },
   {
     titleKey: 'setting_group_more',
     items: [
-      { id: 'other', titleKey: 'setting_other', icon: 'dots-vertical', tint: '#8E8E93' },
-      { id: 'version', titleKey: 'setting_version', icon: 'available_updates', tint: '#FF2D55' },
-      { id: 'about', titleKey: 'setting_about', icon: 'logo', tint: '#5856D6' },
+      { id: 'other', titleKey: 'setting_other', icon: 'dots-vertical' },
+      { id: 'version', titleKey: 'setting_version', icon: 'available_updates' },
+      { id: 'about', titleKey: 'setting_about', icon: 'logo' },
     ],
   },
 ]

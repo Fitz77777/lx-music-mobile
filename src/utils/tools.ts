@@ -11,6 +11,7 @@ import { scaleSizeH, scaleSizeW, setSpText } from './pixelRatio'
 import { toOldMusicInfo } from './index'
 import { stringMd5 } from 'react-native-quick-md5'
 import { windowSizeTools } from '@/utils/windowSizeTools'
+import { showIOSToast } from '@/components/ios/toastEvent'
 
 
 // https://stackoverflow.com/a/47349998
@@ -110,7 +111,8 @@ export const requestStoragePermission = async() => {
  */
 export const toast = (message: string, duration: 'long' | 'short' = 'short', position: 'top' | 'center' | 'bottom' = 'bottom') => {
   if (!isAndroid) {
-    console.log(`[toast:${duration}:${position}] ${message}`)
+    // iOS 没有系统 Toast，交给 iOS 层的 Toast 宿主显示
+    showIOSToast(message, duration == 'long' ? 3000 : 1500)
     return
   }
   let _duration

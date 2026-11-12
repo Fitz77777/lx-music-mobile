@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, forwardRef, useImperativeHandle } from 'react'
-import { FlatList, type FlatListProps, RefreshControl, View } from 'react-native'
+import { FlatList, Platform, type FlatListProps, RefreshControl, View } from 'react-native'
 
 // import { useMusicList } from '@/store/list/hook'
 import ListItem, { ITEM_HEIGHT } from './ListItem'
@@ -13,6 +13,7 @@ import { useI18n } from '@/lang'
 import Text from '@/components/common/Text'
 import { handlePlay } from './listAction'
 import { useSettingValue } from '@/store/setting/hook'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 
 type FlatListType = FlatListProps<LX.Music.MusicInfoOnline>
 
@@ -58,6 +59,7 @@ const List = forwardRef<ListType, ListProps>(({
 }, ref) => {
   // const t = useI18n()
   const theme = useTheme()
+  const iosTheme = useIOSTheme()
   const flatListRef = useRef<FlatList>(null)
   const [currentList, setList] = useState<LX.Music.MusicInfoOnline[]>([])
   const [showSource, setShowSource] = useState(false)
@@ -192,6 +194,7 @@ const List = forwardRef<ListType, ListProps>(({
       rowInfo={rowInfo.current}
       isShowAlbumName={isShowAlbumName}
       isShowInterval={isShowInterval}
+      isLast={index == currentList.length - 1}
     />
   )
   const getkey: FlatListType['keyExtractor'] = item => item.id
@@ -229,10 +232,20 @@ const List = forwardRef<ListType, ListProps>(({
     )
   }, [onLoadMore, status, visibleMultiSelect])
 
+  const listCardStyle = Platform.OS == 'ios' && currentList.length
+    ? {
+        marginHorizontal: 16,
+        marginTop: 8,
+        borderRadius: 12,
+        overflow: 'hidden' as const,
+        backgroundColor: iosTheme.colors.secondaryGroupedBackground,
+      }
+    : null
+
   return (
     <FlatList
       ref={flatListRef}
-      style={styles.list}
+      style={[styles.list, listCardStyle]}
       data={currentList}
       numColumns={rowInfo.current.rowNum}
       horizontal={false}

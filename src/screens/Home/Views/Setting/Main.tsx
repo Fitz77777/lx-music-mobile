@@ -15,12 +15,12 @@ import About from './settings/About'
 
 export const SETTING_SCREENS = [
   'basic',
-  'network',
   'player',
   'lyric_desktop',
   'search',
   'list',
   'sync',
+  'network',
   'backup',
   'other',
   'version',

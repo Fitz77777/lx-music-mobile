@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from 'react'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import Search from '../Views/Search'
 import SongList from '../Views/SongList'
 import Mylist from '../Views/Mylist'
@@ -196,7 +196,8 @@ const indexMap = [
 const Main = () => {
   const pagerViewRef = useRef<ComponentRef<typeof PagerView>>(null)
   let activeIndexRef = useRef(viewMap[commonState.navActiveId])
-  const [scrollEnabled, setScrollEnabled] = useState(settingState.setting['common.homePageScroll'])
+  // iOS 标签栏不提供左右滑动切页，强制关闭分页滑动
+  const [scrollEnabled, setScrollEnabled] = useState(Platform.OS == 'ios' ? false : settingState.setting['common.homePageScroll'])
   // const isScrollingRef = useRef(false)
   // const scrollPositionRef = useRef(-1)
 
@@ -252,10 +253,12 @@ const Main = () => {
       pagerViewRef.current?.setPageWithoutAnimation(index)
     }
     const handleConfigUpdate = (keys: Array<keyof LX.AppSetting>, setting: Partial<LX.AppSetting>) => {
+      if (Platform.OS == 'ios') return
       if (!keys.includes('common.homePageScroll')) return
       setScrollEnabled(setting['common.homePageScroll']!)
     }
     const handleHomePageScrollEnabled = (enabled: boolean) => {
+      if (Platform.OS == 'ios') return
       setScrollEnabled(enabled ? settingState.setting['common.homePageScroll'] : false)
     }
     // window.requestAnimationFrame(() => pagerViewRef.current && pagerViewRef.current.setPage(activeIndexRef.current))

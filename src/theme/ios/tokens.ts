@@ -1,0 +1,268 @@
+/**
+ * iOS 设计令牌（经典 HIG）
+ *
+ * 这里的尺寸全部使用 iOS point，不经过 Android 的 scaleSize/setSpText 缩放。
+ * 颜色遵循 Apple 系统语义色，亮/暗两套，供 iOS 视图层使用。
+ */
+import { StyleSheet, type TextStyle } from 'react-native'
+
+export interface IOSColors {
+  // 背景
+  background: string
+  secondaryBackground: string
+  tertiaryBackground: string
+  groupedBackground: string
+  secondaryGroupedBackground: string
+  tertiaryGroupedBackground: string
+
+  // 文本
+  label: string
+  secondaryLabel: string
+  tertiaryLabel: string
+  quaternaryLabel: string
+  placeholderText: string
+
+  // 分隔线
+  separator: string
+  opaqueSeparator: string
+
+  // 填充
+  fill: string
+  secondaryFill: string
+  tertiaryFill: string
+  quaternaryFill: string
+
+  // 固定系统色
+  systemBlue: string
+  systemGreen: string
+  systemRed: string
+  systemOrange: string
+  systemYellow: string
+  systemGray: string
+
+  // 导航栏 / 标签栏
+  barBackground: string
+  barBackgroundOpaque: string
+
+  // 遮罩 / 阴影
+  overlay: string
+  shadow: string
+}
+
+export const iosColorsLight: IOSColors = {
+  background: '#FFFFFF',
+  secondaryBackground: '#F2F2F7',
+  tertiaryBackground: '#FFFFFF',
+  groupedBackground: '#F2F2F7',
+  secondaryGroupedBackground: '#FFFFFF',
+  tertiaryGroupedBackground: '#F2F2F7',
+
+  label: '#000000',
+  secondaryLabel: 'rgba(60, 60, 67, 0.6)',
+  tertiaryLabel: 'rgba(60, 60, 67, 0.3)',
+  quaternaryLabel: 'rgba(60, 60, 67, 0.18)',
+  placeholderText: 'rgba(60, 60, 67, 0.3)',
+
+  separator: 'rgba(60, 60, 67, 0.29)',
+  opaqueSeparator: '#C6C6C8',
+
+  fill: 'rgba(120, 120, 128, 0.2)',
+  secondaryFill: 'rgba(120, 120, 128, 0.16)',
+  tertiaryFill: 'rgba(118, 118, 128, 0.12)',
+  quaternaryFill: 'rgba(116, 116, 128, 0.08)',
+
+  systemBlue: '#007AFF',
+  systemGreen: '#34C759',
+  systemRed: '#FF3B30',
+  systemOrange: '#FF9500',
+  systemYellow: '#FFCC00',
+  systemGray: '#8E8E93',
+
+  barBackground: 'rgba(249, 249, 249, 0.94)',
+  barBackgroundOpaque: '#F9F9F9',
+
+  overlay: 'rgba(0, 0, 0, 0.3)',
+  shadow: 'rgba(0, 0, 0, 0.12)',
+}
+
+export const iosColorsDark: IOSColors = {
+  background: '#000000',
+  secondaryBackground: '#1C1C1E',
+  tertiaryBackground: '#2C2C2E',
+  groupedBackground: '#000000',
+  secondaryGroupedBackground: '#1C1C1E',
+  tertiaryGroupedBackground: '#2C2C2E',
+
+  label: '#FFFFFF',
+  secondaryLabel: 'rgba(235, 235, 245, 0.6)',
+  tertiaryLabel: 'rgba(235, 235, 245, 0.3)',
+  quaternaryLabel: 'rgba(235, 235, 245, 0.16)',
+  placeholderText: 'rgba(235, 235, 245, 0.3)',
+
+  separator: 'rgba(84, 84, 88, 0.6)',
+  opaqueSeparator: '#38383A',
+
+  fill: 'rgba(120, 120, 128, 0.36)',
+  secondaryFill: 'rgba(120, 120, 128, 0.32)',
+  tertiaryFill: 'rgba(118, 118, 128, 0.24)',
+  quaternaryFill: 'rgba(118, 118, 128, 0.18)',
+
+  systemBlue: '#0A84FF',
+  systemGreen: '#30D158',
+  systemRed: '#FF453A',
+  systemOrange: '#FF9F0A',
+  systemYellow: '#FFD60A',
+  systemGray: '#8E8E93',
+
+  barBackground: 'rgba(22, 22, 24, 0.94)',
+  barBackgroundOpaque: '#161618',
+
+  overlay: 'rgba(0, 0, 0, 0.5)',
+  shadow: 'rgba(0, 0, 0, 0.5)',
+}
+
+export const getIOSColors = (isDark: boolean): IOSColors => isDark ? iosColorsDark : iosColorsLight
+
+export type IOSTextStyleName =
+  | 'largeTitle'
+  | 'title1'
+  | 'title2'
+  | 'title3'
+  | 'headline'
+  | 'body'
+  | 'callout'
+  | 'subheadline'
+  | 'footnote'
+  | 'caption1'
+  | 'caption2'
+
+export interface IOSTextStyle {
+  fontSize: number
+  lineHeight: number
+  fontWeight: TextStyle['fontWeight']
+  letterSpacing?: number
+}
+
+/** Apple 默认文本样式（SF Pro，pt） */
+export const iosTypography: Record<IOSTextStyleName, IOSTextStyle> = {
+  largeTitle: { fontSize: 34, lineHeight: 41, fontWeight: '700', letterSpacing: 0.37 },
+  title1: { fontSize: 28, lineHeight: 34, fontWeight: '700', letterSpacing: 0.36 },
+  title2: { fontSize: 22, lineHeight: 28, fontWeight: '700', letterSpacing: -0.26 },
+  title3: { fontSize: 20, lineHeight: 25, fontWeight: '600', letterSpacing: -0.45 },
+  headline: { fontSize: 17, lineHeight: 22, fontWeight: '600', letterSpacing: -0.41 },
+  body: { fontSize: 17, lineHeight: 22, fontWeight: '400', letterSpacing: -0.41 },
+  callout: { fontSize: 16, lineHeight: 21, fontWeight: '400', letterSpacing: -0.32 },
+  subheadline: { fontSize: 15, lineHeight: 20, fontWeight: '400', letterSpacing: -0.24 },
+  footnote: { fontSize: 13, lineHeight: 18, fontWeight: '400', letterSpacing: -0.08 },
+  caption1: { fontSize: 12, lineHeight: 16, fontWeight: '400' },
+  caption2: { fontSize: 11, lineHeight: 13, fontWeight: '400', letterSpacing: 0.07 },
+}
+
+export const iosSpacing = {
+  xxs: 2,
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+  huge: 40,
+} as const
+
+export const iosRadius = {
+  small: 6,
+  medium: 10,
+  large: 14,
+  sheet: 10,
+  pill: 999,
+} as const
+
+/** 1 物理像素（2x/3x 屏为 0.5pt） */
+export const iosHairline = StyleSheet.hairlineWidth
+
+export const iosRowHeight = {
+  /** 只有标题 */
+  standard: 44,
+  /** 标题 + 副标题 */
+  subtitle: 52,
+  /** 标题 + 副标题 + 封面 */
+  artwork: 60,
+} as const
+
+export const iosBarHeight = {
+  navBar: 44,
+  largeTitle: 52,
+  tabBar: 49,
+  searchBar: 36,
+  segmented: 32,
+  playerBar: 56,
+} as const
+
+export const iosMotion = {
+  pressOpacity: 0.55,
+  fast: 180,
+  normal: 260,
+  spring: {
+    damping: 22,
+    stiffness: 250,
+    mass: 0.9,
+  },
+} as const
+
+/** 给颜色追加透明度，支持 #rgb / #rrggbb / rgb() / rgba() */
+export const withAlpha = (color: string, alpha: number): string => {
+  const rgba = parseColor(color)
+  if (!rgba) return color
+  return `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${alpha})`
+}
+
+/** 解析颜色为 [r, g, b] */
+export const parseColor = (color: string): [number, number, number] | null => {
+  const value = color.trim()
+  if (value.startsWith('#')) {
+    const hex = value.slice(1)
+    if (hex.length == 3) {
+      return [
+        parseInt(hex[0] + hex[0], 16),
+        parseInt(hex[1] + hex[1], 16),
+        parseInt(hex[2] + hex[2], 16),
+      ]
+    }
+    if (hex.length == 6) {
+      return [
+        parseInt(hex.slice(0, 2), 16),
+        parseInt(hex.slice(2, 4), 16),
+        parseInt(hex.slice(4, 6), 16),
+      ]
+    }
+    return null
+  }
+
+  const match = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(value)
+  if (!match) return null
+  return [Number(match[1]), Number(match[2]), Number(match[3])]
+}
+
+/** 相对亮度，用于判断强调色在亮/暗背景下是否可用 */
+export const relativeLuminance = (color: string): number | null => {
+  const rgb = parseColor(color)
+  if (!rgb) return null
+  const [r, g, b] = rgb.map(v => {
+    const c = v / 255
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+/**
+ * 把 LX 主题主色转成 iOS 强调色。
+ * 主色过亮（浅色模式）或过暗（深色模式）时对比度不足，回退系统蓝。
+ */
+export const resolveIOSAccent = (primary: string, isDark: boolean): string => {
+  const colors = getIOSColors(isDark)
+  const luminance = relativeLuminance(primary)
+  if (luminance == null) return colors.systemBlue
+  if (isDark ? luminance < 0.16 : luminance > 0.82) return colors.systemBlue
+  return primary
+}

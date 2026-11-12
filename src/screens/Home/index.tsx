@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
+import { Platform } from 'react-native'
 import { useHorizontalMode } from '@/utils/hooks'
 import PageContent from '@/components/PageContent'
 import { setComponentId } from '@/core/common'
 import { COMPONENT_IDS } from '@/config/constant'
 import Vertical from './Vertical'
 import Horizontal from './Horizontal'
+import IOS from './IOS'
 import { navigations } from '@/navigation'
 import settingState from '@/store/setting/state'
 
@@ -26,13 +28,15 @@ export default ({ componentId }: Props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return (
-    <PageContent>
-      {
-        isHorizontalMode
-          ? <Horizontal />
-          : <Vertical />
-      }
-    </PageContent>
-  )
+  return Platform.OS == 'ios'
+    ? <IOS />
+    : (
+        <PageContent>
+          {
+            isHorizontalMode
+              ? <Horizontal />
+              : <Vertical />
+          }
+        </PageContent>
+      )
 }

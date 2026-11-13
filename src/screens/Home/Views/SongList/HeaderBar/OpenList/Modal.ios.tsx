@@ -27,19 +27,18 @@ export default forwardRef<ModalType, ModalProps>(({ onOpenId }, ref) => {
   const [visible, setVisible] = useState(false)
   const [text, setText] = useState('')
 
-  const focusLater = () => {
-    setTimeout(() => {
-      inputRef.current?.focus()
-    }, 320)
-  }
-
   useImperativeHandle(ref, () => ({
     show() {
       setText('')
       setVisible(true)
-      focusLater()
     },
   }))
+
+  // 面板展示的同时聚焦输入框，让面板上滑与键盘弹出是同一段动画，
+  // 避免「先出面板、再出键盘」的两段式。
+  const handleShow = () => {
+    inputRef.current?.focus()
+  }
 
   const handleClose = () => {
     inputRef.current?.blur()
@@ -69,6 +68,7 @@ export default forwardRef<ModalType, ModalProps>(({ onOpenId }, ref) => {
     <IOSBottomSheet
       visible={visible}
       onClose={handleClose}
+      onShow={handleShow}
       title={t('songlist_open')}
     >
       <View style={{

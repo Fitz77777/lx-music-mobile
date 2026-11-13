@@ -69,7 +69,9 @@ export default ({ componentId, id }: Props) => {
       <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
         <ScrollView
           contentContainerStyle={{ paddingTop: 8, paddingBottom: 40 }}
-          keyboardShouldPersistTaps="always"
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          automaticallyAdjustKeyboardInsets
           contentInsetAdjustmentBehavior="never"
         >
           <SettingContent id={id} />

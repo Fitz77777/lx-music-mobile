@@ -116,7 +116,8 @@ const BoardsSheet = forwardRef<BoardsSheetType, BoardsSheetProps>(({ onSelect, o
           <ScrollView
             ref={scrollRef}
             style={{ maxHeight: gridMaxHeight }}
-            keyboardShouldPersistTaps="always"
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
           >
             {

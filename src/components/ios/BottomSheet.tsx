@@ -23,6 +23,8 @@ export interface BottomSheetProps {
   children: ReactNode
   /** 点击遮罩是否关闭，默认 true */
   dismissOnBackdrop?: boolean
+  /** 面板展示完成（Modal onShow），可在这里聚焦输入框让键盘与面板同时出现 */
+  onShow?: () => void
 }
 
 const OPEN_DURATION = 280
@@ -40,6 +42,7 @@ export default memo(({
   description,
   children,
   dismissOnBackdrop = true,
+  onShow,
 }: BottomSheetProps) => {
   const { colors, spacing, radius } = useIOSTheme()
   const [mounted, setMounted] = useState(visible)
@@ -85,6 +88,7 @@ export default memo(({
       transparent
       animationType="none"
       onRequestClose={onClose}
+      onShow={onShow}
       supportedOrientations={['portrait', 'landscape']}
     >
       <View style={{ flex: 1 }}>

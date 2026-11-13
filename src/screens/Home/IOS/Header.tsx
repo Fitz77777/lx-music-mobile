@@ -4,6 +4,7 @@ import { useI18n } from '@/lang'
 import { useNavActiveId } from '@/store/common/hook'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import IOSIcon from '@/components/ios/Icon'
+import IOSLink from '@/components/ios/Link'
 import IOSText from '@/components/ios/Text'
 
 /**
@@ -52,9 +53,20 @@ export default () => {
               hitSlop={8}
               accessibilityRole="button"
               accessibilityLabel={id == 'nav_songlist' ? t('songlist_open') : t('leaderboard_all')}
-              style={{ paddingVertical: 4, marginBottom: 4 }}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 5,
+                paddingVertical: 4,
+                marginBottom: 4,
+              }}
             >
-              <IOSText size={15} weight="500" color={accent}>
+              {id == 'nav_songlist' ? <IOSLink size={19} color={accent} /> : null}
+              <IOSText
+                size={id == 'nav_songlist' ? 16 : 15}
+                weight="500"
+                color={accent}
+              >
                 {id == 'nav_songlist' ? t('songlist_open') : t('leaderboard_all')}
               </IOSText>
             </Pressable>

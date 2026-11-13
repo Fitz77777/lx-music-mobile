@@ -66,10 +66,10 @@ export default ({ componentId, id }: Props) => {
     <View style={{ flex: 1 }}>
       <IOSBackdrop />
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: colors.groupedBackground }}
+        style={{ flex: 1, backgroundColor: colors.canvas }}
         {...panResponder.panHandlers}
       >
-        <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
+        <View style={{ flex: 1, backgroundColor: colors.canvas }}>
           <ScrollView
             contentContainerStyle={{ paddingTop: 12, paddingBottom: 40 }}
             keyboardShouldPersistTaps="handled"

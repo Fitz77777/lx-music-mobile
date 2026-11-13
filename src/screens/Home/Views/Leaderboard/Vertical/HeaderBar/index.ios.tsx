@@ -91,7 +91,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
       alignItems: 'center',
       paddingHorizontal: spacing.xl,
       paddingBottom: 12,
-      backgroundColor: colors.groupedBackground,
+      backgroundColor: colors.canvas,
     }}
     >
       <ScrollView

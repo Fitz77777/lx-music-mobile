@@ -49,7 +49,7 @@ export default () => {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.groupedBackground }}
+      style={{ flex: 1, backgroundColor: colors.canvas }}
       contentContainerStyle={{ paddingTop: 8, paddingBottom: 32 + iosHomeBottomInset }}
       contentInsetAdjustmentBehavior="automatic"
     >

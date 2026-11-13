@@ -58,16 +58,11 @@ export const useIOSTheme = (): IOSTheme => {
 
   const colors = useMemo(() => {
     const base = getIOSColors(isDark)
-    // 没有背景图时保持原本的不透明分组灰；
-    // 有背景图时页面底色改为透明（背景图 + 统一蒙版由 Backdrop 绘制），
-    // 卡片保留一点透明度，让背景图隐约透出来。
+    // 没有背景图时保持原本的分组灰；
+    // 有背景图时只有页面画布变透明（背景图 + 蒙版由 Backdrop 绘制），
+    // 分组底色/卡片/面板仍然不透明，保证文字可读。
     if (!backdrop) return base
-    return {
-      ...base,
-      groupedBackground: 'transparent',
-      secondaryGroupedBackground: withAlpha(base.secondaryGroupedBackground, 0.88),
-      tertiaryGroupedBackground: withAlpha(base.tertiaryGroupedBackground, 0.8),
-    }
+    return { ...base, canvas: 'transparent' }
   }, [isDark, backdrop])
 
   // 订阅主题选择：iOS 深色下基础主题被强制为内置深色主题，

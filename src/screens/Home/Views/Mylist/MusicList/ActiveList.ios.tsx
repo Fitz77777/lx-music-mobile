@@ -79,7 +79,7 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
       alignItems: 'center',
       paddingHorizontal: spacing.xl,
       paddingBottom: 12,
-      backgroundColor: colors.groupedBackground,
+      backgroundColor: colors.canvas,
       opacity: visibleBar ? 1 : 0,
     }}>
       <ScrollView

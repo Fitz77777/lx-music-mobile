@@ -40,7 +40,7 @@ export default () => {
       paddingTop: 6,
       paddingHorizontal: spacing.xl,
       paddingBottom: 10,
-      backgroundColor: colors.groupedBackground,
+      backgroundColor: colors.canvas,
     }}>
       <IOSText variant="largeTitle" numberOfLines={1} style={{ flex: 1 }}>{title}</IOSText>
       {id == 'nav_songlist' || id == 'nav_top'

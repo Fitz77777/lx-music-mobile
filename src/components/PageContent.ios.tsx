@@ -16,11 +16,11 @@ export default ({ children }: Props) => {
   const { colors } = useIOSTheme()
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
+    <View style={{ flex: 1, backgroundColor: colors.canvas }}>
       <IOSBackdrop />
       <SizeView />
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
-        <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }}>
+        <View style={{ flex: 1, backgroundColor: colors.canvas }}>
           {children}
         </View>
       </SafeAreaView>

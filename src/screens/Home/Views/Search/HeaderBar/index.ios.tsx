@@ -92,7 +92,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
   }, [sourceList, source])
 
   return (
-    <View style={{ backgroundColor: colors.groupedBackground }}>
+    <View style={{ backgroundColor: colors.canvas }}>
       <View style={{
         flexDirection: 'row',
         alignItems: 'center',

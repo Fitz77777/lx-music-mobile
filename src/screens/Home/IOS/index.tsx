@@ -38,13 +38,13 @@ export default () => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
+    <View style={{ flex: 1, backgroundColor: colors.canvas }}>
       <IOSBackdrop />
       <SizeView />
-      <SafeAreaView style={{ backgroundColor: colors.groupedBackground }}>
+      <SafeAreaView style={{ backgroundColor: colors.canvas }}>
         <Header />
       </SafeAreaView>
-      <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
+      <View style={{ flex: 1, backgroundColor: colors.canvas }}>
         <Main />
       </View>
       <View

@@ -54,7 +54,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onSortChange, onTagC
       height: 48,
       paddingLeft: spacing.xl,
       paddingRight: spacing.xl,
-      backgroundColor: colors.groupedBackground,
+      backgroundColor: colors.canvas,
     }}>
       <Tag ref={tagRef} onTagChange={onTagChange} />
       <SortTab ref={sortTabRef} onSortChange={onSortChange} />

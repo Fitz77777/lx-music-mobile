@@ -22,7 +22,7 @@ export default memo(() => {
   const { backdrop, isDark } = useIOSTheme()
   if (!backdrop) return null
 
-  const tint = withAlpha(getIOSColors(isDark).groupedBackground, isDark ? 0.7 : 0.66)
+  const tint = withAlpha(getIOSColors(isDark).groupedBackground, isDark ? 0.75 : 0.72)
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>

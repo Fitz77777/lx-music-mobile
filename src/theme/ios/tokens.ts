@@ -12,6 +12,11 @@ export interface IOSColors {
   secondaryBackground: string
   tertiaryBackground: string
   /**
+   * 页面画布底色：没有主题背景图时等于 groupedBackground；
+   * 有背景图时为 transparent，让最底层的背景图透出来。
+   */
+  canvas: string
+  /**
    * 页面底色（原型 --bg，分组灰）。
    * 亮色 #F2F2F7 / 暗色 #000000，卡片用 secondaryGroupedBackground。
    */
@@ -78,6 +83,7 @@ export const iosColorsLight: IOSColors = {
   background: '#FFFFFF',
   secondaryBackground: '#F2F2F7',
   tertiaryBackground: '#FFFFFF',
+  canvas: '#F2F2F7',
   groupedBackground: '#F2F2F7',
   secondaryGroupedBackground: '#FFFFFF',
   tertiaryGroupedBackground: '#F2F2F7',
@@ -123,6 +129,7 @@ export const iosColorsDark: IOSColors = {
   background: '#000000',
   secondaryBackground: '#1C1C1E',
   tertiaryBackground: '#2C2C2E',
+  canvas: '#000000',
   groupedBackground: '#000000',
   secondaryGroupedBackground: '#1C1C1E',
   tertiaryGroupedBackground: '#2C2C2E',

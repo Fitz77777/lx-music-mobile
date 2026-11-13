@@ -6,6 +6,30 @@ Project versioning adheres to [Semantic Versioning](http://semver.org/).
 Commit convention is based on [Conventional Commits](http://conventionalcommits.org).
 Change log format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [1.9.2-fork.4](https://github.com/Fitz77777/lx-music-mobile/compare/v1.9.2-fork.3...v1.9.2-fork.4) - 2026-11-13
+
+### 新增
+
+- iOS 端独立的界面层：首页标签页、播放页、歌单/歌手/专辑详情、评论页、设置页按 iOS 设计语言重做，Android 界面保持不变
+- iOS 底部标签栏改为自绘浮动标签栏，迷你播放器改为悬浮卡片，播放页支持向下滑动收起
+- iOS 二级页统一改为右滑手势返回，不再显示返回按钮
+- iOS 支持显示主题背景图与「动态背景」（当前播放歌曲封面）
+- iOS 设置页改为系统设置风格：分组卡片、行内下拉、整行按钮、iOS 风格确认框与底部面板
+
+### 优化
+
+- iOS 歌单页新增标签筛选面板，打开歌单面板与键盘同步弹出
+- iOS 设置页行高统一，输入框聚焦时自动避开键盘，点击空白或拖动列表收起键盘
+- iOS 搜索页去掉重复的取消按钮，清空关键字时同时清空上一次的搜索结果
+
+### 修复
+
+- 修复 iOS 打开歌单面板时先出面板再出键盘的问题
+- 修复 iOS 标签筛选面板打开后内容为空的问题
+- 修复 iOS 设置页缓存大小输入被键盘遮挡的问题
+- 修复 iOS 使用带背景图的主题时弹层透明、文字看不清的问题
+- 修复 iOS 构建版本号带 -fork.N 后缀导致 CFBundleShortVersionString 非法的问题
+
 ## [1.9.2-fork.3](https://github.com/Fitz77777/lx-music-mobile/compare/v1.9.2-fork.2...v1.9.2-fork.3) - 2026-11-11
 
 ### 新增

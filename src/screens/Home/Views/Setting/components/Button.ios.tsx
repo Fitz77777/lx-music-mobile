@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable } from 'react-native'
 
 import type { BtnProps } from '@/components/common/Button'
 import IOSText from '@/components/ios/Text'
@@ -8,29 +8,34 @@ import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 type ButtonProps = BtnProps
 
 /**
- * iOS 设置页动作按钮：整行可点，强调色文字。
- * 保留 BtnProps，设置项无需改动。
+ * iOS 设置页动作按钮：强调色浅底 + 强调色文字，圆角 10、高 44。
+ * 默认按内容宽度居中显示，也可以传 style（如 alignSelf: 'stretch' / flex: 1）
+ * 做成整行按钮或并排按钮，避免看起来像一行文字链接。
  */
-export default memo(({ disabled, onPress, children }: ButtonProps) => {
-  const { accent, spacing } = useIOSTheme()
+export default memo(({ disabled, onPress, children, style }: ButtonProps) => {
+  const { accent, spacing, withAlpha } = useIOSTheme()
 
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => ({
-        minHeight: 48,
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.sm + 2,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: disabled ? 0.4 : pressed ? 0.5 : 1,
-      })}
+      accessibilityRole="button"
+      style={({ pressed }) => ([
+        {
+          minHeight: 44,
+          paddingHorizontal: spacing.xl,
+          paddingVertical: spacing.sm + 2,
+          borderRadius: 10,
+          alignSelf: 'center',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: withAlpha(accent, 0.12),
+          opacity: disabled ? 0.4 : pressed ? 0.6 : 1,
+        },
+        style,
+      ])}
     >
-      <View>
-        <IOSText variant="body" weight="600" color={accent} numberOfLines={1}>{children}</IOSText>
-      </View>
+      <IOSText size={16} weight="600" color={accent} numberOfLines={1}>{children}</IOSText>
     </Pressable>
   )
 })

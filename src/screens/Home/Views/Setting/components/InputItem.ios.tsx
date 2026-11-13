@@ -71,9 +71,9 @@ export default memo(({ value, label, onChanged, ...props }: InputItemProps) => {
 
   return (
     <View style={{
-      minHeight: 44,
+      minHeight: 48,
       paddingHorizontal: spacing.lg,
-      paddingVertical: spacing.sm,
+      paddingVertical: 7,
       flexDirection: 'row',
       alignItems: 'center',
     }}>

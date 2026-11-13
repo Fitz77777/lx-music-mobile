@@ -69,8 +69,13 @@ export default memo(() => {
         isUserApiSupported
           ? (
               <>
-                <View style={{ borderTopWidth: hairline, borderTopColor: colors.rowSeparator }}>
-                  <Button onPress={() => { modalRef.current?.show() }}>
+                <View style={{
+                  borderTopWidth: hairline,
+                  borderTopColor: colors.rowSeparator,
+                  paddingHorizontal: 16,
+                  paddingVertical: 10,
+                }}>
+                  <Button style={{ alignSelf: 'stretch' }} onPress={() => { modalRef.current?.show() }}>
                     {t('setting_basic_source_user_api_btn')}
                   </Button>
                 </View>

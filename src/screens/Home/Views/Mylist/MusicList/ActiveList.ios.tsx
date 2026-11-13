@@ -4,8 +4,7 @@ import { Pressable, ScrollView, View } from 'react-native'
 import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { useActiveListId, useListFetching } from '@/store/list/hook'
-import listState from '@/store/list/state'
+import { useActiveListId, useListFetching, useMyList } from '@/store/list/hook'
 import { getListPrevSelectId } from '@/utils/data'
 import { setActiveList } from '@/core/list'
 import { LIST_IDS } from '@/config/constant'
@@ -29,6 +28,7 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
   const { colors, accent, spacing } = useIOSTheme()
   const currentListId = useActiveListId()
   const fetching = useListFetching(currentListId)
+  const allList = useMyList()
   const t = useI18n()
   const [visibleBar, setVisibleBar] = useState(true)
 
@@ -41,21 +41,19 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
       case LIST_IDS.LOVE:
         return t('list_name_love')
       default:
-        return listState.allList.find(l => l.id === currentListId)?.name ?? ''
+        return allList.find(l => l.id === currentListId)?.name ?? ''
     }
-  }, [currentListId, t])
+  }, [currentListId, t, allList])
 
   const chips = useMemo(() => {
-    const list = [
-      { id: LIST_IDS.DEFAULT, name: t('list_name_default') },
-      { id: LIST_IDS.LOVE, name: t('list_name_love') },
-      { id: LIST_IDS.TEMP, name: t('list_name_temp') },
-    ] as Array<{ id: string, name: string }>
+    // 横向歌单与「全部歌单」列表保持同一批、同一顺序；
+    // 临时列表不在 allList 里，只有它是当前列表时才补一个
+    const list = allList.map(item => ({ id: item.id, name: item.name }))
     if (!list.some(item => item.id == currentListId) && currentListName) {
       list.push({ id: currentListId, name: currentListName })
     }
     return list
-  }, [currentListId, currentListName, t])
+  }, [allList, currentListId, currentListName])
 
   useImperativeHandle(ref, () => ({
     setVisibleBar(visible) {

@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 
 import InputItem, { type InputItemProps } from '../../components/InputItem'
 import { createStyle, toast } from '@/utils/tools'
@@ -48,7 +48,7 @@ export default memo(() => {
 
 const styles = createStyle({
   content: {
-    marginTop: 10,
+    marginTop: Platform.OS == 'ios' ? 0 : 10,
   },
 })
 

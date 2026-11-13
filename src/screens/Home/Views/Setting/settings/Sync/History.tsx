@@ -13,7 +13,7 @@ import { useI18n } from '@/lang'
 import { useSettingValue } from '@/store/setting/hook'
 import { createStyle } from '@/utils/tools'
 
-type SyncHistoryItem = Awaited<ReturnType<typeof getSyncHostHistory>>[number]
+export type SyncHistoryItem = Awaited<ReturnType<typeof getSyncHostHistory>>[number]
 
 const HistoryListItem = ({ item, index, onRemove, onSelect }: {
   item: SyncHistoryItem
@@ -52,10 +52,10 @@ const HistoryListItem = ({ item, index, onRemove, onSelect }: {
 interface HistoryListProps {
   onSelect: (item: SyncHistoryItem) => void
 }
-interface HistoryListType {
+export interface HistoryListType {
   show: () => void
 }
-const HistoryList = forwardRef<HistoryListType, HistoryListProps>(({ onSelect }, ref) => {
+export const HistoryList = forwardRef<HistoryListType, HistoryListProps>(({ onSelect }, ref) => {
   const popupRef = useRef<PopupType>(null)
   const [visible, setVisible] = useState(false)
   const [list, setList] = useState<SyncHistoryItem[]>([])

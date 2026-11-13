@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
-import { useColorScheme } from 'react-native'
+import { useColorScheme, type ImageSourcePropType } from 'react-native'
 import { useTheme } from '@/store/theme/hook'
 import { useSettingValue } from '@/store/setting/hook'
+import { useBgPic } from '@/store/common/hook'
 import { getSelectedThemePrimary } from '@/theme/themes'
 import {
   getIOSColors,
@@ -32,6 +33,11 @@ export interface IOSTheme {
   barHeight: typeof iosBarHeight
   hairline: number
   motion: typeof iosMotion
+  /**
+   * 页面背景图：自定义背景图优先，其次是主题自带的背景图。
+   * 存在时 iOS 页面底色会变成半透明，让背景图透出来。
+   */
+  backdrop?: ImageSourcePropType
   isDark: boolean
   withAlpha: (color: string, alpha: number) => string
 }
@@ -42,7 +48,28 @@ export const useIOSTheme = (): IOSTheme => {
   // LX 主题在这里只提供强调色。
   const scheme = useColorScheme()
   const isDark = scheme == 'dark'
-  const colors = useMemo(() => getIOSColors(isDark), [isDark])
+  const bgPic = useBgPic()
+
+  // 自定义背景图优先，其次使用主题配置里的背景图
+  const backdrop = useMemo<ImageSourcePropType | undefined>(() => {
+    if (bgPic) return { uri: bgPic }
+    return theme['bg-image']
+  }, [bgPic, theme])
+
+  const colors = useMemo(() => {
+    const base = getIOSColors(isDark)
+    // 没有背景图时保持原本的不透明分组灰；
+    // 有背景图时页面底色改为透明（背景图 + 统一蒙版由 Backdrop 绘制），
+    // 卡片保留一点透明度，让背景图隐约透出来。
+    if (!backdrop) return base
+    return {
+      ...base,
+      groupedBackground: 'transparent',
+      secondaryGroupedBackground: withAlpha(base.secondaryGroupedBackground, 0.88),
+      tertiaryGroupedBackground: withAlpha(base.tertiaryGroupedBackground, 0.8),
+    }
+  }, [isDark, backdrop])
+
   // 订阅主题选择：iOS 深色下基础主题被强制为内置深色主题，
   // 强调色仍需取用户真正选择的主题主色。
   const selectedThemeId = useSettingValue('theme.id')
@@ -63,7 +90,8 @@ export const useIOSTheme = (): IOSTheme => {
     barHeight: iosBarHeight,
     hairline: iosHairline,
     motion: iosMotion,
+    backdrop,
     isDark,
     withAlpha,
-  }), [theme, colors, accent, isDark])
+  }), [theme, colors, accent, backdrop, isDark])
 }

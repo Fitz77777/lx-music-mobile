@@ -1,6 +1,7 @@
 import { SafeAreaView, View } from 'react-native'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import IOSToast from './ios/Toast'
+import IOSBackdrop from './ios/Backdrop'
 import SizeView from './SizeView'
 
 interface Props {
@@ -16,6 +17,7 @@ export default ({ children }: Props) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
+      <IOSBackdrop />
       <SizeView />
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
         <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>

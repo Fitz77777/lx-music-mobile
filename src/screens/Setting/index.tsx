@@ -3,6 +3,7 @@ import { Navigation } from 'react-native-navigation'
 import { PanResponder, SafeAreaView, ScrollView, View } from 'react-native'
 
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import IOSBackdrop from '@/components/ios/Backdrop'
 import Basic from '@/screens/Home/Views/Setting/settings/Basic'
 import Network from '@/screens/Home/Views/Setting/settings/Network'
 import Player from '@/screens/Home/Views/Setting/settings/Player'
@@ -62,21 +63,24 @@ export default ({ componentId, id }: Props) => {
   }), [componentId])
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: colors.groupedBackground }}
-      {...panResponder.panHandlers}
-    >
-      <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
-        <ScrollView
-          contentContainerStyle={{ paddingTop: 12, paddingBottom: 40 }}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          automaticallyAdjustKeyboardInsets
-          contentInsetAdjustmentBehavior="never"
-        >
-          <SettingContent id={id} />
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+    <View style={{ flex: 1 }}>
+      <IOSBackdrop />
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: colors.groupedBackground }}
+        {...panResponder.panHandlers}
+      >
+        <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
+          <ScrollView
+            contentContainerStyle={{ paddingTop: 12, paddingBottom: 40 }}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            automaticallyAdjustKeyboardInsets
+            contentInsetAdjustmentBehavior="never"
+          >
+            <SettingContent id={id} />
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+    </View>
   )
 }

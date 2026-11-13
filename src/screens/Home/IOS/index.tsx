@@ -6,6 +6,7 @@ import { setNavActiveId } from '@/core/common'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { type TabBarItem } from '@/components/ios/TabBar'
 import IOSTabBar from '@/components/ios/TabBar'
+import IOSBackdrop from '@/components/ios/Backdrop'
 import IOSToast from '@/components/ios/Toast'
 import SizeView from '@/components/SizeView'
 import PlayerBar from '@/components/player/PlayerBar'
@@ -38,6 +39,7 @@ export default () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
+      <IOSBackdrop />
       <SizeView />
       <SafeAreaView style={{ backgroundColor: colors.groupedBackground }}>
         <Header />

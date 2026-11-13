@@ -2,12 +2,13 @@ import { memo, useEffect, useRef, useState } from 'react'
 import { View } from 'react-native'
 
 import PlayQueueModal, { type PlayQueueModalType } from '@/components/player/PlayQueueModal'
+import { IOSHeart } from '@/components/ios'
 import { LIST_IDS } from '@/config/constant'
 import { getListMusics } from '@/core/list'
 import { collectMusic, uncollectMusic } from '@/core/player/player'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { usePlayerMusicInfo } from '@/store/player/hook'
-import Btn from './Btn'
+import Btn, { BTN_ICON_SIZE } from './Btn'
 import PlayModeBtn from './PlayModeBtn'
 import CommentBtn from './CommentBtn'
 
@@ -76,7 +77,9 @@ export default memo(({ onToggleLyric, showingLyric }: MoreBtnProps) => {
         icon="love"
         color={isLove ? accent : colors.label}
         onPress={handleToggleLove}
-      />
+      >
+        {isLove ? <IOSHeart size={BTN_ICON_SIZE} color={accent} /> : undefined}
+      </Btn>
       <PlayModeBtn />
       <Btn
         icon="lyric-on"

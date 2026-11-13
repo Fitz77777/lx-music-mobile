@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react'
 import { TouchableOpacity } from 'react-native'
 import { Icon } from '@/components/common/Icon'
 import { createStyle } from '@/utils/tools'
@@ -12,6 +13,8 @@ export default ({ icon, color, onPress, onLongPress }: {
   color?: string
   onPress: () => void
   onLongPress?: () => void
+  /** iOS：自定义图标内容（选中态实心爱心），Android 忽略 */
+  children?: ReactNode
 }) => {
   const theme = useTheme()
   return (

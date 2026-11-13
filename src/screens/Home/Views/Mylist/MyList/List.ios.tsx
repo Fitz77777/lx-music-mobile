@@ -127,7 +127,6 @@ export default ({ onShowMenu }: {
       data={allList}
       maxToRenderPerBatch={9}
       windowSize={9}
-      removeClippedSubviews
       initialNumToRender={18}
       renderItem={renderItem}
       keyExtractor={getkey}

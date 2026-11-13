@@ -248,7 +248,7 @@ export const iosRowHeight = {
 export const iosBarHeight = {
   navBar: 44,
   largeTitle: 52,
-  tabBar: 56,
+  tabBar: 49,
   searchBar: 36,
   segmented: 32,
   playerBar: 56,
@@ -260,7 +260,7 @@ export const iosBarHeight = {
  * 首页内容底部留白：浮动迷你播放器 + 标签栏 + 底部安全区。
  * 列表内容可以滚到这两层浮层下面，最后一行仍能完整露出。
  */
-export const iosHomeBottomInset = 170
+export const iosHomeBottomInset = 163
 
 export const iosMotion = {
   pressOpacity: 0.55,

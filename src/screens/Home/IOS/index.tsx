@@ -52,7 +52,6 @@ export default () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: colors.barBackgroundOpaque,
         }}
       >
         <PlayerBar isHome />
@@ -60,7 +59,7 @@ export default () => {
           <IOSTabBar items={items} activeId={activeId} onChange={handleChange} />
         </SafeAreaView>
       </View>
-      <IOSToast bottomOffset={170} />
+      <IOSToast bottomOffset={163} />
     </View>
   )
 }

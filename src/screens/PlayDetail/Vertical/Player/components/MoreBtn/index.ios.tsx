@@ -43,7 +43,7 @@ const useIsLove = (musicId: string | null) => {
 }
 
 export interface MoreBtnProps {
-  /** 切换封面 / 歌词页 */
+  /** 切换封面 / 歌词页（iOS 已移除歌词按钮，仅保留给共用类型） */
   onToggleLyric?: () => void
   /** 当前是否显示歌词页 */
   showingLyric?: boolean
@@ -51,9 +51,10 @@ export interface MoreBtnProps {
 
 /**
  * iOS 播放页底部操作行（原型 .secondary）：
- * 收藏 / 播放模式 / 歌词 / 评论 / 播放队列。
+ * 收藏 / 播放模式 / 评论 / 播放队列。
+ * 歌词页通过左右滑动封面切换，不再提供独立的歌词按钮。
  */
-export default memo(({ onToggleLyric, showingLyric }: MoreBtnProps) => {
+export default memo(() => {
   const { colors, accent } = useIOSTheme()
   const musicInfo = usePlayerMusicInfo()
   const isLove = useIsLove(musicInfo.id)
@@ -81,11 +82,6 @@ export default memo(({ onToggleLyric, showingLyric }: MoreBtnProps) => {
         {isLove ? <IOSHeart size={BTN_ICON_SIZE} color={accent} /> : undefined}
       </Btn>
       <PlayModeBtn />
-      <Btn
-        icon="lyric-on"
-        color={showingLyric ? accent : colors.label}
-        onPress={() => { onToggleLyric?.() }}
-      />
       <CommentBtn />
       <Btn icon="list-order" onPress={() => { queueRef.current?.show() }} />
       <PlayQueueModal ref={queueRef} />

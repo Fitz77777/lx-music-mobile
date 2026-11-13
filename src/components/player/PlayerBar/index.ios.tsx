@@ -25,7 +25,7 @@ const CARD_HEIGHT = 60
  * 左右 16pt、圆角 16、封面 44，右侧三个按钮（播放/暂停、下一首、播放列表）。
  */
 export default memo(({ isHome = false }: { isHome?: boolean }) => {
-  const { colors, spacing, hairline, isDark, withAlpha } = useIOSTheme()
+  const { colors, spacing, hairline, isDark } = useIOSTheme()
   const musicInfo = usePlayerMusicInfo()
   const isPlay = useIsPlay()
   const autoHidePlayBar = useSettingValue('common.autoHidePlayBar')
@@ -54,12 +54,15 @@ export default memo(({ isHome = false }: { isHome?: boolean }) => {
   if (autoHidePlayBar && keyboardShown) return null
 
   return (
-    <View style={{
-      paddingHorizontal: spacing.lg,
-      paddingTop: spacing.xs,
-      paddingBottom: spacing.sm,
-      backgroundColor: 'transparent',
-    }}>
+    <View
+      pointerEvents="box-none"
+      style={{
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.xs,
+        paddingBottom: spacing.sm,
+        backgroundColor: 'transparent',
+      }}
+    >
       <View style={{
         height: CARD_HEIGHT,
         flexDirection: 'row',
@@ -67,7 +70,7 @@ export default memo(({ isHome = false }: { isHome?: boolean }) => {
         paddingLeft: spacing.md,
         paddingRight: spacing.sm,
         borderRadius: 16,
-        backgroundColor: withAlpha(colors.secondaryGroupedBackground, 0.92),
+        backgroundColor: colors.secondaryGroupedBackground,
         borderWidth: isDark ? hairline : 0,
         borderColor: colors.separator,
         shadowColor: '#000000',

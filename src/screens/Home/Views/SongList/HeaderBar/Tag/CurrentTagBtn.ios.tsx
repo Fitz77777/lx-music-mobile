@@ -2,7 +2,6 @@ import { forwardRef, useImperativeHandle, useState } from 'react'
 import { Pressable } from 'react-native'
 
 import IOSIcon from '@/components/ios/Icon'
-import IOSText from '@/components/ios/Text'
 import { useI18n } from '@/lang'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 
@@ -14,16 +13,15 @@ export interface CurrentTagBtnType {
   setCurrentTagInfo: (name: string) => void
 }
 
-/** iOS 当前标签按钮：文字 + 下箭头 */
+/** iOS 标签筛选按钮：29×29 圆形图标，已选标签时使用强调色（原型 .chip.filter） */
 export default forwardRef<CurrentTagBtnType, CurrentTagBtnProps>(({ onShowList }, ref) => {
   const t = useI18n()
-  const [name, setName] = useState('')
-  const { colors, spacing } = useIOSTheme()
+  const [active, setActive] = useState(false)
+  const { colors, accent } = useIOSTheme()
 
   useImperativeHandle(ref, () => ({
     setCurrentTagInfo(name) {
-      if (!name) name = t('songlist_tag_default')
-      setName(name)
+      setActive(!!name && name != t('songlist_tag_default'))
     },
   }))
 
@@ -31,15 +29,23 @@ export default forwardRef<CurrentTagBtnType, CurrentTagBtnProps>(({ onShowList }
     <Pressable
       onPress={onShowList}
       hitSlop={8}
-      style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.md }}
+      accessibilityRole="button"
+      accessibilityLabel={t('songlist_tags')}
+      style={{
+        width: 29,
+        height: 29,
+        borderRadius: 15,
+        marginRight: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: active ? accent : colors.secondaryGroupedBackground,
+        shadowColor: '#000000',
+        shadowOpacity: active ? 0 : 0.06,
+        shadowRadius: 3,
+        shadowOffset: { width: 0, height: 1 },
+      }}
     >
-      <IOSText variant="subheadline" numberOfLines={1} style={{ maxWidth: 96 }}>{name}</IOSText>
-      <IOSIcon
-        name="chevron-right"
-        size={10}
-        color={colors.secondaryLabel}
-        style={{ marginLeft: 2, transform: [{ rotate: '90deg' }] }}
-      />
+      <IOSIcon name="slider" size={16} color={active ? '#FFFFFF' : colors.secondaryLabel} />
     </Pressable>
   )
 })

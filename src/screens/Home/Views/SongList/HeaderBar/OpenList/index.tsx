@@ -16,9 +16,11 @@ import commonState from '@/store/common/state'
 
 export interface OpenListType {
   setInfo: (source: Source) => void
+  /** 使用当前音源打开面板（iOS 导航栏按钮触发） */
+  show: () => void
 }
 
-export default forwardRef<OpenListType, {}>((props, ref) => {
+export default forwardRef<OpenListType, { hideButton?: boolean }>(({ hideButton = false }, ref) => {
   const t = useI18n()
   const modalRef = useRef<ModalType>(null)
   const songlistInfoRef = useRef<{ source: Source }>({ source: 'kw' })
@@ -26,6 +28,9 @@ export default forwardRef<OpenListType, {}>((props, ref) => {
   useImperativeHandle(ref, () => ({
     setInfo(source) {
       songlistInfoRef.current.source = source
+    },
+    show() {
+      modalRef.current?.show(songlistInfoRef.current.source)
     },
   }))
 
@@ -49,9 +54,13 @@ export default forwardRef<OpenListType, {}>((props, ref) => {
 
   return (
     <>
-      <Button style={styles.button} onPress={() => modalRef.current?.show(songlistInfoRef.current.source)}>
-        <Text>{t('songlist_open')}</Text>
-      </Button>
+      {hideButton
+        ? null
+        : (
+            <Button style={styles.button} onPress={() => modalRef.current?.show(songlistInfoRef.current.source)}>
+              <Text>{t('songlist_open')}</Text>
+            </Button>
+          )}
       <Modal ref={modalRef} onOpenId={handleOpenSonglist} />
     </>
   )

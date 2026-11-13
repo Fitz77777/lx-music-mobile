@@ -13,7 +13,7 @@ export interface SortTabType {
   setSource: (source: Source, activeTab: SortInfo['id']) => void
 }
 
-/** iOS 歌单排序：横向胶囊标签 */
+/** iOS 歌单排序：白色胶囊 chips，选中态使用主题强调色（原型 .chip） */
 export default forwardRef<SortTabType, SortTabProps>(({ onSortChange }, ref) => {
   const [sortList, setSortList] = useState<SortInfo[]>([])
   const [activeId, setActiveId] = useState<SortInfo['id']>('')
@@ -42,7 +42,7 @@ export default forwardRef<SortTabType, SortTabProps>(({ onSortChange }, ref) => 
     <ScrollView
       ref={scrollViewRef}
       style={{ flexGrow: 1, flexShrink: 1 }}
-      contentContainerStyle={{ alignItems: 'center', paddingHorizontal: spacing.md }}
+      contentContainerStyle={{ alignItems: 'center', paddingRight: spacing.md }}
       keyboardShouldPersistTaps="always"
       horizontal
       showsHorizontalScrollIndicator={false}
@@ -55,15 +55,19 @@ export default forwardRef<SortTabType, SortTabProps>(({ onSortChange }, ref) => 
               key={s.id}
               onPress={() => { handleSortChange(s.id) }}
               style={{
-                paddingHorizontal: spacing.md,
-                paddingVertical: 5,
+                paddingHorizontal: 14,
+                paddingVertical: 6,
                 marginRight: spacing.sm,
-                borderRadius: 999,
-                backgroundColor: active ? accent : colors.secondaryFill,
+                borderRadius: 16,
+                backgroundColor: active ? accent : colors.secondaryGroupedBackground,
+                shadowColor: '#000000',
+                shadowOpacity: active ? 0 : 0.06,
+                shadowRadius: 3,
+                shadowOffset: { width: 0, height: 1 },
               }}
             >
               <IOSText
-                variant="subheadline"
+                size={14}
                 weight={active ? '600' : '400'}
                 color={active ? '#FFFFFF' : colors.label}
                 numberOfLines={1}

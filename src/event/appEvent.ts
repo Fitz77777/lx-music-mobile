@@ -207,6 +207,11 @@ export class AppEvent extends Event {
     this.emit('hideSonglistTagList')
   }
 
+  /** 打开「打开歌单」面板（iOS 导航栏按钮触发） */
+  showSonglistOpenList() {
+    this.emit('showSonglistOpenList')
+  }
+
   songlistTagInfoChange(name: string, id: string) {
     this.emit('songlistTagInfoChange', name, id)
   }

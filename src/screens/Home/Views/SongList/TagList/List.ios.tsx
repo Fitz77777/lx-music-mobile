@@ -1,7 +1,8 @@
-import { useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react'
+import { useEffect, useMemo, useState, useRef, forwardRef, useImperativeHandle } from 'react'
 import { View, ScrollView } from 'react-native'
 
 import TagGroup, { type TagGroupProps } from './TagGroup'
+import IOSSearchBar from '@/components/ios/SearchBar'
 import { useI18n } from '@/lang'
 import { type TagInfo, type Source } from '@/store/songlist/state'
 import { getTags } from '@/core/songlist'
@@ -20,6 +21,7 @@ export interface ListType {
 export default forwardRef<ListType, ListProps>(({ onTagChange }, ref) => {
   const [activeId, setActiveId] = useState('')
   const [list, setList] = useState<TagInfo['tags']>([])
+  const [keyword, setKeyword] = useState('')
   const t = useI18n()
   const { colors, spacing } = useIOSTheme()
   const prevSource = useRef('')
@@ -51,34 +53,60 @@ export default forwardRef<ListType, ListProps>(({ onTagChange }, ref) => {
   }))
 
 
+  const groups = useMemo(() => {
+    const key = keyword.trim().toLowerCase()
+    if (!key) return list
+    return list
+      .map(type => ({
+        ...type,
+        list: type.list.filter(item => item.name.toLowerCase().includes(key)),
+      }))
+      .filter(type => type.list.length)
+  }, [list, keyword])
+
   return (
-    <ScrollView
-      style={{ flexShrink: 1, flexGrow: 0 }}
-      contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xl }}
-      keyboardShouldPersistTaps="always"
-    >
-      <View onStartShouldSetResponder={() => true}>
-        {
-          list.map((type, index) => (
-            <TagGroup
-              key={index}
-              name={type.name}
-              list={type.list}
-              activeId={activeId}
-              onTagChange={onTagChange}
-            />
-          ))
-        }
-        {
-          list.length == 1
-            ? (
-                <View style={{ paddingTop: 60, alignItems: 'center', justifyContent: 'center' }}>
-                  <IOSText variant="body" color={colors.secondaryLabel}>{t('list_loading')}</IOSText>
-                </View>
-              )
-            : null
-        }
+    <View style={{ flexShrink: 1, flexGrow: 0 }}>
+      <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.sm }}>
+        <IOSSearchBar
+          value={keyword}
+          onChangeText={setKeyword}
+          placeholder={t('songlist_tag_search')}
+        />
       </View>
-    </ScrollView>
+      <ScrollView
+        style={{ flexShrink: 1, flexGrow: 0 }}
+        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xl }}
+        keyboardShouldPersistTaps="always"
+      >
+        <View onStartShouldSetResponder={() => true}>
+          {
+            groups.map((type, index) => (
+              <TagGroup
+                key={index}
+                name={type.name}
+                list={type.list}
+                activeId={activeId}
+                onTagChange={onTagChange}
+              />
+            ))
+          }
+          {
+            list.length == 1
+              ? (
+                  <View style={{ paddingTop: 60, alignItems: 'center', justifyContent: 'center' }}>
+                    <IOSText variant="body" color={colors.secondaryLabel}>{t('list_loading')}</IOSText>
+                  </View>
+                )
+              : list.length > 0 && !groups.length
+                ? (
+                    <View style={{ paddingTop: 40, alignItems: 'center', justifyContent: 'center' }}>
+                      <IOSText variant="body" color={colors.secondaryLabel}>{t('songlist_tag_search_empty')}</IOSText>
+                    </View>
+                  )
+                : null
+          }
+        </View>
+      </ScrollView>
+    </View>
   )
 })

@@ -32,25 +32,37 @@ export default () => {
       backgroundColor: colors.groupedBackground,
     }}>
       <IOSText variant="largeTitle" numberOfLines={1} style={{ flex: 1 }}>{t(id)}</IOSText>
-      {id == 'nav_love'
+      {id == 'nav_songlist'
         ? (
             <Pressable
-              onPress={showListSearch}
+              onPress={() => { global.app_event.showSonglistOpenList() }}
               hitSlop={8}
               accessibilityRole="button"
-              accessibilityLabel={t('nav_search')}
-              style={{
-                width: 32,
-                height: 32,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 2,
-              }}
+              accessibilityLabel={t('songlist_open')}
+              style={{ paddingVertical: 4, marginBottom: 4 }}
             >
-              <IOSIcon name="search-2" size={20} color={accent} />
+              <IOSText size={16} weight="500" color={accent}>{t('songlist_open')}</IOSText>
             </Pressable>
           )
-        : null}
+        : id == 'nav_love'
+          ? (
+              <Pressable
+                onPress={showListSearch}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t('nav_search')}
+                style={{
+                  width: 32,
+                  height: 32,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 2,
+                }}
+              >
+                <IOSIcon name="search-2" size={20} color={accent} />
+              </Pressable>
+            )
+          : null}
     </View>
   )
 }

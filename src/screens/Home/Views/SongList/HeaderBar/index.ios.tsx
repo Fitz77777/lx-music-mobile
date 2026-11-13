@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { View } from 'react-native'
 
 import SortTab, { type SortTabProps, type SortTabType } from './SortTab'
@@ -21,9 +21,9 @@ export interface HeaderBarType {
   setSource: (source: Source, sortId: string, tagName: string, tagId: string) => void
 }
 
-/** iOS 歌单广场头部：排序胶囊 + 标签 + 打开歌单 + 音源 */
+/** iOS 歌单广场工具条：标签筛选 + 排序胶囊 + 音源链接（打开歌单入口在导航栏） */
 export default forwardRef<HeaderBarType, HeaderBarProps>(({ onSortChange, onTagChange, onSourceChange }, ref) => {
-  const { colors } = useIOSTheme()
+  const { colors, spacing } = useIOSTheme()
   const sortTabRef = useRef<SortTabType>(null)
   const tagRef = useRef<TagType>(null)
   const openListRef = useRef<OpenListType>(null)
@@ -38,17 +38,27 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onSortChange, onTagC
     },
   }), [])
 
+  // 导航栏的「打开」按钮通过事件触发这里的打开歌单面板
+  useEffect(() => {
+    const handleShow = () => { openListRef.current?.show() }
+    global.app_event.on('showSonglistOpenList', handleShow)
+    return () => {
+      global.app_event.off('showSonglistOpenList', handleShow)
+    }
+  }, [])
+
   return (
     <View style={{
       flexDirection: 'row',
       alignItems: 'center',
       height: 48,
+      paddingLeft: spacing.lg,
       backgroundColor: colors.groupedBackground,
     }}>
-      <SortTab ref={sortTabRef} onSortChange={onSortChange} />
       <Tag ref={tagRef} onTagChange={onTagChange} />
-      <OpenList ref={openListRef} />
-      <SourceSelector ref={sourceSelectorRef} onSourceChange={onSourceChange} />
+      <SortTab ref={sortTabRef} onSortChange={onSortChange} />
+      <SourceSelector ref={sourceSelectorRef} onSourceChange={onSourceChange} style={{ paddingRight: spacing.lg }} />
+      <OpenList ref={openListRef} hideButton />
     </View>
   )
 })

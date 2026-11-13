@@ -13,14 +13,12 @@ import type { RowInfo } from '@/utils/tools'
 export const ITEM_HEIGHT = 68
 const PIC_SIZE = 56
 const ROW_PADDING = 14
-const INDEX_WIDTH = 22
-const COVER_MARGIN = 8
 const TEXT_GAP = 12
 /** 分隔线内缩到文字起点 */
-const SEPARATOR_INSET = ROW_PADDING + INDEX_WIDTH + COVER_MARGIN + PIC_SIZE + TEXT_GAP
+const SEPARATOR_INSET = ROW_PADDING + PIC_SIZE + TEXT_GAP
 
 /**
- * iOS「我的列表」歌曲行：序号/播放标记 + 封面 + 标题 + 音源/歌手 + 时长 + 更多。
+ * iOS「我的列表」歌曲行：封面 + 标题 + 音源/歌手 + 时长 + 更多。
  * 与 Android 版共用 props 与 memo 比较逻辑。
  */
 export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval, isLast = false, onToggleSource }: {
@@ -70,20 +68,12 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         onPress={() => { onPress(item, index) }}
         onLongPress={() => { onLongPress(item, index) }}
       >
-        <View style={{ width: INDEX_WIDTH, alignItems: 'center' }}>
-          {
-            active
-              ? <Icon name="play-outline" size={14} color={accent} />
-              : <IOSText size={13} color={colors.secondaryLabel}>{index + 1}</IOSText>
-          }
-        </View>
         <Image
           url={item.meta.picUrl}
           style={{
             width: PIC_SIZE,
             height: PIC_SIZE,
             borderRadius: 8,
-            marginLeft: COVER_MARGIN,
             backgroundColor: colors.tertiaryFill,
           }}
         />
@@ -130,7 +120,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
           justifyContent: 'center',
         }}
       >
-        <Icon name="dots-vertical" color={colors.secondaryLabel} rawSize={18} />
+        <Icon name="dots-vertical" color={colors.secondaryLabel} rawSize={20} />
       </TouchableOpacity>
       {!isLast
         ? (

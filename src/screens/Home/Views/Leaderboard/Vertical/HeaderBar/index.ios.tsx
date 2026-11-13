@@ -103,10 +103,8 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
     <View style={{
       flexDirection: 'row',
       alignItems: 'center',
-      height: 52,
-      paddingLeft: spacing.lg,
-      paddingRight: spacing.lg,
-      paddingBottom: spacing.sm + 2,
+      paddingHorizontal: spacing.xl,
+      paddingBottom: 12,
       backgroundColor: colors.groupedBackground,
     }}
     >

@@ -40,7 +40,7 @@ export default ({ visible = true }: { visible?: boolean }) => {
   if (!visible) return null
 
   return (
-    <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.sm }}>
+    <View style={{ paddingHorizontal: spacing.xl, paddingBottom: 12 }}>
       <IOSSegmentedControl
         values={values}
         selectedIndex={SEARCH_TYPE_LIST.indexOf(type)}

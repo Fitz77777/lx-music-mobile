@@ -77,10 +77,8 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
     <View style={{
       flexDirection: 'row',
       alignItems: 'center',
-      height: 52,
-      paddingLeft: spacing.lg,
-      paddingRight: spacing.md,
-      paddingBottom: spacing.sm + 2,
+      paddingHorizontal: spacing.xl,
+      paddingBottom: 12,
       backgroundColor: colors.groupedBackground,
       opacity: visibleBar ? 1 : 0,
     }}>

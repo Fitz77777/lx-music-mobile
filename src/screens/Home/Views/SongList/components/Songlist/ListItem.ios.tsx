@@ -18,14 +18,14 @@ export default memo(({ item, index, width, showSource, onPress }: {
 }) => {
   const { colors, spacing } = useIOSTheme()
 
-  if (!item.source) return <View style={{ width, marginBottom: spacing.lg }} />
+  if (!item.source) return <View style={{ width, marginBottom: spacing.xl }} />
 
   const handlePress = () => {
     onPress(item, index)
   }
 
   return (
-    <View style={{ width, marginBottom: spacing.lg }}>
+    <View style={{ width, marginBottom: spacing.xl }}>
       <TouchableOpacity activeOpacity={0.6} onPress={handlePress}>
         <View style={{
           width,

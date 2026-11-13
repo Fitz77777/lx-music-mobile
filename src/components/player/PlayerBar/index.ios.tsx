@@ -64,8 +64,8 @@ export default memo(({ isHome = false }: { isHome?: boolean }) => {
         height: CARD_HEIGHT,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingLeft: spacing.sm,
-        paddingRight: spacing.xs,
+        paddingLeft: spacing.md,
+        paddingRight: spacing.sm,
         borderRadius: 16,
         backgroundColor: colors.secondaryGroupedBackground,
         borderWidth: isDark ? hairline : 0,
@@ -99,7 +99,7 @@ export default memo(({ isHome = false }: { isHome?: boolean }) => {
         <Pressable
           onPress={() => { markTimeoutExitInteraction(); togglePlay() }}
           hitSlop={6}
-          style={{ width: BTN_SIZE, height: BTN_SIZE, alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: BTN_SIZE, height: BTN_SIZE, alignItems: 'center', justifyContent: 'center', marginLeft: spacing.md }}
         >
           <IOSIcon name={isPlay ? 'pause' : 'play'} size={26} color={colors.label} />
         </Pressable>

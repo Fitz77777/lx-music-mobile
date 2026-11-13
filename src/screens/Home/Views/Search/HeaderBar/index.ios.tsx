@@ -96,8 +96,8 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
       <View style={{
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.xl,
+        paddingBottom: 14,
       }}>
         <IOSSearchBar
           ref={searchBarRef}
@@ -115,18 +115,21 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
           disabled={!sourceList.length}
           hitSlop={8}
           style={{
-            marginLeft: spacing.md,
-            height: 36,
+            marginLeft: 10,
+            minWidth: 72,
+            height: 38,
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: 3,
           }}
         >
-          <IOSText variant="subheadline" color={accent} numberOfLines={1}>{activeSourceLabel}</IOSText>
+          <IOSText size={14} color={accent} numberOfLines={1}>{activeSourceLabel}</IOSText>
           <IOSIcon
             name="chevron-right"
-            size={11}
+            size={13}
             color={accent}
-            style={{ marginLeft: 2, transform: [{ rotate: '90deg' }] }}
+            style={{ transform: [{ rotate: '90deg' }] }}
           />
         </Pressable>
         <IOSPopover

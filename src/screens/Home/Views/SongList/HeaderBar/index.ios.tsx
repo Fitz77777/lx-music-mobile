@@ -52,12 +52,13 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onSortChange, onTagC
       flexDirection: 'row',
       alignItems: 'center',
       height: 48,
-      paddingLeft: spacing.lg,
+      paddingLeft: spacing.xl,
+      paddingRight: spacing.xl,
       backgroundColor: colors.groupedBackground,
     }}>
       <Tag ref={tagRef} onTagChange={onTagChange} />
       <SortTab ref={sortTabRef} onSortChange={onSortChange} />
-      <SourceSelector ref={sourceSelectorRef} onSourceChange={onSourceChange} style={{ paddingRight: spacing.lg }} />
+      <SourceSelector ref={sourceSelectorRef} onSourceChange={onSourceChange} />
       <OpenList ref={openListRef} hideButton />
     </View>
   )

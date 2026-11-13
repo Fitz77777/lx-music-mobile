@@ -3,8 +3,6 @@ import { FlatList, Pressable, View } from 'react-native'
 
 import Image from '@/components/common/Image'
 import IOSBottomSheet from '@/components/ios/BottomSheet'
-import IOSBadge from '@/components/ios/Badge'
-import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 import { useI18n } from '@/lang'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
@@ -20,6 +18,7 @@ const ListItem = memo(({ item, index, active, onPress }: {
   active: boolean
   onPress: (index: number) => void
 }) => {
+  const t = useI18n()
   const { colors, accent, withAlpha } = useIOSTheme()
 
   return (
@@ -30,6 +29,7 @@ const ListItem = memo(({ item, index, active, onPress }: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 12,
+        gap: 11,
         backgroundColor: active
           ? withAlpha(accent, 0.1)
           : pressed
@@ -37,43 +37,42 @@ const ListItem = memo(({ item, index, active, onPress }: {
             : 'transparent',
       })}
     >
-      <View style={{ width: 20, alignItems: 'center' }}>
-        {active
-          ? <IOSIcon name="play-outline" size={13} color={accent} />
-          : <IOSText size={12} color={colors.tertiaryLabel}>{index + 1}</IOSText>}
-      </View>
+      <IOSText size={12} color={colors.tertiaryLabel} style={{ width: 15, textAlign: 'center' }}>
+        {index + 1}
+      </IOSText>
       <Image
         url={item.meta.picUrl}
         style={{
-          width: 40,
-          height: 40,
-          marginLeft: 8,
+          width: 38,
+          height: 38,
           borderRadius: 8,
           backgroundColor: colors.tertiaryFill,
         }}
       />
-      <View style={{ flex: 1, marginLeft: 12, marginRight: 8 }}>
+      <View style={{ flex: 1, minWidth: 0 }}>
         <IOSText
-          size={15}
-          weight={active ? '600' : '400'}
-          color={active ? accent : colors.label}
+          size={14.5}
+          weight="500"
+          color={colors.label}
           numberOfLines={1}
         >{item.name}</IOSText>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 3, gap: 6 }}>
-          <IOSBadge variant="source">{item.source.toUpperCase()}</IOSBadge>
-          <IOSText size={12} color={colors.secondaryLabel} numberOfLines={1} style={{ flexShrink: 1 }}>
-            {item.singer}
-          </IOSText>
-        </View>
+        <IOSText size={12} color={colors.secondaryLabel} numberOfLines={1} style={{ marginTop: 2 }}>
+          {item.singer}
+        </IOSText>
       </View>
-      {item.interval
-        ? <IOSText size={12} color={colors.secondaryLabel}>{item.interval}</IOSText>
+      {active
+        ? <IOSText size={11.5} color={accent}>{t('playing')}</IOSText>
         : null}
     </Pressable>
   )
 }, (prev, next) => {
   return prev.item === next.item && prev.index === next.index && prev.active === next.active
 })
+
+const Separator = () => {
+  const { colors, hairline } = useIOSTheme()
+  return <View style={{ height: hairline, backgroundColor: colors.rowSeparator }} />
+}
 
 export interface PlayQueueModalType {
   show: () => void
@@ -123,19 +122,21 @@ export default forwardRef<PlayQueueModalType, {}>((props, ref) => {
     <IOSBottomSheet
       visible={visible}
       onClose={() => { setVisible(false) }}
-      title={`${t('play_queue_title')} (${list.length})`}
+      title={t('play_queue_title')}
+      description={t('play_queue_count', { num: list.length })}
     >
       <FlatList
-        style={{ maxHeight: 380, flexGrow: 0 }}
+        style={{ maxHeight: 322, flexGrow: 0, marginBottom: spacing.lg }}
         contentContainerStyle={{
           borderRadius: 12,
           overflow: 'hidden',
-          backgroundColor: colors.groupedBackground,
+          backgroundColor: colors.secondaryGroupedBackground,
         }}
         data={list}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         getItemLayout={getItemLayout}
+        ItemSeparatorComponent={Separator}
         initialScrollIndex={Math.max(0, activeIndex - 2)}
         maxToRenderPerBatch={10}
         windowSize={5}

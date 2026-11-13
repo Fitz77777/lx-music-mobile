@@ -1,4 +1,5 @@
 import { Navigation, type Options } from 'react-native-navigation'
+import { Appearance, Platform } from 'react-native'
 // import { InteractionManager } from 'react-native'
 
 import {
@@ -14,6 +15,7 @@ import {
 import themeState from '@/store/theme/state'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 import { getStatusBarStyle } from './utils'
+import { getIOSColors } from '@/theme/ios/tokens'
 import { windowSizeTools } from '@/utils/windowSizeTools'
 import { type ListInfoItem } from '@/store/songlist/state'
 
@@ -122,6 +124,10 @@ export function pushPlayDetailScreen(componentId: string, skipAnimation = false)
   */
   requestAnimationFrame(() => {
     const theme = themeState.theme
+    // iOS 播放页使用系统语义色背景与状态栏，强调色仍由 LX 主题提供
+    const isIOS = Platform.OS == 'ios'
+    const iosIsDark = Appearance.getColorScheme() == 'dark'
+    const contentBackgroundColor = isIOS ? getIOSColors(iosIsDark).groupedBackground : theme['c-content-background']
 
     void Navigation.push(componentId, {
       component: {
@@ -135,15 +141,15 @@ export function pushPlayDetailScreen(componentId: string, skipAnimation = false)
           statusBar: {
             drawBehind: true,
             visible: true,
-            style: getStatusBarStyle(theme.isDark),
+            style: isIOS ? (iosIsDark ? 'light' : 'dark') : getStatusBarStyle(theme.isDark),
             backgroundColor: 'transparent',
           },
           navigationBar: {
             // visible: false,
-            backgroundColor: theme['c-content-background'],
+            backgroundColor: contentBackgroundColor,
           },
           layout: {
-            componentBackgroundColor: theme['c-content-background'],
+            componentBackgroundColor: contentBackgroundColor,
           },
           animations: {
             push: skipAnimation ? {} : {

@@ -71,8 +71,8 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
   return (
     <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
       <View style={{ flex: 1, justifyContent: 'center' }}>
-        <View pointerEvents="none" style={{ position: 'absolute', left: spacing.sm + 1, zIndex: 1 }}>
-          <IOSIcon name="search-2" size={15} color={colors.secondaryLabel} />
+        <View pointerEvents="none" style={{ position: 'absolute', left: 11, zIndex: 1 }}>
+          <IOSIcon name="search-2" size={17} color={colors.secondaryLabel} />
         </View>
         <TextInput
           ref={inputRef}
@@ -90,13 +90,13 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
           onFocus={handleFocus}
           onBlur={handleBlur}
           style={{
-            height: 36,
+            height: 38,
             borderRadius: radius.medium,
-            paddingLeft: spacing.xxxl,
-            paddingRight: spacing.sm,
+            paddingLeft: 35,
+            paddingRight: 11,
             paddingVertical: 0,
             backgroundColor: colors.fill,
-            fontSize: 17,
+            fontSize: 16,
             color: colors.label,
           }}
         />

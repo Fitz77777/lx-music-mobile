@@ -17,10 +17,10 @@ type FlatListType = FlatListProps<ListInfoItem>
 const MIN_WIDTH = scaleSizeW(110)
 const GAP = scaleSizeW(20)
 
-/** iOS 歌单宫格：2 列、页边距 16、列间距 12（原型 .grid2） */
+/** iOS 歌单宫格：2 列、页边距 16、列间距 14、行间距 20（原型 .grid2） */
 const IOS_COLUMNS = 2
 const IOS_PADDING = 16
-const IOS_GAP = 12
+const IOS_GAP = 14
 
 export interface ListProps {
   onRefresh: () => void

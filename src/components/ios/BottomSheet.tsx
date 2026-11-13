@@ -124,6 +124,7 @@ export default memo(({
               ? (
                   <IOSText
                     variant="title3"
+                    weight="700"
                     align="center"
                     numberOfLines={1}
                     style={{ letterSpacing: 0.2 }}

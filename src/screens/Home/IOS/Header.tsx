@@ -14,9 +14,6 @@ export default () => {
   const id = useNavActiveId()
   const { colors, accent, spacing } = useIOSTheme()
 
-  // 搜索页自带「搜索框 + 范围」头部，这里不再叠加标题栏
-  if (id == 'nav_search') return null
-
   const showListSearch = () => {
     global.app_event.showMylistSearchBar()
   }
@@ -44,7 +41,7 @@ export default () => {
               accessibilityLabel={id == 'nav_songlist' ? t('songlist_open') : t('leaderboard_all')}
               style={{ paddingVertical: 4, marginBottom: 4 }}
             >
-              <IOSText size={16} weight="500" color={accent}>
+              <IOSText size={15} weight="500" color={accent}>
                 {id == 'nav_songlist' ? t('songlist_open') : t('leaderboard_all')}
               </IOSText>
             </Pressable>

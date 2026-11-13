@@ -15,29 +15,45 @@ export interface HotSearchType {
 
 export type List = NonNullable<InitState['sourceList'][keyof InitState['sourceList']]>
 
-const ListItem = ({ keyword, onSearch }: {
+const ListItem = ({ keyword, index, onSearch }: {
   keyword: string
+  index: number
   onSearch: (keyword: string) => void
 }) => {
-  const { colors, spacing } = useIOSTheme()
+  const { colors, accent, isDark, withAlpha } = useIOSTheme()
+  const top = index < 3
   return (
     <Pressable
       onPress={() => { onSearch(keyword) }}
       style={({ pressed }) => ({
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm - 1,
-        borderRadius: 999,
-        backgroundColor: pressed ? colors.tertiaryFill : colors.secondaryFill,
-        marginRight: spacing.sm,
-        marginTop: spacing.sm,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderRadius: 18,
+        backgroundColor: top ? withAlpha(accent, 0.1) : colors.secondaryGroupedBackground,
+        shadowColor: '#000000',
+        shadowOpacity: top || isDark ? 0 : 0.07,
+        shadowRadius: 3,
+        shadowOffset: { width: 0, height: 1 },
+        opacity: pressed ? 0.62 : 1,
       })}
     >
-      <IOSText variant="subheadline" numberOfLines={1}>{keyword}</IOSText>
+      <IOSText
+        size={10.5}
+        weight="700"
+        color={top ? accent : colors.secondaryLabel}
+        style={{ opacity: top ? 0.8 : 1 }}
+      >{index + 1}</IOSText>
+      <IOSText size={14} weight={top ? '600' : '400'} color={top ? accent : colors.label} numberOfLines={1}>
+        {keyword}
+      </IOSText>
     </Pressable>
   )
 }
 
-/** iOS 热门搜索：胶囊标签 */
+/** iOS 热门搜索：带排名的胶囊标签，前三名强调色（原型 .hot-tag） */
 export default forwardRef<HotSearchType, ListProps>((props, ref) => {
   const [list, setList] = useState<List>([])
   const { colors, spacing } = useIOSTheme()
@@ -64,14 +80,23 @@ export default forwardRef<HotSearchType, ListProps>((props, ref) => {
 
   return (
     <View>
-      <IOSText
-        variant="headline"
-        color={colors.label}
-        style={{ marginTop: spacing.xl, marginBottom: spacing.xs }}
-      >{t('search_hot_search')}</IOSText>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        justifyContent: 'space-between',
+        marginTop: spacing.xl,
+        marginBottom: spacing.md,
+      }}>
+        <IOSText size={20} weight="700" color={colors.label} style={{ letterSpacing: 0.2 }}>
+          {t('search_hot_search')}
+        </IOSText>
+        <IOSText size={12.5} color={colors.secondaryLabel}>{t('search_hot_search_sub')}</IOSText>
+      </View>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {
-          list.map(keyword => <ListItem keyword={keyword} key={keyword} onSearch={props.onSearch} />)
+          list.map((keyword, index) => (
+            <ListItem keyword={keyword} index={index} key={keyword} onSearch={props.onSearch} />
+          ))
         }
       </View>
     </View>

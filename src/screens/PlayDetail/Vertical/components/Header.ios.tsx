@@ -1,10 +1,13 @@
-import { memo, useRef } from 'react'
-import { View } from 'react-native'
+import { memo, useMemo, useRef, useState } from 'react'
+import { Pressable, View, type View as ViewType } from 'react-native'
 
 import { pop } from '@/navigation'
 import StatusBar from '@/components/common/StatusBar'
-import IOSIconButton from '@/components/ios/IconButton'
+import TimeoutExitEditModal, { type TimeoutExitEditModalType, useTimeInfo } from '@/components/TimeoutExitEditModal'
+import IOSIcon from '@/components/ios/Icon'
+import IOSPopover from '@/components/ios/Popover'
 import IOSText from '@/components/ios/Text'
+import { useI18n } from '@/lang'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { usePlayerMusicInfo } from '@/store/player/hook'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
@@ -13,54 +16,125 @@ import SettingPopup, { type SettingPopupType } from '../../components/SettingPop
 import SoundEffectPopup, { type SoundEffectPopupType } from '../../components/SoundEffectPopup'
 import { useSetting } from '@/store/setting/hook'
 import { isSoundEffectActive } from '@/plugins/player/soundEffect'
-import TimeoutExitBtn from './TimeoutExitBtn'
 
 /** 头部高度（pt），Pic 用它计算封面尺寸 */
 export const HEADER_HEIGHT = 44
 
-/** iOS 播放页头部：返回 + 歌曲信息 + 定时/音效/设置 */
+const BUTTON_SIZE = 32
+
+/**
+ * iOS 播放页头部（原型 .player .bar）：
+ * 左侧向下箭头收起、中间歌曲名/歌手、右侧「更多」下拉（定时退出 / 音效 / 播放器设置）。
+ */
 export default memo(() => {
+  const t = useI18n()
   const popupRef = useRef<SettingPopupType>(null)
   const soundEffectPopupRef = useRef<SoundEffectPopupType>(null)
+  const timeoutModalRef = useRef<TimeoutExitEditModalType>(null)
+  const [menuVisible, setMenuVisible] = useState(false)
+  const moreAnchorRef = useRef<ViewType>(null)
   const { colors, accent, spacing } = useIOSTheme()
   const musicInfo = usePlayerMusicInfo()
   const setting = useSetting()
+  const timeInfo = useTimeInfo()
 
-  const back = () => {
+  const close = () => {
     void pop(commonState.componentIds.playDetail!)
   }
-  const showSetting = () => {
-    popupRef.current?.show()
-  }
-  const showSoundEffect = () => {
-    soundEffectPopupRef.current?.show()
+
+  const items = useMemo(() => [
+    {
+      key: 'timeout',
+      label: timeInfo.active ? t('timeout_exit_btn_update') : t('timeout_exit_tip_off'),
+      selected: timeInfo.active,
+    },
+    {
+      key: 'soundEffect',
+      label: t('setting_play_sound_effect'),
+      selected: isSoundEffectActive(setting),
+    },
+    { key: 'setting', label: t('play_detail_setting_title') },
+  ], [setting, t, timeInfo.active])
+
+  const handleSelect = (key: string) => {
+    setMenuVisible(false)
+    // 等下拉菜单收起后再打开二级弹层，避免两个 Modal 叠加
+    setTimeout(() => {
+      switch (key) {
+        case 'timeout':
+          timeoutModalRef.current?.show()
+          break
+        case 'soundEffect':
+          soundEffectPopupRef.current?.show()
+          break
+        case 'setting':
+          popupRef.current?.show()
+          break
+      }
+    }, 140)
   }
 
   return (
     <View nativeID={NAV_SHEAR_NATIVE_IDS.playDetail_header}>
       <StatusBar />
       <View style={{
-        height: 44,
+        height: HEADER_HEIGHT,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: spacing.xs,
+        paddingHorizontal: spacing.xl,
       }}>
-        <IOSIconButton name="chevron-left" size={22} color={accent} onPress={back} accessibilityLabel={global.i18n.t('back')} />
-        <View style={{ flex: 1, paddingHorizontal: spacing.sm }}>
-          <IOSText variant="headline" numberOfLines={1}>{musicInfo.name}</IOSText>
-          <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1}>{musicInfo.singer}</IOSText>
+        <Pressable
+          onPress={close}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t('back')}
+          style={({ pressed }) => ({
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: pressed ? 0.5 : 1,
+          })}
+        >
+          <IOSIcon
+            name="chevron-right"
+            size={22}
+            color={accent}
+            style={{ transform: [{ rotate: '90deg' }] }}
+          />
+        </Pressable>
+        <View style={{ flex: 1, paddingHorizontal: spacing.sm, alignItems: 'center' }}>
+          <IOSText size={16} weight="600" numberOfLines={1} align="center">{musicInfo.name}</IOSText>
+          <IOSText size={12} color={colors.secondaryLabel} numberOfLines={1} align="center" style={{ marginTop: 1 }}>
+            {musicInfo.singer}
+          </IOSText>
         </View>
-        <TimeoutExitBtn />
-        <IOSIconButton
-          name="slider"
-          size={20}
-          color={isSoundEffectActive(setting) ? accent : colors.label}
-          onPress={showSoundEffect}
-        />
-        <IOSIconButton name="setting" size={19} onPress={showSetting} />
+        <Pressable
+          ref={moreAnchorRef}
+          onPress={() => { setMenuVisible(true) }}
+          hitSlop={8}
+          accessibilityRole="button"
+          style={({ pressed }) => ({
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: pressed ? 0.5 : 1,
+          })}
+        >
+          <IOSIcon name="dots-vertical" size={22} color={accent} />
+        </Pressable>
       </View>
+      <IOSPopover
+        visible={menuVisible}
+        anchorRef={moreAnchorRef}
+        items={items}
+        onClose={() => { setMenuVisible(false) }}
+        onSelect={handleSelect}
+      />
       <SoundEffectPopup ref={soundEffectPopupRef} layoutMode="stacked" />
       <SettingPopup ref={popupRef} direction="vertical" />
+      <TimeoutExitEditModal ref={timeoutModalRef} timeInfo={timeInfo} />
     </View>
   )
 })

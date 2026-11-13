@@ -5,7 +5,7 @@ import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 
 /** 播放页更多操作按钮尺寸（pt） */
 export const BTN_WIDTH = 44
-export const BTN_ICON_SIZE = 22
+export const BTN_ICON_SIZE = 24
 
 /** iOS 播放页底部操作按钮 */
 export default ({ icon, color, onPress, onLongPress }: {

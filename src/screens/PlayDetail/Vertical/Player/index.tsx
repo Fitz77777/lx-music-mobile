@@ -9,7 +9,15 @@ import { createStyle } from '@/utils/tools'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 
 
-export default memo(() => {
+export default memo(({ onToggleLyric, showingLyric }: {
+  /** iOS：切换封面 / 歌词页，Android 忽略 */
+  onToggleLyric?: () => void
+  /** iOS：当前是否显示歌词页，Android 忽略 */
+  showingLyric?: boolean
+} = {}) => {
+  // 这两个参数仅 iOS 使用，Android 侧忽略
+  void onToggleLyric
+  void showingLyric
   return (
     <View style={styles.container} nativeID={NAV_SHEAR_NATIVE_IDS.playDetail_player}>
       <PlayInfo />

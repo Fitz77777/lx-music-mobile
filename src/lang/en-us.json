@@ -207,6 +207,7 @@
   "play_list_random": "Shuffle",
   "play_next": "Next Song",
   "play_prev": "Prev Song",
+  "play_queue_title": "Play Queue",
   "play_single": "Disable",
   "play_single_loop": "Repeat",
   "player__buffering": "Buffering...",

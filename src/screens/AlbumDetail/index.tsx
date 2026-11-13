@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { View } from 'react-native'
 
 import PageContent from '@/components/PageContent'
+import { useIOSPanBack } from '@/navigation/iosGestures'
 import Header from './Header'
 import OnlineList, { type OnlineListType } from '@/components/OnlineList'
 import wyApi from '@/utils/musicSdk/wy/album'
@@ -39,6 +40,7 @@ const getApi = (source?: string) => {
 }
 
 export default memo(({ componentId, albumInfo }: { componentId: string, albumInfo: AlbumInfo }) => {
+  const panBack = useIOSPanBack(componentId)
   const [albumDetail, setAlbumDetail] = useState<{ info: any, list: LX.Music.MusicInfoOnline[] }>({ info: null, list: [] })
   const listRef = useRef<OnlineListType>(null)
   const api = getApi(albumInfo.source)
@@ -76,7 +78,7 @@ export default memo(({ componentId, albumInfo }: { componentId: string, albumInf
 
   return (
     <PageContent>
-      <View style={styles.container}>
+      <View style={styles.container} {...panBack.panHandlers}>
         <Header albumInfo={albumDetail.info || albumInfo} componentId={componentId} />
         <OnlineList
           ref={listRef}

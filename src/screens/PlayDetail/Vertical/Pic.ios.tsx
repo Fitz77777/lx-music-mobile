@@ -5,6 +5,7 @@ import { usePlayerMusicInfo } from '@/store/player/hook'
 import { useWindowSize } from '@/utils/hooks'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 import { useNavigationComponentDidAppear } from '@/navigation'
+import { useIOSPanDown } from '@/navigation/iosGestures'
 import { HEADER_HEIGHT } from './components/Header'
 import Image from '@/components/common/Image'
 import { useStatusbarHeight } from '@/store/common/hook'
@@ -23,6 +24,7 @@ export default ({ componentId }: { componentId: string }) => {
   const musicInfo = usePlayerMusicInfo()
   const { width: winWidth, height: winHeight } = useWindowSize()
   const statusBarHeight = useStatusbarHeight()
+  const panDown = useIOSPanDown(componentId)
 
   const [animated, setAnimated] = useState(!!commonState.componentIds.playDetail)
   const [pic, setPic] = useState(musicInfo.pic)
@@ -42,7 +44,7 @@ export default ({ componentId }: { componentId: string }) => {
   }, [statusBarHeight, winHeight, winWidth])
 
   return (
-    <View style={{ flexGrow: 1, flexShrink: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={{ flexGrow: 1, flexShrink: 1, justifyContent: 'center', alignItems: 'center' }} {...panDown.panHandlers}>
       <View style={{
         borderRadius: ART_RADIUS,
         backgroundColor: 'transparent',

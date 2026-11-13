@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { View } from 'react-native'
 
 import PageContent from '@/components/PageContent'
+import { useIOSPanBack } from '@/navigation/iosGestures'
 import Header from './Header'
 import SongList from './SongList'
 import wyApi from '@/utils/musicSdk/wy/artist'
@@ -55,6 +56,7 @@ interface AlbumsState {
 }
 
 export default memo(({ componentId, artistInfo }: { componentId: string, artistInfo: ArtistInfo }) => {
+  const panBack = useIOSPanBack(componentId)
   const [artistDetail, setArtistDetail] = useState<any>(null)
   const [songs, setSongs] = useState<SongsState>({ list: [], hasMore: true, page: 1, loading: false, sort: 'hot', error: false })
   const [albums, setAlbums] = useState<AlbumsState>({ list: [], hasMore: true, page: 1, loading: false, error: false })
@@ -169,7 +171,7 @@ export default memo(({ componentId, artistInfo }: { componentId: string, artistI
 
   return (
     <PageContent>
-      <View style={styles.container}>
+      <View style={styles.container} {...panBack.panHandlers}>
         <Header artist={displayArtist} componentId={componentId} />
         <SongList
           componentId={componentId}

@@ -11,6 +11,7 @@ import { useI18n } from '@/lang'
 import { COMPONENT_IDS } from '@/config/constant'
 import { setComponentId } from '@/core/common'
 import PageContent from '@/components/PageContent'
+import { useIOSPanBack } from '@/navigation/iosGestures'
 import playerState from '@/store/player/state'
 
 type ActiveId = 'hot' | 'new'
@@ -58,6 +59,7 @@ const getMusicInfo = (musicInfo: LX.Player.PlayMusic | null) => {
 export default memo(({ componentId }: {
   componentId: string
 }) => {
+  const panBack = useIOSPanBack(componentId, 40)
   const pagerViewRef = useRef<PagerView>(null)
   const [activeId, setActiveId] = useState<ActiveId>('hot')
   const [musicInfo, setMusicInfo] = useState<LX.Music.MusicInfo | null>(getMusicInfo(playerState.playMusicInfo.musicInfo))
@@ -132,6 +134,7 @@ export default memo(({ componentId }: {
 
   return (
     <PageContent>
+      <View style={{ flex: 1 }} {...panBack.panHandlers}>
       {
         musicInfo == null
           ? null
@@ -148,7 +151,7 @@ export default memo(({ componentId }: {
             }
         </>
       }
-
+      </View>
     </PageContent>
   )
 })

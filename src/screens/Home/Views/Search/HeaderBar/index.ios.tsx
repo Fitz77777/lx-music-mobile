@@ -72,11 +72,6 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
     onSearch(text)
   }
 
-  const handleCancel = () => {
-    setText('')
-    onTipSearch('')
-  }
-
   const handleShowSourceMenu = () => {
     if (!sourceList.length) return
     setPopoverVisible(true)
@@ -106,7 +101,6 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
           onSubmit={handleSubmit}
           onFocus={onShowTipList}
           onBlur={onHideTipList}
-          onCancel={handleCancel}
           style={{ flex: 1 }}
         />
         <Pressable

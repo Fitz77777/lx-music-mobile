@@ -1,12 +1,12 @@
 import { forwardRef, memo, useEffect, useImperativeHandle, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { View } from 'react-native'
 
 import Image from '@/components/common/Image'
 import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
-import { useNavigationComponentDidAppear, pop } from '@/navigation'
+import { useNavigationComponentDidAppear } from '@/navigation'
 import { useListInfo } from './state'
 import { useAnimateOnecNumber } from '@/utils/hooks/useAnimateNumber'
 import ActionBar from './ActionBar'
@@ -86,7 +86,7 @@ export interface DetailInfo {
 
 /** iOS 歌单详情头部：返回 + 封面/简介 + 操作按钮 */
 export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, spacing } = useIOSTheme()
   const info = useListInfo()
   const [detailInfo, setDetailInfo] = useState<DetailInfo>({ name: '', desc: '', playCount: '', imgUrl: info.img })
 
@@ -96,24 +96,8 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
     },
   }), [])
 
-  const back = () => {
-    void pop(componentId)
-  }
-
   return (
     <View style={{ paddingBottom: spacing.sm }}>
-      <View style={{ height: 44, justifyContent: 'center', paddingHorizontal: spacing.md }}>
-        <Pressable
-          onPress={back}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={global.i18n.t('back')}
-          style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start' }}
-        >
-          <IOSIcon name="chevron-left" size={22} color={accent} />
-          <IOSText variant="body" color={accent}>{global.i18n.t('back')}</IOSText>
-        </Pressable>
-      </View>
       <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
         <Pic componentId={componentId} playCount={detailInfo.playCount} imgUrl={detailInfo.imgUrl} />
         <View

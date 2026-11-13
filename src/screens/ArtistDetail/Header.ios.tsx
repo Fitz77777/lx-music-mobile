@@ -3,10 +3,8 @@ import { Pressable, View } from 'react-native'
 
 import ImageBackground from '@/components/common/ImageBackground'
 import Image from '@/components/common/Image'
-import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { pop } from '@/navigation'
 
 interface Props {
   artist: any
@@ -15,17 +13,13 @@ interface Props {
 
 /** iOS 歌手详情头部：模糊背景 + 头像 + 简介（点击展开） */
 export default memo(({ artist, componentId }: Props) => {
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, spacing } = useIOSTheme()
   const [isDescExpanded, setDescExpanded] = useState(false)
 
   const artistName = artist?.name || ''
   const artistAlias = artist?.alias?.length ? artist.alias[0] : ''
   const description = artist?.briefDesc || artist?.desc || ''
   const artistPic = artist?.picUrl || artist?.img1v1Url || artist?.img
-
-  const back = () => {
-    void pop(componentId)
-  }
 
   return (
     <ImageBackground
@@ -34,23 +28,6 @@ export default memo(({ artist, componentId }: Props) => {
       blurRadius={24}
     >
       <View style={{ backgroundColor: 'rgba(0, 0, 0, 0.45)', paddingBottom: spacing.lg }}>
-        <View style={{
-          height: 44,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: spacing.md,
-        }}>
-          <Pressable
-            onPress={back}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={global.i18n.t('back')}
-            style={{ flexDirection: 'row', alignItems: 'center' }}
-          >
-            <IOSIcon name="chevron-left" size={22} color={accent} />
-            <IOSText variant="body" color={accent}>{global.i18n.t('back')}</IOSText>
-          </Pressable>
-        </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg }}>
           <Image url={artistPic} style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: colors.tertiaryFill }} />
           <View style={{ flex: 1, marginLeft: spacing.lg }}>

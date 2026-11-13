@@ -1,9 +1,8 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
-import { Pressable, TextInput, View, type StyleProp, type ViewStyle } from 'react-native'
+import { forwardRef, useImperativeHandle, useRef } from 'react'
+import { TextInput, View, type StyleProp, type ViewStyle } from 'react-native'
 import { useI18n } from '@/lang'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import IOSIcon from './Icon'
-import IOSText from './Text'
 
 export interface SearchBarType {
   focus: () => void
@@ -18,7 +17,6 @@ export interface SearchBarProps {
   onSubmit?: (text: string) => void
   onFocus?: () => void
   onBlur?: () => void
-  onCancel?: () => void
   autoFocus?: boolean
   editable?: boolean
   style?: StyleProp<ViewStyle>
@@ -32,15 +30,13 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
   onSubmit,
   onFocus,
   onBlur,
-  onCancel,
   autoFocus = false,
   editable = true,
   style,
 }, ref) => {
   const t = useI18n()
-  const { colors, accent, spacing, radius } = useIOSTheme()
+  const { colors, radius } = useIOSTheme()
   const inputRef = useRef<TextInput>(null)
-  const [focused, setFocused] = useState(false)
 
   useImperativeHandle(ref, () => ({
     focus() {
@@ -55,17 +51,10 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
   }), [onChangeText])
 
   const handleFocus = () => {
-    setFocused(true)
     onFocus?.()
   }
   const handleBlur = () => {
-    setFocused(false)
     onBlur?.()
-  }
-  const handleCancel = () => {
-    inputRef.current?.blur()
-    onChangeText('')
-    onCancel?.()
   }
 
   return (
@@ -101,13 +90,6 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
           }}
         />
       </View>
-      {focused
-        ? (
-            <Pressable onPress={handleCancel} hitSlop={8} style={{ paddingLeft: spacing.md }}>
-              <IOSText variant="body" color={accent}>{t('cancel')}</IOSText>
-            </Pressable>
-          )
-        : null}
     </View>
   )
 })

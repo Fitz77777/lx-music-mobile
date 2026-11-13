@@ -2,11 +2,10 @@ import { memo } from 'react'
 import { Pressable, View } from 'react-native'
 
 import Image from '@/components/common/Image'
-import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { dateFormat } from '@/utils/common'
-import { pop, navigations } from '@/navigation'
+import { navigations } from '@/navigation'
 
 interface Props {
   albumInfo: {
@@ -23,17 +22,13 @@ interface Props {
   componentId: string
 }
 
-/** iOS 专辑详情头部：返回 + 封面 + 专辑信息 */
+/** iOS 专辑详情头部：封面 + 专辑信息（返回靠右滑手势） */
 export default memo(({ albumInfo, componentId }: Props) => {
   const { colors, accent, spacing } = useIOSTheme()
   const albumPic = albumInfo.picUrl ?? albumInfo.img
   const artists: Array<{ id: string, name: string }> = albumInfo.artists?.length
     ? albumInfo.artists
     : (albumInfo.author ? [{ id: '', name: albumInfo.author }] : [])
-
-  const back = () => {
-    void pop(componentId)
-  }
 
   const handleArtistPress = (artist: { id: string, name: string }) => {
     if (!artist.id) return
@@ -47,18 +42,6 @@ export default memo(({ albumInfo, componentId }: Props) => {
 
   return (
     <View style={{ paddingBottom: spacing.sm }}>
-      <View style={{ height: 44, justifyContent: 'center', paddingHorizontal: spacing.md }}>
-        <Pressable
-          onPress={back}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={global.i18n.t('back')}
-          style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start' }}
-        >
-          <IOSIcon name="chevron-left" size={22} color={accent} />
-          <IOSText variant="body" color={accent}>{global.i18n.t('back')}</IOSText>
-        </Pressable>
-      </View>
       <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
         <Image
           url={albumPic}

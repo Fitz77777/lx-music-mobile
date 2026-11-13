@@ -1,8 +1,7 @@
-import { useMemo, useRef } from 'react'
-import { Navigation } from 'react-native-navigation'
-import { PanResponder, SafeAreaView, ScrollView, View } from 'react-native'
+import { SafeAreaView, ScrollView, View } from 'react-native'
 
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { useIOSPanBack } from '@/navigation/iosGestures'
 import IOSBackdrop from '@/components/ios/Backdrop'
 import Basic from '@/screens/Home/Views/Setting/settings/Basic'
 import Network from '@/screens/Home/Views/Setting/settings/Network'
@@ -46,28 +45,14 @@ const SettingContent = ({ id }: { id: SettingScreenIds }) => {
  */
 export default ({ componentId, id }: Props) => {
   const { colors } = useIOSTheme()
-  const isPoppedRef = useRef(false)
-
-  const panResponder = useMemo(() => PanResponder.create({
-    onMoveShouldSetPanResponderCapture: (_evt, gesture) => {
-      return !isPoppedRef.current && gesture.dx > 12 && gesture.dx > Math.abs(gesture.dy) * 1.6
-    },
-    onPanResponderTerminationRequest: () => false,
-    onPanResponderRelease: (_evt, gesture) => {
-      if (isPoppedRef.current) return
-      if (gesture.dx > 72 || gesture.vx > 0.5) {
-        isPoppedRef.current = true
-        void Navigation.pop(componentId)
-      }
-    },
-  }), [componentId])
+  const panBack = useIOSPanBack(componentId)
 
   return (
     <View style={{ flex: 1 }}>
       <IOSBackdrop />
       <SafeAreaView
         style={{ flex: 1, backgroundColor: colors.canvas }}
-        {...panResponder.panHandlers}
+        {...panBack.panHandlers}
       >
         <View style={{ flex: 1, backgroundColor: colors.canvas }}>
           <ScrollView

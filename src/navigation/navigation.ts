@@ -136,6 +136,8 @@ export function pushPlayDetailScreen(componentId: string, skipAnimation = false)
       component: {
         name: PLAY_DETAIL_SCREEN,
         options: {
+          // 播放页用下拉手势收起，不用系统边缘返回手势
+          popGesture: false,
           topBar: {
             visible: false,
             height: 0,
@@ -221,6 +223,8 @@ export function pushSonglistDetailScreen(componentId: string, info: ListInfoItem
           info,
         },
         options: {
+          // 二级页不显示返回按钮，统一用页面内的右滑手势返回
+          popGesture: false,
           topBar: {
             visible: false,
             height: 0,
@@ -333,6 +337,8 @@ export interface AlbumInfoPassProps {
 const pushDetailOptions = (): Options => {
   const theme = themeState.theme
   return {
+    // 二级页不显示返回按钮，统一用页面内的右滑手势返回
+    popGesture: false,
     topBar: {
       visible: false,
       height: 0,
@@ -438,6 +444,7 @@ export function pushCommentScreen(componentId: string) {
       component: {
         name: COMMENT_SCREEN,
         options: {
+          popGesture: false,
           topBar: {
             visible: false,
             height: 0,

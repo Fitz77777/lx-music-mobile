@@ -1,7 +1,6 @@
 import { memo, useMemo, useRef, useState } from 'react'
 import { Pressable, View, type View as ViewType } from 'react-native'
 
-import { pop } from '@/navigation'
 import StatusBar from '@/components/common/StatusBar'
 import TimeoutExitEditModal, { type TimeoutExitEditModalType, useTimeInfo } from '@/components/TimeoutExitEditModal'
 import IOSIcon from '@/components/ios/Icon'
@@ -12,6 +11,7 @@ import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { usePlayerMusicInfo } from '@/store/player/hook'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 import commonState from '@/store/common/state'
+import { useIOSPanDown } from '@/navigation/iosGestures'
 import SettingPopup, { type SettingPopupType } from '../../components/SettingPopup'
 import SoundEffectPopup, { type SoundEffectPopupType } from '../../components/SoundEffectPopup'
 import { useSetting } from '@/store/setting/hook'
@@ -24,10 +24,12 @@ const BUTTON_SIZE = 32
 
 /**
  * iOS 播放页头部（原型 .player .bar）：
- * 左侧向下箭头收起、中间歌曲名/歌手、右侧「更多」下拉（定时退出 / 音效 / 播放器设置）。
+ * 中间歌曲名/歌手、右侧「更多」下拉（定时退出 / 音效 / 播放器设置）。
+ * 收起不再用按钮，改成在头部或封面上向下滑动。
  */
 export default memo(() => {
   const t = useI18n()
+  const panDown = useIOSPanDown(commonState.componentIds.playDetail)
   const popupRef = useRef<SettingPopupType>(null)
   const soundEffectPopupRef = useRef<SoundEffectPopupType>(null)
   const timeoutModalRef = useRef<TimeoutExitEditModalType>(null)
@@ -37,10 +39,6 @@ export default memo(() => {
   const musicInfo = usePlayerMusicInfo()
   const setting = useSetting()
   const timeInfo = useTimeInfo()
-
-  const close = () => {
-    void pop(commonState.componentIds.playDetail!)
-  }
 
   const items = useMemo(() => [
     {
@@ -75,7 +73,7 @@ export default memo(() => {
   }
 
   return (
-    <View nativeID={NAV_SHEAR_NATIVE_IDS.playDetail_header}>
+    <View nativeID={NAV_SHEAR_NATIVE_IDS.playDetail_header} {...panDown.panHandlers}>
       <StatusBar />
       <View style={{
         height: HEADER_HEIGHT,
@@ -83,26 +81,8 @@ export default memo(() => {
         alignItems: 'center',
         paddingHorizontal: spacing.xl,
       }}>
-        <Pressable
-          onPress={close}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={t('back')}
-          style={({ pressed }) => ({
-            width: BUTTON_SIZE,
-            height: BUTTON_SIZE,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.5 : 1,
-          })}
-        >
-          <IOSIcon
-            name="chevron-right"
-            size={22}
-            color={accent}
-            style={{ transform: [{ rotate: '90deg' }] }}
-          />
-        </Pressable>
+        {/* 播放页不再显示收起按钮，改为在封面上向下滑动收起 */}
+        <View style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }} />
         <View style={{ flex: 1, paddingHorizontal: spacing.sm, alignItems: 'center' }}>
           <IOSText size={16} weight="600" numberOfLines={1} align="center">{musicInfo.name}</IOSText>
           <IOSText size={12} color={colors.secondaryLabel} numberOfLines={1} align="center" style={{ marginTop: 1 }}>

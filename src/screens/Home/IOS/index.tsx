@@ -59,7 +59,7 @@ export default () => {
           <IOSTabBar items={items} activeId={activeId} onChange={handleChange} />
         </SafeAreaView>
       </View>
-      <IOSToast bottomOffset={163} />
+      <IOSToast bottomOffset={168} />
     </View>
   )
 }

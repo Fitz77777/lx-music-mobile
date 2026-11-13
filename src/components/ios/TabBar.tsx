@@ -30,6 +30,7 @@ export default memo(({ items, activeId, onChange, style }: TabBarProps) => {
     <View
       style={[{
         height: barHeight.tabBar,
+        paddingTop: 3,
         flexDirection: 'row',
         backgroundColor: colors.barBackgroundOpaque,
         borderTopWidth: hairline,

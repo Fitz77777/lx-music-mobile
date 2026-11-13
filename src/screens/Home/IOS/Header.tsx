@@ -37,7 +37,7 @@ export default () => {
       flexDirection: 'row',
       alignItems: 'flex-end',
       gap: 10,
-      paddingTop: 6,
+      paddingTop: 14,
       paddingHorizontal: spacing.xl,
       paddingBottom: 10,
       backgroundColor: colors.groupedBackground,

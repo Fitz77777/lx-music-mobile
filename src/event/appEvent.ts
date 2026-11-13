@@ -217,6 +217,14 @@ export class AppEvent extends Event {
     this.emit('showLeaderboardBoards')
   }
 
+  /**
+   * 排行榜当前榜单名称变化（iOS）。
+   * 当前榜不在常驻 chips 内时传榜名，否则传空字符串。
+   */
+  leaderboardBoundChange(name: string) {
+    this.emit('leaderboardBoundChange', name)
+  }
+
   songlistTagInfoChange(name: string, id: string) {
     this.emit('songlistTagInfoChange', name, id)
   }

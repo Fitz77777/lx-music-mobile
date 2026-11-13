@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useI18n } from '@/lang'
 import { useNavActiveId } from '@/store/common/hook'
@@ -8,11 +9,23 @@ import IOSText from '@/components/ios/Text'
 /**
  * iOS 导航栏：34pt 大标题与右侧操作同一行（原型 .nav）。
  * 不再保留 44pt 空操作栏，页面底色直接透出分组灰。
+ * 排行榜选中的榜不在常驻 chips 内时，大标题改为当前榜名（原型行为）。
  */
 export default () => {
   const t = useI18n()
   const id = useNavActiveId()
   const { colors, accent, spacing } = useIOSTheme()
+  const [boardName, setBoardName] = useState('')
+
+  useEffect(() => {
+    const handler = (name: string) => { setBoardName(name) }
+    global.app_event.on('leaderboardBoundChange', handler)
+    return () => {
+      global.app_event.off('leaderboardBoundChange', handler)
+    }
+  }, [])
+
+  const title = id == 'nav_top' && boardName ? boardName : t(id)
 
   const showListSearch = () => {
     global.app_event.showMylistSearchBar()
@@ -28,7 +41,7 @@ export default () => {
       paddingBottom: 10,
       backgroundColor: colors.groupedBackground,
     }}>
-      <IOSText variant="largeTitle" numberOfLines={1} style={{ flex: 1 }}>{t(id)}</IOSText>
+      <IOSText variant="largeTitle" numberOfLines={1} style={{ flex: 1 }}>{title}</IOSText>
       {id == 'nav_songlist' || id == 'nav_top'
         ? (
             <Pressable

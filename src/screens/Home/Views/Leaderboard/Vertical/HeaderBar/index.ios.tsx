@@ -20,25 +20,8 @@ export interface HeaderBarType {
   setBound: (source: LX.OnlineSource, id: string, name: string) => void
 }
 
-/** 常驻快捷榜单的匹配关键词，顺序即展示顺序 */
-const QUICK_BOARD_KEYS = ['热歌', '新歌', '飙升']
-
-/**
- * 从榜单列表里挑出三个常驻快捷榜（热歌 / 新歌 / 飙升）。
- * 某些音源没有对应榜单时，用列表前几个补齐，保证 chips 位置稳定。
- */
-export const pickQuickBoards = (list: BoardItem[]): BoardItem[] => {
-  const picked: BoardItem[] = []
-  for (const key of QUICK_BOARD_KEYS) {
-    const found = list.find(item => item.name.includes(key) && !picked.includes(item))
-    if (found) picked.push(found)
-  }
-  for (const item of list) {
-    if (picked.length >= 3) break
-    if (!picked.includes(item)) picked.push(item)
-  }
-  return picked
-}
+/** 常驻快捷榜单数量 */
+const QUICK_BOARD_COUNT = 3
 
 /** iOS 排行榜工具条：三个常驻榜单 chips + 音源链接（原型 .chips） */
 export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourceChange, onSelectBoard }, ref) => {
@@ -76,14 +59,17 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
   }), [])
 
   const quickBoards = useMemo(() => {
-    const picked = pickQuickBoards(boards)
-    // 当前榜单不在三个常驻榜里时，补一个「当前」chip，避免用户失去位置感
-    if (activeId && !picked.some(item => item.id == activeId)) {
-      const current = boards.find(item => item.id == activeId)
-      if (current) picked.push(current)
-    }
-    return picked
-  }, [boards, activeId])
+    // 与「全部榜单」保持同一顺序：直接取榜单列表前三个（从左往右）
+    return boards.slice(0, QUICK_BOARD_COUNT)
+  }, [boards])
+
+  // 当前榜不在常驻 chips 内时，把榜名交给首页大标题显示（原型行为）
+  useEffect(() => {
+    if (!boards.length) return
+    const isQuick = quickBoards.some(item => item.id == activeId)
+    const name = isQuick ? '' : boards.find(item => item.id == activeId)?.name ?? ''
+    global.app_event.leaderboardBoundChange(name)
+  }, [boards, quickBoards, activeId])
 
   const handleShowSourceMenu = () => {
     if (!sourceList.length) return

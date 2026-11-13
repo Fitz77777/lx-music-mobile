@@ -28,6 +28,8 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
   isShowInterval: boolean
   /** iOS 用于隐藏最后一行分隔线，Android 忽略 */
   isLast?: boolean
+  /** iOS：点击音源标签换源，Android 忽略 */
+  onToggleSource?: (item: LX.Music.MusicInfo) => void
 }) => {
   const theme = useTheme()
 

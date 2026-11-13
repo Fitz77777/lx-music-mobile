@@ -23,7 +23,7 @@ const SEPARATOR_INSET = ROW_PADDING + INDEX_WIDTH + COVER_MARGIN + PIC_SIZE + TE
  * iOS「我的列表」歌曲行：序号/播放标记 + 封面 + 标题 + 音源/歌手 + 时长 + 更多。
  * 与 Android 版共用 props 与 memo 比较逻辑。
  */
-export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval, isLast = false }: {
+export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval, isLast = false, onToggleSource }: {
   item: LX.Music.MusicInfo
   index: number
   activeIndex: number
@@ -35,6 +35,8 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
   isShowAlbumName: boolean
   isShowInterval: boolean
   isLast?: boolean
+  /** 点击音源标签换源 */
+  onToggleSource?: (item: LX.Music.MusicInfo) => void
 }) => {
   const { colors, accent, hairline, withAlpha } = useIOSTheme()
   const isSupported = useAssertApiSupport(item.source)
@@ -93,7 +95,14 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
             numberOfLines={1}
           >{item.name}</IOSText>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 6 }}>
-            <IOSBadge variant="source">{item.source.toUpperCase()}</IOSBadge>
+            <TouchableOpacity
+              disabled={!onToggleSource}
+              onPress={() => { onToggleSource?.(item) }}
+              hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+              accessibilityRole="button"
+            >
+              <IOSBadge variant="source">{item.source.toUpperCase()}</IOSBadge>
+            </TouchableOpacity>
             <IOSText
               size={13}
               color={colors.secondaryLabel}

@@ -1,8 +1,9 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View, type View as ViewType } from 'react-native'
 
-import { iosActionSheet } from '@/components/ios/Alert'
 import IOSIcon from '@/components/ios/Icon'
+import IOSPopover from '@/components/ios/Popover'
+import { getSourceColor } from '@/components/ios/sourceColor'
 import IOSText from '@/components/ios/Text'
 import { useSourceListI18n } from '@/components/SourceSelector'
 import { getBoardsList } from '@/core/leaderboard'
@@ -45,6 +46,8 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
   const [source, setSource] = useState<Source>('kw')
   const [activeId, setActiveId] = useState('')
   const [boards, setBoards] = useState<BoardItem[]>([])
+  const [popoverVisible, setPopoverVisible] = useState(false)
+  const sourceAnchorRef = useRef<ViewType>(null)
   const boardRequestRef = useRef(0)
   const isUnmountedRef = useRef(false)
 
@@ -82,12 +85,19 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
     return picked
   }, [boards, activeId])
 
-  const handleShowSourceMenu = async() => {
+  const handleShowSourceMenu = () => {
     if (!sourceList.length) return
-    const index = await iosActionSheet({ options: sourceList.map(item => item.label) })
-    if (index == null) return
-    onSourceChange(sourceList[index].action as LX.OnlineSource)
+    setPopoverVisible(true)
   }
+
+  const sourceItems = useMemo(() => {
+    return sourceList.map(item => ({
+      key: item.action,
+      label: item.label,
+      color: getSourceColor(item.action),
+      selected: item.action == source,
+    }))
+  }, [sourceList, source])
 
   return (
     <View style={{
@@ -143,7 +153,8 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
       </ScrollView>
       <View style={{ flex: 1 }} />
       <Pressable
-        onPress={() => { void handleShowSourceMenu() }}
+        ref={sourceAnchorRef}
+        onPress={handleShowSourceMenu}
         onLongPress={onShowBound}
         hitSlop={8}
         style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.sm }}
@@ -156,6 +167,16 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
           style={{ marginLeft: 3, transform: [{ rotate: '90deg' }] }}
         />
       </Pressable>
+      <IOSPopover
+        visible={popoverVisible}
+        anchorRef={sourceAnchorRef}
+        items={sourceItems}
+        onClose={() => { setPopoverVisible(false) }}
+        onSelect={key => {
+          setPopoverVisible(false)
+          onSourceChange(key as LX.OnlineSource)
+        }}
+      />
     </View>
   )
 })

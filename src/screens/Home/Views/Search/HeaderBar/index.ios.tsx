@@ -1,9 +1,10 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { Pressable, View, type View as ViewType } from 'react-native'
 
-import { iosActionSheet } from '@/components/ios/Alert'
 import IOSIcon from '@/components/ios/Icon'
+import IOSPopover from '@/components/ios/Popover'
 import IOSSearchBar, { type SearchBarType } from '@/components/ios/SearchBar'
+import { getSourceColor } from '@/components/ios/sourceColor'
 import IOSText from '@/components/ios/Text'
 import { useSourceListI18n } from '@/components/SourceSelector'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
@@ -28,7 +29,7 @@ export interface HeaderBarType {
 }
 
 /**
- * iOS 搜索栏：系统搜索框 + 音源按钮（点击弹出原生 ActionSheet）。
+ * iOS 搜索栏：系统搜索框 + 音源下拉（原型 .src-pop）。
  * 保持与 Android 版相同的 ref API，搜索页逻辑无需改动。
  */
 export default forwardRef<HeaderBarType, HeaderBarProps>(({
@@ -43,6 +44,8 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
   const [text, setText] = useState('')
   const [sources, setSources] = useState<Sources>([])
   const [source, setSource] = useState<Sources[number]>('kw')
+  const [popoverVisible, setPopoverVisible] = useState(false)
+  const sourceAnchorRef = useRef<ViewType>(null)
 
   const sourceList = useSourceListI18n(sources)
   const activeSourceLabel = sourceList.find(item => item.action == source)?.label ?? ''
@@ -74,16 +77,19 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
     onTipSearch('')
   }
 
-  const handleShowSourceMenu = async() => {
+  const handleShowSourceMenu = () => {
     if (!sourceList.length) return
-    const index = await iosActionSheet({
-      options: sourceList.map(item => item.label),
-    })
-    if (index == null) return
-    const next = sourceList[index].action
-    setSource(next)
-    onSourceChange(next)
+    setPopoverVisible(true)
   }
+
+  const sourceItems = useMemo(() => {
+    return sourceList.map(item => ({
+      key: item.action,
+      label: item.label,
+      color: getSourceColor(item.action),
+      selected: item.action == source,
+    }))
+  }, [sourceList, source])
 
   return (
     <View style={{ backgroundColor: colors.groupedBackground }}>
@@ -104,7 +110,8 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
           style={{ flex: 1 }}
         />
         <Pressable
-          onPress={() => { void handleShowSourceMenu() }}
+          ref={sourceAnchorRef}
+          onPress={handleShowSourceMenu}
           disabled={!sourceList.length}
           hitSlop={8}
           style={{
@@ -122,6 +129,18 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
             style={{ marginLeft: 2, transform: [{ rotate: '90deg' }] }}
           />
         </Pressable>
+        <IOSPopover
+          visible={popoverVisible}
+          anchorRef={sourceAnchorRef}
+          items={sourceItems}
+          onClose={() => { setPopoverVisible(false) }}
+          onSelect={key => {
+            setPopoverVisible(false)
+            const next = key as Sources[number]
+            setSource(next)
+            onSourceChange(next)
+          }}
+        />
       </View>
       <SearchTypeSelector visible={text.trim().length > 0} />
     </View>

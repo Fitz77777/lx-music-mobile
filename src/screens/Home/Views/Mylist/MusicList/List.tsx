@@ -22,6 +22,8 @@ export interface ListProps {
   onShowMenu: (musicInfo: LX.Music.MusicInfo, index: number, position: Position) => void
   onMuiltSelectMode: () => void
   onSelectAll: (isAll: boolean) => void
+  /** iOS：点击行内音源标签打开换源面板（Android 忽略） */
+  onToggleSource?: (musicInfo: LX.Music.MusicInfo) => void
 }
 export interface ListType {
   setIsMultiSelectMode: (isMultiSelectMode: boolean) => void
@@ -45,7 +47,7 @@ const usePlayIndex = () => {
 }
 
 
-const List = forwardRef<ListType, ListProps>(({ onShowMenu, onMuiltSelectMode, onSelectAll }, ref) => {
+const List = forwardRef<ListType, ListProps>(({ onShowMenu, onMuiltSelectMode, onSelectAll, onToggleSource }, ref) => {
   // const t = useI18n()
   const flatListRef = useRef<FlatList>(null)
   const iosTheme = useIOSTheme()
@@ -259,6 +261,7 @@ const List = forwardRef<ListType, ListProps>(({ onShowMenu, onMuiltSelectMode, o
       onPress={handlePress}
       onLongPress={handleLongPress}
       onShowMenu={onShowMenu}
+      onToggleSource={onToggleSource}
       selectedList={selectedList}
       rowInfo={rowInfo.current}
       isShowAlbumName={isShowAlbumName}

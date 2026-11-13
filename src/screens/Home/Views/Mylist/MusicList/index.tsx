@@ -149,6 +149,7 @@ export default () => {
           onShowMenu={showMenu}
           onMuiltSelectMode={hancelMultiSelect}
           onSelectAll={isAll => multipleModeBarRef.current?.setIsSelectAll(isAll)}
+          onToggleSource={info => musicToggleModalRef.current?.show({ musicInfo: info, listId: listState.activeListId })}
         />
         <ListMusicSearch
           ref={listMusicSearchRef}

@@ -96,53 +96,55 @@ const DrawerLayoutFixed = forwardRef<DrawerLayoutFixedType, Props>(({
       <View style={{ flex: 1, overflow: 'hidden' }}>
         {children}
       </View>
-      {
-        visible
-          ? (
-              <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-                <Animated.View
-                  style={[StyleSheet.absoluteFill, { backgroundColor: '#000', opacity: overlayOpacity }]}
-                >
-                  <Pressable
-                    onPress={closeDrawer}
-                    accessibilityRole="button"
-                    accessibilityLabel={global.i18n.t('close')}
-                    style={{ flex: 1 }}
-                  />
-                </Animated.View>
-                <Animated.View
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: sheetHeight || undefined,
-                    maxHeight: '88%',
-                    backgroundColor: drawerBackgroundColor ?? colors.secondaryBackground,
-                    borderTopLeftRadius: radius.large,
-                    borderTopRightRadius: radius.large,
-                    overflow: 'hidden',
-                    transform: [{ translateY: sheetTranslate }],
-                  }}
-                >
-                  <View style={{ alignItems: 'center', paddingTop: spacing.sm, paddingBottom: spacing.xs }}>
-                    <View
-                      style={{
-                        width: 36,
-                        height: 5,
-                        borderRadius: 2.5,
-                        backgroundColor: colors.tertiaryLabel,
-                      }}
-                    />
-                  </View>
-                  <View style={{ flex: 1, overflow: 'hidden' }}>
-                    {renderNavigationView()}
-                  </View>
-                </Animated.View>
-              </View>
-            )
-          : null
-      }
+      {/*
+        面板内容必须常驻：标签筛选等页面是先发事件、再打开面板的，
+        如果等面板打开才挂载内容，内容里的监听会漏掉这次事件（标签列表为空）。
+        关闭时靠 translateY 移出可视区域，并用 pointerEvents 关掉交互。
+      */}
+      <View
+        style={StyleSheet.absoluteFill}
+        pointerEvents={visible ? 'box-none' : 'none'}
+      >
+        <Animated.View
+          style={[StyleSheet.absoluteFill, { backgroundColor: '#000', opacity: overlayOpacity }]}
+        >
+          <Pressable
+            onPress={closeDrawer}
+            accessibilityRole="button"
+            accessibilityLabel={global.i18n.t('close')}
+            style={{ flex: 1 }}
+          />
+        </Animated.View>
+        <Animated.View
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: sheetHeight || undefined,
+            maxHeight: '88%',
+            backgroundColor: drawerBackgroundColor ?? colors.secondaryBackground,
+            borderTopLeftRadius: radius.large,
+            borderTopRightRadius: radius.large,
+            overflow: 'hidden',
+            transform: [{ translateY: sheetTranslate }],
+          }}
+        >
+          <View style={{ alignItems: 'center', paddingTop: spacing.sm, paddingBottom: spacing.xs }}>
+            <View
+              style={{
+                width: 36,
+                height: 5,
+                borderRadius: 2.5,
+                backgroundColor: colors.tertiaryLabel,
+              }}
+            />
+          </View>
+          <View style={{ flex: 1, overflow: 'hidden' }}>
+            {renderNavigationView()}
+          </View>
+        </Animated.View>
+      </View>
     </View>
   )
 })

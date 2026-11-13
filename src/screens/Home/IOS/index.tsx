@@ -18,6 +18,8 @@ import type { InitState } from '@/store/common/state'
  * 不使用抽屉；页面内容仍复用 Vertical/Main 的懒加载分页逻辑。
  * 顶栏单独放在一个 SafeAreaView 里，内容区一直延伸到屏幕底部，
  * 迷你播放器与标签栏绝对定位覆盖在内容之上，形成沉浸式底栏。
+ * 项目没有原生模糊库，底部浮层用不透明背板替代毛玻璃，
+ * 避免列表内容从迷你播放器边缘和标签栏下方透出来（底部漏风）。
  */
 export default () => {
   const t = useI18n()
@@ -45,10 +47,16 @@ export default () => {
       </View>
       <View
         pointerEvents="box-none"
-        style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: colors.barBackgroundOpaque,
+        }}
       >
         <PlayerBar isHome />
-        <SafeAreaView style={{ backgroundColor: colors.barBackgroundTranslucent }}>
+        <SafeAreaView style={{ backgroundColor: colors.barBackgroundOpaque }}>
           <IOSTabBar items={items} activeId={activeId} onChange={handleChange} />
         </SafeAreaView>
       </View>

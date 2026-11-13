@@ -20,7 +20,7 @@ export interface TabBarProps {
 /**
  * iOS 底部标签栏（56pt 内容高度，底部安全区由外层 SafeAreaView 提供）。
  * 注意：这里不使用 SafeAreaView，避免和页面容器的安全区重复计算。
- * 原型为 88pt 毛玻璃；项目未引入原生模糊库，这里用半透明栏底色近似，
+ * 原型为 88pt 毛玻璃；项目未引入原生模糊库，这里用不透明栏底色替代，
  * 并让首页内容从栏后滚过，形成沉浸式底栏。
  */
 export default memo(({ items, activeId, onChange, style }: TabBarProps) => {
@@ -31,7 +31,7 @@ export default memo(({ items, activeId, onChange, style }: TabBarProps) => {
       style={[{
         height: barHeight.tabBar,
         flexDirection: 'row',
-        backgroundColor: colors.barBackgroundTranslucent,
+        backgroundColor: colors.barBackgroundOpaque,
         borderTopWidth: hairline,
         borderTopColor: colors.rowSeparator,
       }, style]}

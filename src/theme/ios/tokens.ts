@@ -59,10 +59,11 @@ export interface IOSColors {
   switchTrackOff: string
 
   // 导航栏 / 标签栏
-  barBackground: string
+  /**
+   * 导航栏 / 标签栏 / 底部浮层背板底色。
+   * 项目没有原生模糊库，用不透明底色替代毛玻璃，避免内容从栏后透出。
+   */
   barBackgroundOpaque: string
-  /** 无原生模糊时的半透明栏底色（内容可从栏后透出） */
-  barBackgroundTranslucent: string
 
   // 遮罩 / 阴影
   overlay: string
@@ -109,9 +110,7 @@ export const iosColorsLight: IOSColors = {
   iconTileForeground: '#6E6E73',
   switchTrackOff: '#E9E9EB',
 
-  barBackground: 'rgba(249, 249, 249, 0.94)',
   barBackgroundOpaque: '#F9F9F9',
-  barBackgroundTranslucent: 'rgba(249, 249, 249, 0.88)',
 
   overlay: 'rgba(0, 0, 0, 0.3)',
   shadow: 'rgba(0, 0, 0, 0.12)',
@@ -156,9 +155,7 @@ export const iosColorsDark: IOSColors = {
   iconTileForeground: '#AEAEB2',
   switchTrackOff: 'rgba(120, 120, 128, 0.32)',
 
-  barBackground: 'rgba(22, 22, 24, 0.94)',
   barBackgroundOpaque: '#161618',
-  barBackgroundTranslucent: 'rgba(22, 22, 24, 0.88)',
 
   overlay: 'rgba(0, 0, 0, 0.5)',
   shadow: 'rgba(0, 0, 0, 0.5)',

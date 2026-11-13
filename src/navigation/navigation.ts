@@ -80,7 +80,10 @@ export async function pushHomeScreen() {
                 backgroundColor: theme['c-content-background'],
               },
               layout: {
-                componentBackgroundColor: theme['c-content-background'],
+                // iOS 页面底色是分组灰，组件背景保持同色，避免底部安全区/回弹时露出 LX 主题底色
+                componentBackgroundColor: Platform.OS == 'ios'
+                  ? getIOSColors(theme.isDark).groupedBackground
+                  : theme['c-content-background'],
               },
             },
           },

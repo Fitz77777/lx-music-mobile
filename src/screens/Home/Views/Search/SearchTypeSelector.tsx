@@ -16,7 +16,12 @@ const SEARCH_TYPE_LIST = [
   'album',
 ] as const
 
-export default () => {
+export interface SearchTypeSelectorProps {
+  /** iOS：搜索框有内容时才显示分段控件（默认 true，Android 不受影响） */
+  visible?: boolean
+}
+
+export default ({ visible = true }: SearchTypeSelectorProps) => {
   const t = useI18n()
   const theme = useTheme()
   const [type, setType] = useState<SearchType>('music')
@@ -35,6 +40,8 @@ export default () => {
     setType(type)
     global.app_event.searchTypeChanged(type)
   }
+
+  if (!visible) return null
 
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps={'always'} horizontal={true}>

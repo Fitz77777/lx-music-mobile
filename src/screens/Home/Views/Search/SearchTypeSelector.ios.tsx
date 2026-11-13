@@ -14,8 +14,8 @@ const SEARCH_TYPE_LIST = [
   'album',
 ] as const
 
-/** iOS 搜索范围：系统分段控件 */
-export default () => {
+/** iOS 搜索范围：系统分段控件（搜索框有内容时才显示） */
+export default ({ visible = true }: { visible?: boolean }) => {
   const t = useI18n()
   const { spacing } = useIOSTheme()
   const [type, setType] = useState<SearchType>('music')
@@ -36,6 +36,8 @@ export default () => {
     setType(next)
     global.app_event.searchTypeChanged(next)
   }
+
+  if (!visible) return null
 
   return (
     <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.sm }}>

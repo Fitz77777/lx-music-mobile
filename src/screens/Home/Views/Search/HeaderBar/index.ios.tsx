@@ -123,7 +123,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
           />
         </Pressable>
       </View>
-      <SearchTypeSelector />
+      <SearchTypeSelector visible={text.trim().length > 0} />
     </View>
   )
 })

@@ -1,27 +1,59 @@
-import { forwardRef, useImperativeHandle, useMemo, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { Pressable, ScrollView, View } from 'react-native'
 
 import { iosActionSheet } from '@/components/ios/Alert'
 import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 import { useSourceListI18n } from '@/components/SourceSelector'
+import { getBoardsList } from '@/core/leaderboard'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import leaderboardState, { type Source } from '@/store/leaderboard/state'
+import leaderboardState, { type BoardItem, type Source } from '@/store/leaderboard/state'
 
 export interface HeaderBarProps {
   onShowBound: () => void
   onSourceChange: (source: LX.OnlineSource) => void
+  onSelectBoard?: (id: string, name: string) => void
 }
 
 export interface HeaderBarType {
   setBound: (source: LX.OnlineSource, id: string, name: string) => void
 }
 
-/** iOS 排行榜头部：音源按钮 + 当前榜单（点击打开榜单抽屉） */
-export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourceChange }, ref) => {
+/** 常驻快捷榜单的匹配关键词，顺序即展示顺序 */
+const QUICK_BOARD_KEYS = ['热歌', '新歌', '飙升']
+
+/**
+ * 从榜单列表里挑出三个常驻快捷榜（热歌 / 新歌 / 飙升）。
+ * 某些音源没有对应榜单时，用列表前几个补齐，保证 chips 位置稳定。
+ */
+export const pickQuickBoards = (list: BoardItem[]): BoardItem[] => {
+  const picked: BoardItem[] = []
+  for (const key of QUICK_BOARD_KEYS) {
+    const found = list.find(item => item.name.includes(key) && !picked.includes(item))
+    if (found) picked.push(found)
+  }
+  for (const item of list) {
+    if (picked.length >= 3) break
+    if (!picked.includes(item)) picked.push(item)
+  }
+  return picked
+}
+
+/** iOS 排行榜工具条：三个常驻榜单 chips + 音源链接（原型 .chips） */
+export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourceChange, onSelectBoard }, ref) => {
   const { colors, accent, spacing } = useIOSTheme()
   const [source, setSource] = useState<Source>('kw')
-  const [boardName, setBoardName] = useState('')
+  const [activeId, setActiveId] = useState('')
+  const [boards, setBoards] = useState<BoardItem[]>([])
+  const boardRequestRef = useRef(0)
+  const isUnmountedRef = useRef(false)
+
+  useEffect(() => {
+    isUnmountedRef.current = false
+    return () => {
+      isUnmountedRef.current = true
+    }
+  }, [])
 
   const sourceList = useSourceListI18n(leaderboardState.sources)
   const sourceLabel = useMemo(() => {
@@ -29,11 +61,26 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
   }, [sourceList, source])
 
   useImperativeHandle(ref, () => ({
-    setBound(source, id, name) {
-      setSource(source)
-      setBoardName(name)
+    setBound(nextSource, id) {
+      setSource(nextSource)
+      setActiveId(id)
+      const requestId = ++boardRequestRef.current
+      void getBoardsList(nextSource).then(list => {
+        if (isUnmountedRef.current || requestId != boardRequestRef.current) return
+        setBoards(list)
+      })
     },
   }), [])
+
+  const quickBoards = useMemo(() => {
+    const picked = pickQuickBoards(boards)
+    // 当前榜单不在三个常驻榜里时，补一个「当前」chip，避免用户失去位置感
+    if (activeId && !picked.some(item => item.id == activeId)) {
+      const current = boards.find(item => item.id == activeId)
+      if (current) picked.push(current)
+    }
+    return picked
+  }, [boards, activeId])
 
   const handleShowSourceMenu = async() => {
     if (!sourceList.length) return
@@ -46,30 +93,68 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
     <View style={{
       flexDirection: 'row',
       alignItems: 'center',
-      height: 44,
-      paddingHorizontal: spacing.lg,
+      height: 52,
+      paddingLeft: spacing.lg,
+      paddingRight: spacing.lg,
+      paddingBottom: spacing.sm + 2,
       backgroundColor: colors.groupedBackground,
-    }}>
+    }}
+    >
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ flexGrow: 0, flexShrink: 1 }}
+        contentContainerStyle={{ alignItems: 'center' }}
+        keyboardShouldPersistTaps="always"
+      >
+        {
+          quickBoards.map(item => {
+            const active = activeId == item.id
+            return (
+              <Pressable
+                key={item.id}
+                onPress={() => {
+                  setActiveId(item.id)
+                  onSelectBoard?.(item.id, item.name)
+                }}
+                style={({ pressed }) => ({
+                  paddingHorizontal: 14,
+                  paddingVertical: 6,
+                  marginRight: spacing.sm,
+                  borderRadius: 16,
+                  backgroundColor: active ? accent : colors.secondaryGroupedBackground,
+                  shadowColor: '#000000',
+                  shadowOpacity: active ? 0 : 0.06,
+                  shadowRadius: 3,
+                  shadowOffset: { width: 0, height: 1 },
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <IOSText
+                  size={14}
+                  weight={active ? '600' : '400'}
+                  color={active ? '#FFFFFF' : colors.label}
+                  numberOfLines={1}
+                >{item.name}</IOSText>
+              </Pressable>
+            )
+          })
+        }
+      </ScrollView>
+      <View style={{ flex: 1 }} />
       <Pressable
         onPress={() => { void handleShowSourceMenu() }}
+        onLongPress={onShowBound}
         hitSlop={8}
-        style={{ flexDirection: 'row', alignItems: 'center', marginRight: spacing.lg }}
+        style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.sm }}
       >
-        <IOSText variant="subheadline" color={accent} numberOfLines={1}>{sourceLabel}</IOSText>
+        <IOSText size={14} color={accent} numberOfLines={1}>{sourceLabel}</IOSText>
         <IOSIcon
           name="chevron-right"
-          size={11}
+          size={12}
           color={accent}
-          style={{ marginLeft: 2, transform: [{ rotate: '90deg' }] }}
+          style={{ marginLeft: 3, transform: [{ rotate: '90deg' }] }}
         />
-      </Pressable>
-      <Pressable
-        onPress={onShowBound}
-        hitSlop={8}
-        style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}
-      >
-        <IOSText variant="subheadline" numberOfLines={1} style={{ flexShrink: 1 }}>{boardName}</IOSText>
-        <IOSIcon name="chevron-right" size={11} color={colors.secondaryLabel} style={{ marginLeft: 4 }} />
       </Pressable>
     </View>
   )

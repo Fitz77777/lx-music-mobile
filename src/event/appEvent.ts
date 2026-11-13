@@ -212,6 +212,11 @@ export class AppEvent extends Event {
     this.emit('showSonglistOpenList')
   }
 
+  /** 打开「全部榜单」面板（iOS 导航栏按钮触发） */
+  showLeaderboardBoards() {
+    this.emit('showLeaderboardBoards')
+  }
+
   songlistTagInfoChange(name: string, id: string) {
     this.emit('songlistTagInfoChange', name, id)
   }

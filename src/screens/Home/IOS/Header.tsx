@@ -32,16 +32,21 @@ export default () => {
       backgroundColor: colors.groupedBackground,
     }}>
       <IOSText variant="largeTitle" numberOfLines={1} style={{ flex: 1 }}>{t(id)}</IOSText>
-      {id == 'nav_songlist'
+      {id == 'nav_songlist' || id == 'nav_top'
         ? (
             <Pressable
-              onPress={() => { global.app_event.showSonglistOpenList() }}
+              onPress={() => {
+                if (id == 'nav_songlist') global.app_event.showSonglistOpenList()
+                else global.app_event.showLeaderboardBoards()
+              }}
               hitSlop={8}
               accessibilityRole="button"
-              accessibilityLabel={t('songlist_open')}
+              accessibilityLabel={id == 'nav_songlist' ? t('songlist_open') : t('leaderboard_all')}
               style={{ paddingVertical: 4, marginBottom: 4 }}
             >
-              <IOSText size={16} weight="500" color={accent}>{t('songlist_open')}</IOSText>
+              <IOSText size={16} weight="500" color={accent}>
+                {id == 'nav_songlist' ? t('songlist_open') : t('leaderboard_all')}
+              </IOSText>
             </Pressable>
           )
         : id == 'nav_love'

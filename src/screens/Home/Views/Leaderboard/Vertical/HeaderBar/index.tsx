@@ -17,6 +17,8 @@ import { BorderWidths } from '@/theme'
 export interface HeaderBarProps {
   onShowBound: () => void
   onSourceChange: (source: LX.OnlineSource) => void
+  /** iOS：点击顶部快捷榜单 chips（Android 忽略） */
+  onSelectBoard?: (id: string, name: string) => void
 }
 
 export interface HeaderBarType {

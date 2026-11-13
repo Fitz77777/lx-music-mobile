@@ -5,6 +5,7 @@ import IOSText from '@/components/ios/Text'
 import Image from '@/components/common/Image'
 import Badge from '@/components/common/Badge'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { iosHomeBottomInset } from '@/theme/ios/tokens'
 import { navigations } from '@/navigation'
 import commonState from '@/store/common/state'
 import { useI18n } from '@/lang'
@@ -252,7 +253,7 @@ export default forwardRef<SearchResultListType, SearchResultListProps>(({ search
       keyExtractor={keyExtractor}
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.5}
-      contentContainerStyle={{ paddingBottom: spacing.xxxl }}
+      contentContainerStyle={{ paddingBottom: spacing.xxxl + iosHomeBottomInset }}
       refreshControl={
         <RefreshControl
           colors={[accent]}

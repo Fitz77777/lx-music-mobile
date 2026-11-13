@@ -16,8 +16,8 @@ import type { InitState } from '@/store/common/state'
 /**
  * iOS 主页外壳：大标题 + 内容分页 + 浮动播放卡片 + 底部标签栏。
  * 不使用抽屉；页面内容仍复用 Vertical/Main 的懒加载分页逻辑。
- * 整个外壳放在同一个 SafeAreaView 里，安全区只在最上方和最下方各生效一次，
- * 避免顶栏/标签栏各自叠加上下内边距。
+ * 顶栏单独放在一个 SafeAreaView 里，内容区一直延伸到屏幕底部，
+ * 迷你播放器与标签栏绝对定位覆盖在内容之上，形成沉浸式底栏。
  */
 export default () => {
   const t = useI18n()
@@ -37,14 +37,21 @@ export default () => {
   return (
     <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
       <SizeView />
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
+      <SafeAreaView style={{ backgroundColor: colors.groupedBackground }}>
         <Header />
-        <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
-          <Main />
-        </View>
-        <PlayerBar isHome />
-        <IOSTabBar items={items} activeId={activeId} onChange={handleChange} />
       </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
+        <Main />
+      </View>
+      <View
+        pointerEvents="box-none"
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}
+      >
+        <PlayerBar isHome />
+        <SafeAreaView style={{ backgroundColor: colors.barBackgroundTranslucent }}>
+          <IOSTabBar items={items} activeId={activeId} onChange={handleChange} />
+        </SafeAreaView>
+      </View>
       <IOSToast bottomOffset={170} />
     </View>
   )

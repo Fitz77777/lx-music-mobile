@@ -53,3 +53,31 @@ export const getIOSNavigationOptions = (theme: LX.ActiveTheme, title?: string): 
     },
   }
 }
+
+/**
+ * iOS 设置二级页：不显示原生导航栏。
+ * 按原型规范，二级页不设返回按钮和标题，靠系统左滑手势返回。
+ */
+export const getIOSSettingSubpageOptions = (): Options => {
+  const isDark = Appearance.getColorScheme() == 'dark'
+  const colors = getIOSColors(isDark)
+
+  return {
+    popGesture: true,
+    topBar: {
+      visible: false,
+      height: 0,
+      drawBehind: false,
+      animate: true,
+    },
+    statusBar: {
+      style: isDark ? 'light' : 'dark',
+      animate: true,
+      drawBehind: false,
+      backgroundColor: 'transparent',
+    },
+    layout: {
+      componentBackgroundColor: colors.groupedBackground,
+    },
+  }
+}

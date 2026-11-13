@@ -14,6 +14,7 @@ import Text from '@/components/common/Text'
 import { handlePlay } from './listAction'
 import { useSettingValue } from '@/store/setting/hook'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { iosHomeBottomInset } from '@/theme/ios/tokens'
 
 type FlatListType = FlatListProps<LX.Music.MusicInfoOnline>
 
@@ -265,6 +266,7 @@ const List = forwardRef<ListType, ListProps>(({
       ListHeaderComponent={ListHeaderComponent}
       refreshControl={refreshControl}
       ListFooterComponent={footerComponent}
+      contentContainerStyle={Platform.OS == 'ios' && checkHomePagerIdle ? { paddingBottom: iosHomeBottomInset } : undefined}
     />
   )
 })

@@ -10,6 +10,7 @@ import { useI18n } from '@/lang'
 import { scaleSizeW } from '@/utils/pixelRatio'
 import { createStyle } from '@/utils/tools'
 import Text from '@/components/common/Text'
+import { iosHomeBottomInset } from '@/theme/ios/tokens'
 
 type FlatListType = FlatListProps<ListInfoItem>
 
@@ -167,7 +168,7 @@ export default forwardRef<ListType, ListProps>(({ onRefresh, onLoadMore, onOpenD
                 columnWrapperStyle={Platform.OS == 'ios'
                   ? { justifyContent: 'space-between', paddingHorizontal: IOS_PADDING }
                   : { justifyContent: 'space-evenly' }}
-                contentContainerStyle={Platform.OS == 'ios' ? { paddingTop: 2 } : undefined}
+                contentContainerStyle={Platform.OS == 'ios' ? { paddingTop: 2, paddingBottom: iosHomeBottomInset } : undefined}
                 numColumns={rowInfo.num}
                 data={list}
                 maxToRenderPerBatch={4}

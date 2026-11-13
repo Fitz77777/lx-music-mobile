@@ -4,11 +4,11 @@ import { Navigation } from 'react-native-navigation'
 
 import { useI18n } from '@/lang'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { iosHomeBottomInset } from '@/theme/ios/tokens'
 import { IOSIcon, IOSListRow, IOSListSection } from '@/components/ios'
-import { getIOSNavigationOptions } from '@/navigation/iosOptions'
+import { getIOSSettingSubpageOptions } from '@/navigation/iosOptions'
 import { SETTING_SCREEN } from '@/navigation/screenNames'
 import commonState from '@/store/common/state'
-import themeState from '@/store/theme/state'
 import { IOS_SETTING_GROUPS, type IOSSettingSection } from './iosSections'
 
 const IconTile = memo(({ section }: { section: IOSSettingSection }) => {
@@ -29,7 +29,7 @@ const IconTile = memo(({ section }: { section: IOSSettingSection }) => {
 
 /**
  * iOS 设置首页：系统设置风格的分组列表。
- * 点击后推入原生二级页（大标题 + 返回按钮）。
+ * 点击后推入原生二级页；二级页不显示原生导航栏（无返回按钮和标题）。
  */
 export default () => {
   const t = useI18n()
@@ -42,7 +42,7 @@ export default () => {
       component: {
         name: SETTING_SCREEN,
         passProps: { id: section.id },
-        options: getIOSNavigationOptions(themeState.theme, t(section.titleKey)),
+        options: getIOSSettingSubpageOptions(),
       },
     })
   }
@@ -50,7 +50,7 @@ export default () => {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.groupedBackground }}
-      contentContainerStyle={{ paddingTop: 8, paddingBottom: 32 }}
+      contentContainerStyle={{ paddingTop: 8, paddingBottom: 32 + iosHomeBottomInset }}
       contentInsetAdjustmentBehavior="automatic"
     >
       {

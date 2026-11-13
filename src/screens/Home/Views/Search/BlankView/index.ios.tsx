@@ -2,6 +2,7 @@ import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import { useSettingValue } from '@/store/setting/hook'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { iosHomeBottomInset } from '@/theme/ios/tokens'
 import { useI18n } from '@/lang'
 import IOSText from '@/components/ios/Text'
 import HistorySearch, { type HistorySearchType } from './HistorySearch'
@@ -58,7 +59,7 @@ export default forwardRef<BlankViewType, BlankViewProps>(({ onSearch }, ref) => 
       keyboardShouldPersistTaps="always"
       contentContainerStyle={{
         paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.xxxl,
+        paddingBottom: spacing.xxxl + iosHomeBottomInset,
       }}
     >
       {isShowHotSearch ? <HotSearch ref={hotSearchRef} onSearch={onSearch} /> : null}

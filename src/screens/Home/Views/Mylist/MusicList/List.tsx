@@ -15,6 +15,7 @@ import type { SelectMode } from './MultipleModeBar'
 import { useActiveListId } from '@/store/list/hook'
 import { useSettingValue } from '@/store/setting/hook'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { iosHomeBottomInset } from '@/theme/ios/tokens'
 
 type FlatListType = FlatListProps<LX.Music.MusicInfo>
 
@@ -301,6 +302,7 @@ const List = forwardRef<ListType, ListProps>(({ onShowMenu, onMuiltSelectMode, o
       keyExtractor={getkey}
       extraData={activeIndex}
       getItemLayout={getItemLayout}
+      contentContainerStyle={Platform.OS == 'ios' ? { paddingBottom: iosHomeBottomInset } : undefined}
     />
   )
 })

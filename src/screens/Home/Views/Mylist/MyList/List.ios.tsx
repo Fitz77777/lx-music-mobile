@@ -5,6 +5,7 @@ import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 import CheckMark from '@/components/ios/CheckMark'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { iosHomeBottomInset } from '@/theme/ios/tokens'
 import { useActiveListId, useListFetching, useMyList } from '@/store/list/hook'
 import { LIST_SCROLL_POSITION_KEY } from '@/config/constant'
 import { getListPosition, saveListPosition } from '@/utils/data'
@@ -131,7 +132,7 @@ export default ({ onShowMenu }: {
       renderItem={renderItem}
       keyExtractor={getkey}
       getItemLayout={getItemLayout}
-      contentContainerStyle={{ paddingVertical: 8 }}
+      contentContainerStyle={{ paddingTop: 8, paddingBottom: 8 + iosHomeBottomInset }}
     />
   )
 }

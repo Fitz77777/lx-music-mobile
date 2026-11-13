@@ -1,5 +1,5 @@
 import { Fragment, memo, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
-import { Animated, Easing, Modal, Pressable, StyleSheet, View, useWindowDimensions, type View as ViewType } from 'react-native'
+import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, View, useWindowDimensions, type View as ViewType } from 'react-native'
 
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import IOSIcon from './Icon'
@@ -8,6 +8,8 @@ import IOSText from './Text'
 export interface IOSPopoverItem {
   key: string
   label: string
+  /** 次要说明文字（如版本号、状态） */
+  description?: string
   /** 左侧圆点颜色，不传则不显示圆点 */
   color?: string
   /** 当前选中项（高亮文字 + 右侧打勾） */
@@ -153,6 +155,7 @@ export default memo(({
             top: position?.top ?? -9999,
             minWidth,
             maxWidth: windowWidth - MARGIN * 2,
+            maxHeight: windowHeight - MARGIN * 2 - ARROW_SAFE_BOTTOM,
             padding: 5,
             borderRadius: radius.popover,
             backgroundColor: colors.secondaryGroupedBackground,
@@ -166,47 +169,66 @@ export default memo(({
             transform: [{ scale }],
           }}
         >
-          {children ?? items?.map(item => (
-            <Fragment key={item.key}>
-              {item.dividerBefore
-                ? (
-                    <View style={{
-                      height: hairline,
-                      backgroundColor: colors.rowSeparator,
-                      marginVertical: 4,
-                      marginHorizontal: 8,
-                    }} />
-                  )
-                : null}
-              <Pressable
-                onPress={() => { onSelect?.(item.key) }}
-                accessibilityRole="button"
-                style={({ pressed }) => ({
-                  height: ROW_HEIGHT,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 9,
-                  paddingHorizontal: 10,
-                  borderRadius: 9,
-                  backgroundColor: pressed ? colors.tertiaryFill : 'transparent',
-                })}
-              >
-                {item.color
-                  ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: item.color }} />
+          <ScrollView
+            style={{ flexGrow: 0 }}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {children ?? items?.map(item => (
+              <Fragment key={item.key}>
+                {item.dividerBefore
+                  ? (
+                      <View style={{
+                        height: hairline,
+                        backgroundColor: colors.rowSeparator,
+                        marginVertical: 4,
+                        marginHorizontal: 8,
+                      }} />
+                    )
                   : null}
-                <IOSText
-                  size={15}
-                  weight={item.selected ? '600' : '400'}
-                  color={item.selected ? accent : colors.label}
-                  numberOfLines={1}
-                  style={{ flex: 1 }}
-                >{item.label}</IOSText>
-                {item.selected
-                  ? <IOSIcon name="checkbox-marked" size={15} color={accent} />
-                  : null}
-              </Pressable>
-            </Fragment>
-          ))}
+                <Pressable
+                  onPress={() => { onSelect?.(item.key) }}
+                  accessibilityRole="button"
+                  style={({ pressed }) => ({
+                    minHeight: ROW_HEIGHT,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 9,
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                    borderRadius: 9,
+                    backgroundColor: pressed ? colors.tertiaryFill : 'transparent',
+                  })}
+                >
+                  {item.color
+                    ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: item.color }} />
+                    : null}
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <IOSText
+                      size={15}
+                      weight={item.selected ? '600' : '400'}
+                      color={item.selected ? accent : colors.label}
+                      numberOfLines={1}
+                    >{item.label}</IOSText>
+                    {item.description
+                      ? (
+                          <IOSText
+                            size={11.5}
+                            color={colors.secondaryLabel}
+                            numberOfLines={1}
+                            style={{ marginTop: 1 }}
+                          >{item.description}</IOSText>
+                        )
+                      : null}
+                  </View>
+                  {item.selected
+                    ? <IOSIcon name="checkbox-marked" size={15} color={accent} />
+                    : null}
+                </Pressable>
+              </Fragment>
+            ))}
+          </ScrollView>
         </Animated.View>
       </View>
     </Modal>

@@ -61,6 +61,8 @@ export interface IOSColors {
   // 导航栏 / 标签栏
   barBackground: string
   barBackgroundOpaque: string
+  /** 无原生模糊时的半透明栏底色（内容可从栏后透出） */
+  barBackgroundTranslucent: string
 
   // 遮罩 / 阴影
   overlay: string
@@ -109,6 +111,7 @@ export const iosColorsLight: IOSColors = {
 
   barBackground: 'rgba(249, 249, 249, 0.94)',
   barBackgroundOpaque: '#F9F9F9',
+  barBackgroundTranslucent: 'rgba(249, 249, 249, 0.88)',
 
   overlay: 'rgba(0, 0, 0, 0.3)',
   shadow: 'rgba(0, 0, 0, 0.12)',
@@ -155,6 +158,7 @@ export const iosColorsDark: IOSColors = {
 
   barBackground: 'rgba(22, 22, 24, 0.94)',
   barBackgroundOpaque: '#161618',
+  barBackgroundTranslucent: 'rgba(22, 22, 24, 0.88)',
 
   overlay: 'rgba(0, 0, 0, 0.5)',
   shadow: 'rgba(0, 0, 0, 0.5)',
@@ -254,6 +258,12 @@ export const iosBarHeight = {
   /** 浮动迷你播放器卡片 */
   miniPlayer: 60,
 } as const
+
+/**
+ * 首页内容底部留白：浮动迷你播放器 + 标签栏 + 底部安全区。
+ * 列表内容可以滚到这两层浮层下面，最后一行仍能完整露出。
+ */
+export const iosHomeBottomInset = 170
 
 export const iosMotion = {
   pressOpacity: 0.55,

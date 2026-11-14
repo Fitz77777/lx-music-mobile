@@ -5,7 +5,7 @@ import IOSText from '@/components/ios/Text'
 import Image from '@/components/common/Image'
 import Badge from '@/components/common/Badge'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { iosHomeBottomInset } from '@/theme/ios/tokens'
+import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
 import { navigations } from '@/navigation'
 import commonState from '@/store/common/state'
 import { useI18n } from '@/lang'
@@ -161,6 +161,7 @@ export default forwardRef<SearchResultListType, SearchResultListProps>(({ search
   // 请求序号，用于丢弃过期响应
   const genRef = useRef(0)
   const { colors, accent, spacing } = useIOSTheme()
+  const bottomInset = useIOSHomeBottomInset()
 
   const doSearch = useCallback(async(text: string, page: number, source: string): Promise<SearchResult> => {
     if (source === 'all') {
@@ -254,7 +255,7 @@ export default forwardRef<SearchResultListType, SearchResultListProps>(({ search
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.5}
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ paddingBottom: spacing.xxxl + iosHomeBottomInset }}
+      contentContainerStyle={{ paddingBottom: spacing.xxxl + bottomInset }}
       refreshControl={
         <RefreshControl
           colors={[accent]}

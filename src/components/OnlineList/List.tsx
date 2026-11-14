@@ -14,7 +14,7 @@ import Text from '@/components/common/Text'
 import { handlePlay } from './listAction'
 import { useSettingValue } from '@/store/setting/hook'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { iosHomeBottomInset } from '@/theme/ios/tokens'
+import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
 
 type FlatListType = FlatListProps<LX.Music.MusicInfoOnline>
 
@@ -61,6 +61,7 @@ const List = forwardRef<ListType, ListProps>(({
   // const t = useI18n()
   const theme = useTheme()
   const iosTheme = useIOSTheme()
+  const bottomInset = useIOSHomeBottomInset()
   const flatListRef = useRef<FlatList>(null)
   const [currentList, setList] = useState<LX.Music.MusicInfoOnline[]>([])
   const [showSource, setShowSource] = useState(false)
@@ -269,7 +270,7 @@ const List = forwardRef<ListType, ListProps>(({
       // 键盘弹出时点击列表行：第一次点击收起键盘，第二次才触发行的 onPress，
       // 无法直接播放/跳转；这里用 handled 让点击直接生效，键盘由滚动/收起逻辑处理
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={Platform.OS == 'ios' && checkHomePagerIdle ? { paddingBottom: iosHomeBottomInset } : undefined}
+      contentContainerStyle={Platform.OS == 'ios' && checkHomePagerIdle ? { paddingBottom: bottomInset } : undefined}
     />
   )
 })

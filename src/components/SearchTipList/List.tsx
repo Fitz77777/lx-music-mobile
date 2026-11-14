@@ -14,6 +14,7 @@ export type ListProps<T> = Pick<FlatListProps<T>,
 | 'getItemLayout'
 | 'keyboardShouldPersistTaps'
 | 'ListEmptyComponent'
+| 'style'
 >
 
 export interface ListType<T> {

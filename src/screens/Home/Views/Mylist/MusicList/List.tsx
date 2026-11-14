@@ -15,7 +15,7 @@ import type { SelectMode } from './MultipleModeBar'
 import { useActiveListId } from '@/store/list/hook'
 import { useSettingValue } from '@/store/setting/hook'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { iosHomeBottomInset } from '@/theme/ios/tokens'
+import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
 
 type FlatListType = FlatListProps<LX.Music.MusicInfo>
 
@@ -52,6 +52,7 @@ const List = forwardRef<ListType, ListProps>(({ onShowMenu, onMuiltSelectMode, o
   // const t = useI18n()
   const flatListRef = useRef<FlatList>(null)
   const iosTheme = useIOSTheme()
+  const bottomInset = useIOSHomeBottomInset()
   const [currentList, setList] = useState<LX.List.ListMusics>([])
   const listFirstScrollRef = useRef(false)
   const isMultiSelectModeRef = useRef(false)
@@ -302,7 +303,7 @@ const List = forwardRef<ListType, ListProps>(({ onShowMenu, onMuiltSelectMode, o
       keyExtractor={getkey}
       extraData={activeIndex}
       getItemLayout={getItemLayout}
-      contentContainerStyle={Platform.OS == 'ios' ? { paddingBottom: iosHomeBottomInset } : undefined}
+      contentContainerStyle={Platform.OS == 'ios' ? { paddingBottom: bottomInset } : undefined}
     />
   )
 })

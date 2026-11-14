@@ -5,7 +5,7 @@ import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 import CheckMark from '@/components/ios/CheckMark'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { iosHomeBottomInset } from '@/theme/ios/tokens'
+import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
 import { useActiveListId, useListFetching, useMyList } from '@/store/list/hook'
 import { LIST_SCROLL_POSITION_KEY } from '@/config/constant'
 import { getListPosition, saveListPosition } from '@/utils/data'
@@ -82,6 +82,7 @@ export default ({ onShowMenu }: {
   const allList = useMyList()
   const activeListId = useActiveListId()
   const { colors } = useIOSTheme()
+  const bottomInset = useIOSHomeBottomInset()
 
   const handleToggleList = (item: LX.List.MyListInfo) => {
     global.app_event.changeLoveListVisible(false)
@@ -131,7 +132,7 @@ export default ({ onShowMenu }: {
       renderItem={renderItem}
       keyExtractor={getkey}
       getItemLayout={getItemLayout}
-      contentContainerStyle={{ paddingTop: 8, paddingBottom: 8 + iosHomeBottomInset }}
+      contentContainerStyle={{ paddingTop: 8, paddingBottom: 8 + bottomInset }}
     />
   )
 }

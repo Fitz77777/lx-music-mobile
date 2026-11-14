@@ -4,7 +4,7 @@ import { Navigation } from 'react-native-navigation'
 
 import { useI18n } from '@/lang'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { iosHomeBottomInset } from '@/theme/ios/tokens'
+import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
 import { IOSIcon, IOSListRow, IOSListSection } from '@/components/ios'
 import { getIOSSettingSubpageOptions } from '@/navigation/iosOptions'
 import { SETTING_SCREEN } from '@/navigation/screenNames'
@@ -34,6 +34,7 @@ const IconTile = memo(({ section }: { section: IOSSettingSection }) => {
 export default () => {
   const t = useI18n()
   const { colors } = useIOSTheme()
+  const bottomInset = useIOSHomeBottomInset()
 
   const handlePress = (section: IOSSettingSection) => {
     const componentId = commonState.componentIds.home
@@ -50,7 +51,7 @@ export default () => {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.canvas }}
-      contentContainerStyle={{ paddingTop: 8, paddingBottom: 32 + iosHomeBottomInset }}
+      contentContainerStyle={{ paddingTop: 8, paddingBottom: 32 + bottomInset }}
       contentInsetAdjustmentBehavior="automatic"
     >
       {

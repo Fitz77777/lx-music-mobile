@@ -10,7 +10,7 @@ import { useI18n } from '@/lang'
 import { scaleSizeW } from '@/utils/pixelRatio'
 import { createStyle } from '@/utils/tools'
 import Text from '@/components/common/Text'
-import { iosHomeBottomInset } from '@/theme/ios/tokens'
+import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
 
 type FlatListType = FlatListProps<ListInfoItem>
 
@@ -41,6 +41,7 @@ export default forwardRef<ListType, ListProps>(({ onRefresh, onLoadMore, onOpenD
   const [showSource, setShowSource] = useState(false)
   const [status, setStatus] = useState<Status>('idle')
   const { onLayout, width } = useLayout()
+  const bottomInset = useIOSHomeBottomInset()
   const theme = useTheme()
   // console.log('render songlist')
 
@@ -184,7 +185,7 @@ export default forwardRef<ListType, ListProps>(({ onRefresh, onLoadMore, onOpenD
                 columnWrapperStyle={Platform.OS == 'ios'
                   ? { justifyContent: 'space-between', paddingHorizontal: IOS_PADDING }
                   : { justifyContent: 'space-evenly' }}
-                contentContainerStyle={Platform.OS == 'ios' ? { paddingTop: 2, paddingBottom: iosHomeBottomInset } : undefined}
+                contentContainerStyle={Platform.OS == 'ios' ? { paddingTop: 2, paddingBottom: bottomInset } : undefined}
                 numColumns={rowInfo.num}
                 data={list}
                 maxToRenderPerBatch={4}

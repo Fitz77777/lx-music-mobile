@@ -2,7 +2,7 @@ import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import { useSettingValue } from '@/store/setting/hook'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { iosHomeBottomInset } from '@/theme/ios/tokens'
+import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
 import { useI18n } from '@/lang'
 import IOSText from '@/components/ios/Text'
 import HistorySearch, { type HistorySearchType } from './HistorySearch'
@@ -25,6 +25,7 @@ export default forwardRef<BlankViewType, BlankViewProps>(({ onSearch }, ref) => 
   const isShowHotSearch = useSettingValue('search.isShowHotSearch')
   const isShowHistorySearch = useSettingValue('search.isShowHistorySearch')
   const { colors, spacing } = useIOSTheme()
+  const bottomInset = useIOSHomeBottomInset()
   const t = useI18n()
 
   const handleShow = (source: Source) => {
@@ -59,7 +60,7 @@ export default forwardRef<BlankViewType, BlankViewProps>(({ onSearch }, ref) => 
       keyboardShouldPersistTaps="always"
       contentContainerStyle={{
         paddingHorizontal: spacing.lg,
-        paddingBottom: spacing.xxxl + iosHomeBottomInset,
+        paddingBottom: spacing.xxxl + bottomInset,
       }}
     >
       {isShowHotSearch ? <HotSearch ref={hotSearchRef} onSearch={onSearch} /> : null}

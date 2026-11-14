@@ -8,7 +8,7 @@ import { type TagInfo, type Source } from '@/store/songlist/state'
 import { getTags } from '@/core/songlist'
 import IOSText from '@/components/ios/Text'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { iosHomeBottomInset } from '@/theme/ios/tokens'
+import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
 
 export interface ListProps {
   onTagChange: TagGroupProps['onTagChange']
@@ -25,6 +25,7 @@ export default forwardRef<ListType, ListProps>(({ onTagChange }, ref) => {
   const [keyword, setKeyword] = useState('')
   const t = useI18n()
   const { colors, spacing } = useIOSTheme()
+  const bottomInset = useIOSHomeBottomInset()
   const prevSource = useRef('')
 
   const isUnmountedRef = useRef(false)
@@ -76,7 +77,7 @@ export default forwardRef<ListType, ListProps>(({ onTagChange }, ref) => {
       </View>
       <ScrollView
         style={{ flexShrink: 1, flexGrow: 0 }}
-        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xl + iosHomeBottomInset }}
+        contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xl + bottomInset }}
         keyboardShouldPersistTaps="always"
       >
         <View onStartShouldSetResponder={() => true}>

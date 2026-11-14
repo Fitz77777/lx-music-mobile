@@ -117,7 +117,23 @@ export default forwardRef<ListType, ListProps>(({ onRefresh, onLoadMore, onOpenD
   // }, [width])
   // console.log(Math.trunc(width * 0.125), itemWidth)
   // console.log(itemWidth, MIN_WIDTH, GAP, width)
+  // 平板（内容区 >= 600pt）：歌单网格按宽度自适应列数（原型 minmax(150px,1fr)，上限 6 列）
+  const PAD_MIN_WIDTH = 150
+  const PAD_MAX_COLUMNS = 6
+
   const rowInfo = useMemo(() => {
+    if (width >= 600) {
+      // iOS 网格左右各留 IOS_PADDING，列间 IOS_GAP；Android 网格用 space-evenly，无左右留白
+      const padPadding = Platform.OS == 'ios' ? IOS_PADDING : 0
+      const padGap = Platform.OS == 'ios' ? IOS_GAP : 20
+      let n = width / (PAD_MIN_WIDTH + padGap)
+      if (n > PAD_MAX_COLUMNS) n = PAD_MAX_COLUMNS
+      const num = Math.max(Math.floor(n), 2)
+      return {
+        num,
+        width: (width - padPadding * 2 - padGap * (num - 1)) / num,
+      }
+    }
     if (Platform.OS == 'ios') {
       return {
         num: IOS_COLUMNS,

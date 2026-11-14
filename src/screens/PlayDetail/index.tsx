@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
-// import { View, StyleSheet } from 'react-native'
-import { useHorizontalMode } from '@/utils/hooks'
+import { useHorizontalMode, useIsPad } from '@/utils/hooks'
 
 import Vertical from './Vertical'
 import Horizontal from './Horizontal'
+import Pad from './Pad'
 import PageContent from '@/components/PageContent'
 import StatusBar from '@/components/common/StatusBar'
 import { setComponentId } from '@/core/common'
@@ -11,6 +11,7 @@ import { COMPONENT_IDS } from '@/config/constant'
 
 export default ({ componentId }: { componentId: string }) => {
   const isHorizontalMode = useHorizontalMode()
+  const isPad = useIsPad()
 
   useEffect(() => {
     setComponentId(COMPONENT_IDS.playDetail, componentId)
@@ -21,9 +22,11 @@ export default ({ componentId }: { componentId: string }) => {
     <PageContent>
       <StatusBar />
       {
-        isHorizontalMode
-          ? <Horizontal componentId={componentId} />
-          : <Vertical componentId={componentId} />
+        isPad
+          ? <Pad componentId={componentId} />
+          : isHorizontalMode
+            ? <Horizontal componentId={componentId} />
+            : <Vertical componentId={componentId} />
       }
     </PageContent>
   )

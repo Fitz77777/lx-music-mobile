@@ -5,6 +5,8 @@ import {
 } from '@/utils/data'
 import { updateListMusics } from '@/core/list'
 import settingState from '@/store/setting/state'
+import musicSdk from '@/utils/musicSdk'
+import { toOldMusicInfo } from '@/utils'
 
 import {
   buildLyricInfo,
@@ -78,7 +80,29 @@ export const getPicUrl = async({ musicInfo, listId, isRefresh, allowToggleSource
   allowToggleSource?: boolean
   onToggleSource?: (musicInfo?: LX.Music.MusicInfoOnline) => void
 }): Promise<string> => {
-  if (musicInfo.meta.picUrl && !isRefresh) return musicInfo.meta.picUrl
+  // meta.picUrl 来自搜索列表，是低分辨率缩略图（约 400px），播放页大图会很模糊。
+  // 这里优先通过源站的 getPic 换取高清封面，失败时回退缩略图；
+  // 缩略图不存在（或强制刷新）时仍走原有的换源兜底逻辑。
+  if (musicInfo.meta.picUrl && !isRefresh) {
+    const fallbackUrl = musicInfo.meta.picUrl
+    let reqPromise
+    try {
+      reqPromise = musicSdk[musicInfo.source].getPic(toOldMusicInfo(musicInfo))
+    } catch (err) {
+      reqPromise = Promise.reject(err)
+    }
+    return reqPromise.then((url: string) => {
+      if (!url) throw new Error('pic url is empty')
+      if (listId) {
+        musicInfo.meta.picUrl = url
+        void updateListMusics([{ id: listId, musicInfo }])
+      }
+      return url
+      // eslint-disable-next-line @typescript-eslint/promise-function-async
+    }).catch(() => {
+      return fallbackUrl
+    })
+  }
   return handleGetOnlinePicUrl({ musicInfo, onToggleSource, isRefresh, allowToggleSource }).then(({ url, musicInfo: targetMusicInfo, isFromCache }) => {
     // picRequest = null
     if (listId) {

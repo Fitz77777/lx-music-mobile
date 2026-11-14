@@ -1,12 +1,13 @@
 import { useEffect } from 'react'
 import { Platform } from 'react-native'
-import { useHorizontalMode } from '@/utils/hooks'
+import { useHorizontalMode, useIsPad } from '@/utils/hooks'
 import PageContent from '@/components/PageContent'
 import { setComponentId } from '@/core/common'
 import { COMPONENT_IDS } from '@/config/constant'
 import Vertical from './Vertical'
 import Horizontal from './Horizontal'
 import IOS from './IOS'
+import Pad from './Pad'
 import { navigations } from '@/navigation'
 import settingState from '@/store/setting/state'
 
@@ -18,6 +19,7 @@ interface Props {
 
 export default ({ componentId }: Props) => {
   const isHorizontalMode = useHorizontalMode()
+  const isPad = useIsPad()
   useEffect(() => {
     setComponentId(COMPONENT_IDS.home, componentId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -28,15 +30,17 @@ export default ({ componentId }: Props) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return Platform.OS == 'ios'
-    ? <IOS />
-    : (
-        <PageContent>
-          {
-            isHorizontalMode
-              ? <Horizontal />
-              : <Vertical />
-          }
-        </PageContent>
-      )
+  return isPad
+    ? <Pad />
+    : Platform.OS == 'ios'
+      ? <IOS />
+      : (
+          <PageContent>
+            {
+              isHorizontalMode
+                ? <Horizontal />
+                : <Vertical />
+            }
+          </PageContent>
+        )
 }

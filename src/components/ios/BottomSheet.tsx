@@ -7,10 +7,13 @@ import {
   Pressable,
   StyleSheet,
   View,
+  useWindowDimensions,
   type LayoutChangeEvent,
 } from 'react-native'
 
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { iosPad, iosShadow } from '@/theme/ios/tokens'
+import { useIsPad } from '@/utils/hooks'
 import IOSText from './Text'
 
 export interface BottomSheetProps {
@@ -45,6 +48,8 @@ export default memo(({
   onShow,
 }: BottomSheetProps) => {
   const { colors, spacing, radius } = useIOSTheme()
+  const { width: windowWidth } = useWindowDimensions()
+  const isPad = useIsPad()
   const [mounted, setMounted] = useState(visible)
   const [sheetHeight, setSheetHeight] = useState(420)
   const anim = useRef(new Animated.Value(visible ? 1 : 0)).current
@@ -77,10 +82,20 @@ export default memo(({
 
   if (!mounted) return null
 
-  const translateY = anim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [sheetHeight, 0],
-  })
+  // 平板：底部抽屉改为居中浮层卡片（原型 iPad 版 .sheet）
+  const centered = isPad
+  const sheetWidth = Math.min(iosPad.sheetWidth, windowWidth - 48)
+  const raisedShadow = centered ? iosShadow.raised : null
+
+  const translateY = centered
+    ? anim.interpolate({ inputRange: [0, 1], outputRange: [18, 0] })
+    : anim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [sheetHeight, 0],
+    })
+  const scale = centered
+    ? anim.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] })
+    : undefined
 
   return (
     <Modal
@@ -102,28 +117,41 @@ export default memo(({
         <KeyboardAvoidingView
           behavior="padding"
           pointerEvents="box-none"
-          style={{ flex: 1, justifyContent: 'flex-end' }}
+          style={{ flex: 1, justifyContent: centered ? 'center' : 'flex-end' }}
         >
           <Animated.View
             onLayout={handleLayout}
             style={{
-              transform: [{ translateY }],
+              transform: scale ? [{ translateY }, { scale }] : [{ translateY }],
+              alignSelf: centered ? 'center' : 'stretch',
+              width: centered ? sheetWidth : undefined,
               backgroundColor: colors.secondaryGroupedBackground,
               borderTopLeftRadius: radius.sheet,
               borderTopRightRadius: radius.sheet,
               paddingTop: spacing.sm,
-              paddingHorizontal: spacing.xl,
-              paddingBottom: 34,
+              paddingHorizontal: centered ? spacing.xxl : spacing.xl,
+              paddingBottom: centered ? 24 : 34,
+              ...(centered
+                ? {
+                    borderRadius: iosPad.sheetRadius,
+                    maxHeight: '88%',
+                    ...raisedShadow,
+                  }
+                : null),
             }}
           >
-            <View style={{ alignItems: 'center', marginBottom: 14 }}>
-              <View style={{
-                width: 36,
-                height: 5,
-                borderRadius: 3,
-                backgroundColor: colors.tertiaryLabel,
-              }} />
-            </View>
+            {!centered
+              ? (
+                  <View style={{ alignItems: 'center', marginBottom: 14 }}>
+                    <View style={{
+                      width: 36,
+                      height: 5,
+                      borderRadius: 3,
+                      backgroundColor: colors.tertiaryLabel,
+                    }} />
+                  </View>
+                )
+              : null}
             {title
               ? (
                   <IOSText

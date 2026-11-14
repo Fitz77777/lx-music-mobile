@@ -536,6 +536,18 @@ export const isHorizontalMode = (width: number, height: number): boolean => {
   return width / height > 1.2
 }
 
+/**
+ * 是否为平板设备（iPad / Android 平板，短边 >= 600pt/dp，即 Android sw600dp 约定）。
+ * 平板统一使用侧边栏布局（Home/Pad、PlayDetail/Pad），不再走手机的水平/垂直分支。
+ * iOS 用 Platform.isPad 精确判断；Android 平板在分屏等场景下窗口可能变窄，
+ * 因此按窗口短边判断而不是机型。
+ */
+export const isPadDevice = (width: number, height: number): boolean => {
+  if (Platform.OS == 'ios') return Platform.isPad
+  if (width <= 0 || height <= 0) return false
+  return Math.min(width, height) >= 600
+}
+
 
 export interface RowInfo {
   rowNum: number | undefined
@@ -546,6 +558,13 @@ export type RowInfoType = 'full' | 'medium'
 
 export const getRowInfo = (type: RowInfoType = 'full'): RowInfo => {
   const win = windowSizeTools.getSize()
+  // 平板固定单列：列表宽度已限宽居中，分列反而破坏节奏
+  if (isPadDevice(win.width, win.height)) {
+    return {
+      rowNum: undefined,
+      rowWidth: '100%',
+    }
+  }
   let isMultiRow = isHorizontalMode(win.width, win.height)
   if (type == 'medium' && win.width / win.height < 1.8) isMultiRow = false
   // console.log('getRowInfo')

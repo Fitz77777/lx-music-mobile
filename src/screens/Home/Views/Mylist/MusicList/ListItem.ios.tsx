@@ -10,8 +10,8 @@ import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import type { RowInfo } from '@/utils/tools'
 
 /** iOS 音乐行高（pt，原型 68pt / 封面 56pt） */
-export const ITEM_HEIGHT = 68
-const PIC_SIZE = 56
+export const ITEM_HEIGHT = 64
+const PIC_SIZE = 44
 const ROW_PADDING = 14
 const TEXT_GAP = 12
 /** 分隔线内缩到文字起点 */

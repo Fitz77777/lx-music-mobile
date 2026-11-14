@@ -126,7 +126,7 @@ export default forwardRef<ConfirmAlertType, ConfirmAlertProps>(({
             keyboardShouldPersistTaps="handled"
           >
             {children ?? (
-              <IOSText variant="footnote" align="center" color={colors.secondaryLabel} style={{ lineHeight: 18 }}>{text}</IOSText>
+              <IOSText variant="footnote" align="center" color={colors.secondaryLabel}>{text}</IOSText>
             )}
           </ScrollView>
           <View style={{ flexDirection: 'row', borderTopWidth: hairline, borderTopColor: colors.rowSeparator }}>

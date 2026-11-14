@@ -22,7 +22,7 @@ export interface ModalType {
  */
 export default forwardRef<ModalType, ModalProps>(({ onOpenId }, ref) => {
   const t = useI18n()
-  const { colors, accent, spacing, radius } = useIOSTheme()
+  const { colors, accent, spacing, radius, typography } = useIOSTheme()
   const inputRef = useRef<TextInput>(null)
   const [visible, setVisible] = useState(false)
   const [text, setText] = useState('')
@@ -94,7 +94,7 @@ export default forwardRef<ModalType, ModalProps>(({ onOpenId }, ref) => {
             flex: 1,
             minWidth: 0,
             padding: 0,
-            fontSize: 15,
+            fontSize: typography.subheadline.fontSize,
             color: colors.label,
           }}
         />
@@ -118,7 +118,7 @@ export default forwardRef<ModalType, ModalProps>(({ onOpenId }, ref) => {
       <IOSText
         variant="caption1"
         color={colors.secondaryLabel}
-        style={{ marginTop: 9, marginBottom: 18, lineHeight: 17 }}
+        style={{ marginTop: 9, marginBottom: 18 }}
       >{t('songlist_open_input_tip')}</IOSText>
       <Pressable
         onPress={handleConfirm}

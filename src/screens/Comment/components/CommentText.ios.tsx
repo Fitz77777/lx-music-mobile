@@ -37,7 +37,7 @@ export default memo(({ text }: { text: string }) => {
     length
       ? (
           <View>
-            <IOSText variant="subheadline" selectable style={{ marginTop: spacing.xs, lineHeight: 20 }}>
+            <IOSText variant="subheadline" selectable style={{ marginTop: spacing.xs }}>
               {show ? text : `${text.substring(0, length)}……`}
             </IOSText>
             <IOSText
@@ -48,6 +48,6 @@ export default memo(({ text }: { text: string }) => {
             >{show ? t('comment_hide_text') : t('comment_show_text')}</IOSText>
           </View>
         )
-      : <IOSText variant="subheadline" selectable style={{ marginTop: spacing.xs, lineHeight: 20 }}>{text}</IOSText>
+      : <IOSText variant="subheadline" selectable style={{ marginTop: spacing.xs }}>{text}</IOSText>
   )
 })

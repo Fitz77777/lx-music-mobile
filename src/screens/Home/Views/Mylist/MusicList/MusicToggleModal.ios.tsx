@@ -140,7 +140,7 @@ export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
           <View style={{
             width: 7,
             height: 7,
-            borderRadius: 4,
+            borderRadius: radius.pill,
             backgroundColor: active ? colors.onAccent : getSourceColor(item.action),
           }} />
           <IOSText

@@ -6,9 +6,8 @@ import Button from '../../components/Button'
 import Section from '../../components/Section'
 import ConfirmAlert, { type ConfirmAlertType } from '@/components/common/ConfirmAlert'
 import Input from '@/components/common/Input'
-import Text from '@/components/common/Text'
-import { IOSListRow } from '@/components/ios'
 import IOSText from '@/components/ios/Text'
+import { IOSListRow } from '@/components/ios'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { connectServer, disconnectServer } from '@/plugins/sync'
 import { getWIFIIPV4Address } from '@/utils/nativeModules/utils'
@@ -34,7 +33,7 @@ export default memo(({ host, setHost }: {
   setHost: (host: string) => void
 }) => {
   const t = useI18n()
-  const { colors, spacing, typography } = useIOSTheme()
+  const { colors, spacing, typography, radius } = useIOSTheme()
   const syncStatus = useStatus()
   const isEnableSync = useSettingValue('sync.enable')
   const isUnmountedRef = useRef(true)
@@ -207,7 +206,7 @@ export default memo(({ host, setHost }: {
         ref={confirmAlertRef}
       >
         <View style={{ flexGrow: 1, flexShrink: 1, flexDirection: 'column' }}>
-          <Text style={{ marginBottom: 5 }}>{t('setting_sync_code_label')}</Text>
+          <IOSText variant="footnote" style={{ marginBottom: 5 }}>{t('setting_sync_code_label')}</IOSText>
           <Input
             placeholder={t('setting_sync_code_input_tip')}
             value={authCode}
@@ -216,7 +215,7 @@ export default memo(({ host, setHost }: {
               flexGrow: 1,
               flexShrink: 1,
               minWidth: 260,
-              borderRadius: 4,
+              borderRadius: radius.control,
               backgroundColor: colors.fill,
             }}
           />

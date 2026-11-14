@@ -64,7 +64,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
     }}>
       <TouchableOpacity
         style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingLeft: ROW_PADDING }}
-        activeOpacity={0.5}
+        activeOpacity={0.6}
         onPress={() => { onPress(item, index) }}
         onLongPress={() => { onLongPress(item, index) }}
       >

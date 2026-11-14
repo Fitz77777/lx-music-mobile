@@ -91,7 +91,7 @@ const ArtistItemComp = memo(({ item, showSource }: { item: ArtistItem, showSourc
         paddingHorizontal: spacing.lg,
         paddingVertical: spacing.sm,
       }}
-      activeOpacity={0.5}
+      activeOpacity={0.6}
       onPress={() => { handleItemPress('artist', item) }}
     >
       <Image
@@ -125,7 +125,7 @@ const AlbumItemComp = memo(({ item, showSource }: { item: AlbumItem, showSource:
         paddingHorizontal: spacing.lg,
         paddingVertical: spacing.sm,
       }}
-      activeOpacity={0.5}
+      activeOpacity={0.6}
       onPress={() => { handleItemPress('album', item) }}
     >
       <Image

@@ -79,7 +79,7 @@ export default memo(({ item, index, width, showSource, onPress }: {
           variant="subheadline"
           weight="500"
           numberOfLines={2}
-          style={{ marginTop: spacing.sm, lineHeight: 19 }}
+          style={{ marginTop: spacing.sm }}
         >{item.name}</IOSText>
       </TouchableOpacity>
     </View>

@@ -9,7 +9,7 @@ import { toast } from '@/utils/tools'
 import ConfirmAlert, { type ConfirmAlertType } from '@/components/common/ConfirmAlert'
 import CheckBoxItem from '../../components/CheckBoxItem'
 import { useI18n } from '@/lang'
-import Text from '@/components/common/Text'
+import IOSText from '@/components/ios/Text'
 
 /** iOS 错误日志设置：两行开关 + 一个整行按钮 */
 export default memo(() => {
@@ -88,8 +88,8 @@ export default memo(() => {
         <View onStartShouldSetResponder={() => true}>
           {
             logText
-              ? <Text selectable size={13}>{logText}</Text>
-              : <Text size={13}>{t('setting_other_log_tip_null')}</Text>
+              ? <IOSText selectable variant="footnote">{logText}</IOSText>
+              : <IOSText variant="footnote">{t('setting_other_log_tip_null')}</IOSText>
           }
         </View>
       </ConfirmAlert>

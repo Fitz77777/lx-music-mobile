@@ -26,7 +26,7 @@ export default memo(() => {
     <IOSText
       variant="footnote"
       color={colors.secondaryLabel}
-      style={[{ lineHeight: 19, marginBottom: 10 }, style]}
+      style={[{ marginBottom: 10 }, style]}
     >{children}</IOSText>
   )
   const Strong = ({ children }: { children: React.ReactNode }) => (

@@ -135,7 +135,7 @@ const DrawerLayoutFixed = forwardRef<DrawerLayoutFixedType, Props>(({
               style={{
                 width: 36,
                 height: 5,
-                borderRadius: 2.5,
+                borderRadius: radius.pill,
                 backgroundColor: colors.tertiaryLabel,
               }}
             />

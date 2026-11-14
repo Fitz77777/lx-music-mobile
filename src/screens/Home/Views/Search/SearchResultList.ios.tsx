@@ -253,6 +253,7 @@ export default forwardRef<SearchResultListType, SearchResultListProps>(({ search
       keyExtractor={keyExtractor}
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.5}
+      keyboardShouldPersistTaps="handled"
       contentContainerStyle={{ paddingBottom: spacing.xxxl + iosHomeBottomInset }}
       refreshControl={
         <RefreshControl

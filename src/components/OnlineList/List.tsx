@@ -266,6 +266,9 @@ const List = forwardRef<ListType, ListProps>(({
       ListHeaderComponent={ListHeaderComponent}
       refreshControl={refreshControl}
       ListFooterComponent={footerComponent}
+      // 键盘弹出时点击列表行：第一次点击收起键盘，第二次才触发行的 onPress，
+      // 无法直接播放/跳转；这里用 handled 让点击直接生效，键盘由滚动/收起逻辑处理
+      keyboardShouldPersistTaps="handled"
       contentContainerStyle={Platform.OS == 'ios' && checkHomePagerIdle ? { paddingBottom: iosHomeBottomInset } : undefined}
     />
   )

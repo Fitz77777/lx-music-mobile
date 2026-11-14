@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react'
-import { Platform, type LayoutChangeEvent, View } from 'react-native'
+import { Keyboard, Platform, type LayoutChangeEvent, View } from 'react-native'
 
 // import music from '@/utils/musicSdk'
 // import InsetShadow from 'react-native-inset-shadow'
@@ -132,7 +132,15 @@ export default () => {
         onHideTipList={handleHideTipList}
         onShowTipList={handleShowTipList}
       />
-      <View style={styles.content} onLayout={handleLayout}>
+      <View
+        style={styles.content}
+        onLayout={handleLayout}
+        onStartShouldSetResponder={() => {
+          // 点击搜索结果区域时收起键盘，避免键盘常驻挡住列表
+          Keyboard.dismiss()
+          return false
+        }}
+      >
         <TipList ref={searchTipListRef} onSearch={handleSearch} />
         <List ref={listRef} onSearch={handleSearch} />
       </View>

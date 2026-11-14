@@ -12,7 +12,7 @@ import { usePlayerMusicInfo } from '@/store/player/hook'
 import { useStatusbarHeight } from '@/store/common/hook'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 import commonState from '@/store/common/state'
-import { useIOSPanDown } from '@/navigation/iosGestures'
+import { useIOSDismissPan } from '@/navigation/iosGestures'
 import SettingPopup, { type SettingPopupType } from '../../components/SettingPopup'
 import SoundEffectPopup, { type SoundEffectPopupType } from '../../components/SoundEffectPopup'
 import { useSetting } from '@/store/setting/hook'
@@ -26,11 +26,11 @@ const BUTTON_SIZE = 32
 /**
  * 播放页头部（原型 .player .bar）：
  * 中间歌曲名/歌手、右侧「更多」下拉（定时退出 / 音效 / 播放器设置）。
- * 收起改为在头部或封面上向下滑动（平板同样适用）。
+ * 收起改为在头部或封面上向下滑动、或右滑返回（平板同样适用）。
  */
 export default memo(() => {
   const t = useI18n()
-  const panDown = useIOSPanDown(commonState.componentIds.playDetail)
+  const panDismiss = useIOSDismissPan(commonState.componentIds.playDetail)
   const popupRef = useRef<SettingPopupType>(null)
   const soundEffectPopupRef = useRef<SoundEffectPopupType>(null)
   const timeoutModalRef = useRef<TimeoutExitEditModalType>(null)
@@ -77,7 +77,7 @@ export default memo(() => {
   }
 
   return (
-    <View nativeID={NAV_SHEAR_NATIVE_IDS.playDetail_header} style={{ paddingTop: statusBarPadding }} {...panDown.panHandlers}>
+    <View nativeID={NAV_SHEAR_NATIVE_IDS.playDetail_header} style={{ paddingTop: statusBarPadding }} {...panDismiss.panHandlers}>
       <StatusBar />
       <View style={{
         height: HEADER_HEIGHT,

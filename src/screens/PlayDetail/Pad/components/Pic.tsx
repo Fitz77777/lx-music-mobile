@@ -5,7 +5,7 @@ import { usePlayerMusicInfo } from '@/store/player/hook'
 import { useWindowSize } from '@/utils/hooks'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 import { useNavigationComponentDidAppear } from '@/navigation'
-import { useIOSPanDown } from '@/navigation/iosGestures'
+import { useIOSDismissPan } from '@/navigation/iosGestures'
 import commonState from '@/store/common/state'
 import { HEADER_HEIGHT } from './Header'
 import Image from '@/components/common/Image'
@@ -20,13 +20,13 @@ const ART_RADIUS = 18
 /**
  * 播放页封面（原型 .art-wrap / .art）：
  * 左右 34pt、圆角 18、大范围柔和阴影，宽屏下不超过 520pt。
- * 在封面上下滑收起播放页。
+ * 在封面上下滑或右滑收起播放页。
  */
 export default ({ componentId }: { componentId: string }) => {
   const musicInfo = usePlayerMusicInfo()
   const { width: winWidth, height: winHeight } = useWindowSize()
   const statusBarHeight = useStatusbarHeight()
-  const panDown = useIOSPanDown(componentId)
+  const panDismiss = useIOSDismissPan(componentId)
 
   const [animated, setAnimated] = useState(!!commonState.componentIds.playDetail)
   const [pic, setPic] = useState(musicInfo.pic)
@@ -47,7 +47,7 @@ export default ({ componentId }: { componentId: string }) => {
   }, [statusBarHeight, winHeight, winWidth])
 
   return (
-    <View style={{ flexGrow: 1, flexShrink: 1, justifyContent: 'center', alignItems: 'center' }} {...panDown.panHandlers}>
+    <View style={{ flexGrow: 1, flexShrink: 1, justifyContent: 'center', alignItems: 'center' }} {...panDismiss.panHandlers}>
       <View style={{
         borderRadius: ART_RADIUS,
         backgroundColor: 'transparent',

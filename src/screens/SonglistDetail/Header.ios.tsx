@@ -9,6 +9,7 @@ import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 import { useNavigationComponentDidAppear } from '@/navigation'
 import { useListInfo } from './state'
 import { useAnimateOnecNumber } from '@/utils/hooks/useAnimateNumber'
+import { cleanDesc } from '@/utils'
 import ActionBar from './ActionBar'
 
 const PIC_SIZE = 96
@@ -110,7 +111,7 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
             color={colors.secondaryLabel}
             numberOfLines={3}
             style={{ marginTop: spacing.xs }}
-          >{detailInfo.desc}</IOSText>
+          >{cleanDesc(detailInfo.desc)}</IOSText>
         </View>
       </View>
       <ActionBar />

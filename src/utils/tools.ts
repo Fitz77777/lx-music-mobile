@@ -537,13 +537,17 @@ export const isHorizontalMode = (width: number, height: number): boolean => {
 }
 
 /**
- * 是否为平板设备（iPad / Android 平板，短边 >= 600pt/dp，即 Android sw600dp 约定）。
+ * 是否为平板设备（iPad / Android 平板，窗口短边 >= 600pt/dp，即 Android sw600dp 约定）。
  * 平板统一使用侧边栏布局（Home/Pad、PlayDetail/Pad），不再走手机的水平/垂直分支。
- * iOS 用 Platform.isPad 精确判断；Android 平板在分屏等场景下窗口可能变窄，
- * 因此按窗口短边判断而不是机型。
+ * iPad 支持台前调度 / 分屏自由调整窗口大小，窗口过窄时回退到手机布局（侧边栏放不下）；
+ * Android 平板分屏同理按窗口短边判断而不是机型。
  */
 export const isPadDevice = (width: number, height: number): boolean => {
-  if (Platform.OS == 'ios') return Platform.isPad
+  if (Platform.OS == 'ios') {
+    // 尺寸还没测量出来时先按机型判断，避免 iPad 启动瞬间闪一下手机布局
+    if (width <= 0 || height <= 0) return Platform.isPad
+    return Platform.isPad && Math.min(width, height) >= 600
+  }
   if (width <= 0 || height <= 0) return false
   return Math.min(width, height) >= 600
 }

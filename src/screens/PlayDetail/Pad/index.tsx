@@ -99,6 +99,9 @@ export default memo(({ componentId }: { componentId: string }) => {
   }, [isLandscape])
 
   if (isLandscape) {
+    // 歌词是一个 flex:1 的 FlatList，需要明确高度才不会塌成 0；
+    // 横屏时只占半屏、位于播放控制栏上方，不铺满整列
+    const lyricHeight = Math.round(winHeight * 0.5)
     return (
       <>
         <Header />
@@ -112,7 +115,7 @@ export default memo(({ componentId }: { componentId: string }) => {
             justifyContent: 'center',
             paddingHorizontal: 10,
           }}>
-            <View style={{ flexShrink: 1, maxHeight: 360 }}>
+            <View style={{ height: lyricHeight }}>
               <Lyric />
             </View>
             <Player />

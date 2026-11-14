@@ -284,13 +284,8 @@ export function pushSonglistDetailScreen(componentId: string, info: ListInfoItem
               // },
             },
             pop: {
-              sharedElementTransitions: [
-                {
-                  fromId: `${NAV_SHEAR_NATIVE_IDS.songlistDetail_pic}_to_${info.id}`,
-                  toId: `${NAV_SHEAR_NATIVE_IDS.songlistDetail_pic}_from_${info.id}`,
-                  interpolation: { type: 'spring' },
-                },
-              ],
+              // 返回不再使用封面共享元素：列表可能已滚动，封面从详情飞回原格子的
+              // 长距离弹簧动画观感很差，改用系统默认的返回转场
               elementTransitions: [
                 {
                   id: NAV_SHEAR_NATIVE_IDS.songlistDetail_title,

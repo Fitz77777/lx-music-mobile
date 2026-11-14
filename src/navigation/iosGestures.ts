@@ -28,6 +28,31 @@ export const useIOSPanBack = (componentId?: string | null, edgeWidth = 0) => {
 }
 
 /**
+ * 播放页收起手势：下拉收起（原型）或右滑返回。
+ * 横向位移明显时按右滑处理，纵向明显时按下拉处理，其它方向不接管。
+ */
+export const useIOSDismissPan = (componentId?: string | null) => {
+  const poppedRef = useRef(false)
+
+  return useMemo(() => PanResponder.create({
+    onMoveShouldSetPanResponderCapture: (_evt, gesture) => {
+      if (!componentId || poppedRef.current) return false
+      const horizontal = gesture.dx > 12 && gesture.dx > Math.abs(gesture.dy) * 1.6
+      const vertical = gesture.dy > 10 && gesture.dy > Math.abs(gesture.dx) * 1.5
+      return horizontal || vertical
+    },
+    onPanResponderTerminationRequest: () => false,
+    onPanResponderRelease: (_evt, gesture) => {
+      if (!componentId || poppedRef.current) return
+      if (gesture.dy > 90 || gesture.vy > 0.6 || gesture.dx > 72 || gesture.vx > 0.5) {
+        poppedRef.current = true
+        void Navigation.pop(componentId)
+      }
+    },
+  }), [componentId])
+}
+
+/**
  * iOS 下拉收起手势：播放页用，向下拖动足够距离后收起。
  */
 export const useIOSPanDown = (componentId?: string | null) => {

@@ -1,14 +1,18 @@
 import { useEffect, useRef } from 'react'
+import { View } from 'react-native'
 import settingState from '@/store/setting/state'
 import Content from './Content'
 import TagList from './TagList'
+import TagPanel from './TagList/Panel'
 import DrawerLayoutFixed, { type DrawerLayoutFixedType } from '@/components/common/DrawerLayoutFixed'
 import { COMPONENT_IDS } from '@/config/constant'
 import { useDrawerAppearance } from '../useDrawerAppearance'
+import { useIsPad } from '@/utils/hooks'
 import type { InitState as CommonState } from '@/store/common/state'
 
 export default () => {
   const drawer = useRef<DrawerLayoutFixedType>(null)
+  const isPad = useIsPad()
   const { backgroundColor: drawerBackgroundColor, maxWidth, widthPercentage } = useDrawerAppearance('songlist')
 
   useEffect(() => {
@@ -37,6 +41,16 @@ export default () => {
 
   const navigationView = () => <TagList />
   // console.log('render drawer content')
+
+  // 平板：标签筛选使用居中浮层（3 列网格），不使用侧边抽屉
+  if (isPad) {
+    return (
+      <View style={{ flex: 1 }}>
+        <Content />
+        <TagPanel />
+      </View>
+    )
+  }
 
   return (
     <DrawerLayoutFixed

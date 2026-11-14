@@ -4,12 +4,10 @@ import { NAV_MENUS } from '@/config/constant'
 import { useNavActiveId, useStatusbarHeight } from '@/store/common/hook'
 import { setNavActiveId } from '@/core/common'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { isHorizontalMode, isPadDevice } from '@/utils/tools'
 import { iosPad, iosPadBottomInset } from '@/theme/ios/tokens'
 import IOSBackdrop from '@/components/ios/Backdrop'
 import IOSToast from '@/components/ios/Toast'
 import PadPlayerBar from '@/components/player/PadPlayerBar'
-import useWindowSize from '@/utils/hooks/useWindowSize'
 import SizeView from '@/components/SizeView'
 import Main from '../Vertical/Main'
 import Header from '../IOS/Header'
@@ -27,12 +25,9 @@ export default () => {
   const t = useI18n()
   const activeId = useNavActiveId()
   const { colors } = useIOSTheme()
-  const { width: winWidth, height: winHeight } = useWindowSize()
   // Android 的 SafeAreaView 不生效，状态栏高度需要手动留出（iOS 由 SafeAreaView 处理）
   const statusBarHeight = useStatusbarHeight()
   const statusBarPadding = Platform.OS == 'android' ? statusBarHeight : 0
-  // 宽屏（横屏 / 大内容区）下列表限宽居中；窄内容区不额外限宽
-  const isLandscape = isPadDevice(winWidth, winHeight) && isHorizontalMode(winWidth, winHeight)
 
   const toItem = (id: string): PadSidebarItem => {
     const menu = NAV_MENUS.find(menu => menu.id == id)!
@@ -60,7 +55,7 @@ export default () => {
       <IOSBackdrop />
       <SizeView />
       <View style={{ flex: 1, flexDirection: 'row', paddingTop: statusBarPadding }}>
-        <SafeAreaView style={{ width: iosPad.sidebarWidth }}>
+        <SafeAreaView style={{ width: iosPad.sidebarWidth, backgroundColor: colors.barBackgroundOpaque }}>
           <Sidebar
             groups={groups}
             bottomItems={bottomItems}
@@ -72,12 +67,10 @@ export default () => {
           <SafeAreaView>
             <Header />
           </SafeAreaView>
-          {/* 横屏下列表限宽居中，避免行内元素被拉得太开 */}
+          {/* 内容区随窗口自适应铺满（iPad 可自由调整窗口大小） */}
           <View style={{
             flex: 1,
             width: '100%',
-            maxWidth: isLandscape ? iosPad.maxContentWidth : undefined,
-            alignSelf: 'center',
             backgroundColor: colors.canvas,
           }}>
             <Main />

@@ -305,16 +305,12 @@ export const iosPad = {
   sidebarWidth: 236,
   /** 内容区左右留白 */
   contentPadding: 26,
-  /** 列表内容最大宽度（宽屏下居中，避免行被拉得太开） */
-  maxContentWidth: 720,
   /** 居中浮层卡片宽度 */
   sheetWidth: 460,
   /** 居中浮层卡片圆角（比手机 Sheet 的 20 略大） */
   sheetRadius: 24,
   /** 播放页横屏右栏（歌词 + 控制）宽度 */
   playerLandscapeSideWidth: 440,
-  /** 横屏右栏内容最大宽度 */
-  playerSideMaxWidth: 400,
   /** 封面最大尺寸 */
   artMaxSize: 520,
   /** 迷你播放器浮动卡片的底部距离 */

@@ -198,3 +198,19 @@ export const decodeName = (str: string | null = '') => {
   if (!str) return ''
   return he.decode(str)
 }
+
+/**
+ * 歌单简介清洗：各源返回的简介格式不统一，部分直接带 HTML（`<br>`、`&nbsp;` 等）。
+ * 解码实体 → `<br>` 转换行 → 去掉其余标签 → 压缩空白。
+ */
+export const cleanDesc = (str: string | null = '') => {
+  if (!str) return ''
+  let text = decodeName(str)
+  text = text.replace(/<br\s*\/?>/gi, '\n')
+  text = text.replace(/<[^>]*>/g, '')
+  // &nbsp; 解码后是 \u00a0，统一成普通空格
+  text = text.replace(/\u00a0/g, ' ')
+  text = text.replace(/[ \t]+/g, ' ')
+  text = text.replace(/\n{3,}/g, '\n\n')
+  return text.trim()
+}

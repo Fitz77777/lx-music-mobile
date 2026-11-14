@@ -4,9 +4,7 @@ import { Pressable, View } from 'react-native'
 import PlayQueueModal, { type PlayQueueModalType } from '@/components/player/PlayQueueModal'
 import IOSIcon from '@/components/ios/Icon'
 import IOSHeart from '@/components/ios/Heart'
-import { navigations } from '@/navigation'
 import { toast } from '@/utils/tools'
-import commonState from '@/store/common/state'
 import { MUSIC_TOGGLE_MODE_LIST, MUSIC_TOGGLE_MODE, LIST_IDS } from '@/config/constant'
 import { getListMusics } from '@/core/list'
 import { collectMusic, uncollectMusic } from '@/core/player/player'
@@ -80,7 +78,7 @@ const ActionBtn = ({ icon, color, onPress, children }: {
  * 收藏 / 播放模式 / 评论 / 播放队列。
  * 歌词页通过左右滑动封面切换，不提供独立的歌词按钮。
  */
-export default memo(() => {
+export default memo(({ onShowComment }: { onShowComment: () => void }) => {
   const { colors, accent } = useIOSTheme()
   const musicInfo = usePlayerMusicInfo()
   const isLove = useIsLove(musicInfo.id)
@@ -156,7 +154,7 @@ export default memo(() => {
       />
       <ActionBtn
         icon="comment"
-        onPress={() => { navigations.pushCommentScreen(commonState.componentIds.playDetail!) }}
+        onPress={onShowComment}
       />
       <ActionBtn icon="list-order" onPress={() => { queueRef.current?.show() }} />
       <PlayQueueModal ref={queueRef} />

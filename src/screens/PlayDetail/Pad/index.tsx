@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState, type ComponentRef } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from 'react'
 import { AppState, View } from 'react-native'
 
 import Header from './components/Header'
@@ -6,6 +6,7 @@ import Pic from './components/Pic'
 import PlayInfo from './components/PlayInfo'
 import ControlBtn from './components/ControlBtn'
 import MoreBtn from './components/MoreBtn'
+import CommentModal from './components/CommentModal'
 import Lyric from '../Vertical/Lyric'
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view'
 import { screenkeepAwake, screenUnkeepAwake } from '@/utils/nativeModules/utils'
@@ -22,7 +23,7 @@ import { iosPad } from '@/theme/ios/tokens'
  * 平板组件不区分平台；滑动封面下拉近收起在两种方向都可用。
  */
 
-const Player = memo(() => {
+const Player = memo(({ onShowComment }: { onShowComment: () => void }) => {
   return (
     <View
       style={{ flex: 0, width: '100%', flexDirection: 'column', paddingBottom: 22 }}
@@ -30,7 +31,7 @@ const Player = memo(() => {
     >
       <PlayInfo />
       <ControlBtn />
-      <MoreBtn />
+      <MoreBtn onShowComment={onShowComment} />
     </View>
   )
 })
@@ -51,6 +52,9 @@ export default memo(({ componentId }: { componentId: string }) => {
   const [pageIndex, setPageIndex] = useState(0)
   const showLyricRef = useRef(false)
   const pagerViewRef = useRef<ComponentRef<typeof PagerView>>(null)
+  const [commentVisible, setCommentVisible] = useState(false)
+  const showComment = useCallback(() => { setCommentVisible(true) }, [])
+  const hideComment = useCallback(() => { setCommentVisible(false) }, [])
 
   const onPageSelected = ({ nativeEvent }: PagerViewOnPageSelectedEvent) => {
     setPageIndex(nativeEvent.position)
@@ -118,9 +122,10 @@ export default memo(({ componentId }: { componentId: string }) => {
             <View style={{ height: lyricHeight }}>
               <Lyric />
             </View>
-            <Player />
+            <Player onShowComment={showComment} />
           </View>
         </View>
+        <CommentModal visible={commentVisible} componentId={componentId} onClose={hideComment} />
       </>
     )
   }
@@ -141,8 +146,9 @@ export default memo(({ componentId }: { componentId: string }) => {
             <LyricPane active={pageIndex} />
           </View>
         </PagerView>
-        <Player />
+        <Player onShowComment={showComment} />
       </View>
+      <CommentModal visible={commentVisible} componentId={componentId} onClose={hideComment} />
     </>
   )
 })

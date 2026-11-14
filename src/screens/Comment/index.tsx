@@ -1,5 +1,5 @@
 import { memo, useMemo, useEffect, useRef, useState, useCallback } from 'react'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view'
 import Header from './components/Header'
 import TabBar from './components/TabBar'
@@ -7,6 +7,9 @@ import CommentHot from './CommentHot'
 import CommentNew from './CommentNew'
 import { createStyle, toast } from '@/utils/tools'
 import Text from '@/components/common/Text'
+import IOSIcon from '@/components/ios/Icon'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { useI18n } from '@/lang'
 import { COMPONENT_IDS } from '@/config/constant'
 import { setComponentId } from '@/core/common'
@@ -48,6 +51,33 @@ const NewCommentPage = memo(({ activeId, musicInfo, onUpdateTotal }: {
   }
 })
 
+/** 平板浮层里的评论头部（iOS 风格：标题 + 关闭） */
+const EmbeddedHeader = memo(({ musicInfo, onClose }: {
+  musicInfo: LX.Music.MusicInfo | null
+  onClose?: () => void
+}) => {
+  const t = useI18n()
+  const { colors, accent, spacing } = useIOSTheme()
+  return (
+    <View style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      height: 48,
+      paddingHorizontal: spacing.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.rowSeparator,
+    }}>
+      <IOSText variant="headline" numberOfLines={1} style={{ flex: 1 }}>
+        {musicInfo ? t('comment_title', { name: musicInfo.name, singer: musicInfo.singer }) : ''}
+      </IOSText>
+      <Pressable onPress={onClose} hitSlop={8} style={({ pressed }) => ({ padding: 6, opacity: pressed ? 0.6 : 1 })}>
+        <IOSIcon name="close" size={20} color={accent} />
+      </Pressable>
+    </View>
+  )
+})
+EmbeddedHeader.displayName = 'EmbeddedHeader'
+
 const TABS = [
   'hot',
   'new',
@@ -56,17 +86,22 @@ const getMusicInfo = (musicInfo: LX.Player.PlayMusic | null) => {
   if (!musicInfo) return null
   return 'progress' in musicInfo ? musicInfo.metadata.musicInfo : musicInfo
 }
-export default memo(({ componentId }: {
+export default memo(({ componentId, embedded = false, onClose }: {
   componentId: string
+  /** 平板：嵌在浮层卡片里展示（非整页），不接管导航 */
+  embedded?: boolean
+  onClose?: () => void
 }) => {
-  const panBack = useIOSPanBack(componentId, 40)
+  const panBack = useIOSPanBack(embedded ? null : componentId, 40)
   const pagerViewRef = useRef<PagerView>(null)
   const [activeId, setActiveId] = useState<ActiveId>('hot')
   const [musicInfo, setMusicInfo] = useState<LX.Music.MusicInfo | null>(getMusicInfo(playerState.playMusicInfo.musicInfo))
   const t = useI18n()
+  const { colors } = useIOSTheme()
   const [total, setTotal] = useState({ hot: 0, new: 0 })
 
   useEffect(() => {
+    if (embedded) return
     setComponentId(COMPONENT_IDS.comment, componentId)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -131,6 +166,25 @@ export default memo(({ componentId }: {
       </View>
     )
   }, [activeId, musicInfo, onPageSelected, refreshComment, setHotTotal, setNewTotal, tabs, toggleTab])
+
+  if (embedded) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
+        <EmbeddedHeader musicInfo={musicInfo} onClose={onClose} />
+        {
+          musicInfo == null
+            ? null
+            : musicInfo.source == 'local'
+              ? (
+                  <View style={{ ...styles.container, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text>{t('comment_not support')}</Text>
+                  </View>
+                )
+              : commentComponent
+        }
+      </View>
+    )
+  }
 
   return (
     <PageContent>

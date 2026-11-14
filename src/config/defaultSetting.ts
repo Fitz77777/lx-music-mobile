@@ -1,3 +1,9 @@
+import { Platform } from 'react-native'
+
+// iOS 搜索页的空状态按原型默认展示热门搜索与历史搜索（设置里仍可关闭）；
+// Android 保持原有的欢迎文案
+const isIOS = Platform.OS == 'ios'
+
 const defaultSetting: LX.AppSetting = {
   version: '2.1',
   'common.isAutoTheme': false,
@@ -79,8 +85,8 @@ const defaultSetting: LX.AppSetting = {
   'desktopLyric.style.lyricPlayedColor': 'rgba(7, 197, 86, 1)',
   'desktopLyric.style.lyricShadowColor': 'rgba(0, 0, 0, 0.6)',
 
-  'search.isShowHotSearch': false,
-  'search.isShowHistorySearch': false,
+  'search.isShowHotSearch': isIOS,
+  'search.isShowHistorySearch': isIOS,
 
   'list.isClickPlayList': false,
   'list.isShowSource': true,

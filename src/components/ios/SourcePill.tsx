@@ -2,12 +2,11 @@ import { memo, type Ref } from 'react'
 import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native'
 
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { getSourceColor } from './sourceColor'
 import IOSIcon from './Icon'
 import IOSText from './Text'
 
 export interface IOSSourcePillProps {
-  /** 音源 id（用于取音源色点） */
+  /** 音源 id */
   source: string
   /** 当前音源名称 */
   label: string
@@ -19,11 +18,11 @@ export interface IOSSourcePillProps {
 }
 
 /**
- * 音源选择触发器（胶囊）：音源色点 + 当前音源名 + 下拉箭头。
- * 只显示音源名时用户看不出这里可以点，统一加底色和箭头表达「可切换」。
+ * 音源选择触发器：当前音源名 + 下拉箭头（强调色）。
+ * 三处音源入口（搜索 / 排行榜 / 歌单）共用，保持轻量、不加底色。
  */
-export default memo(({ source, label, anchorRef, onPress, onLongPress, disabled, style }: IOSSourcePillProps) => {
-  const { colors, radius } = useIOSTheme()
+export default memo(({ label, anchorRef, onPress, onLongPress, disabled, style }: IOSSourcePillProps) => {
+  const { accent, spacing } = useIOSTheme()
 
   return (
     <Pressable
@@ -36,25 +35,16 @@ export default memo(({ source, label, anchorRef, onPress, onLongPress, disabled,
       style={({ pressed }) => [{
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 5,
-        height: 28,
-        paddingHorizontal: 10,
-        borderRadius: radius.pill,
-        backgroundColor: colors.tertiaryFill,
+        gap: 2,
+        paddingVertical: spacing.xs,
         opacity: pressed ? 0.6 : disabled ? 0.4 : 1,
       }, style]}
     >
-      <View style={{
-        width: 7,
-        height: 7,
-        borderRadius: 3.5,
-        backgroundColor: getSourceColor(source),
-      }} />
-      <IOSText variant="footnote" weight="500" numberOfLines={1}>{label}</IOSText>
+      <IOSText variant="subheadline" color={accent} numberOfLines={1}>{label}</IOSText>
       <IOSIcon
         name="chevron-right"
-        size={11}
-        color={colors.secondaryLabel}
+        size={12}
+        color={accent}
         style={{ transform: [{ rotate: '90deg' }] }}
       />
     </Pressable>

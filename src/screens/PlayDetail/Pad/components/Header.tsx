@@ -11,6 +11,7 @@ import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { usePlayerMusicInfo } from '@/store/player/hook'
 import { useStatusbarHeight } from '@/store/common/hook'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
+import { pop } from '@/navigation'
 import commonState from '@/store/common/state'
 import { useIOSDismissPan } from '@/navigation/iosGestures'
 import SettingPopup, { type SettingPopupType } from '../../components/SettingPopup'
@@ -25,8 +26,8 @@ const BUTTON_SIZE = 32
 
 /**
  * 播放页头部（原型 .player .bar）：
- * 中间歌曲名/歌手、右侧「更多」下拉（定时退出 / 音效 / 播放器设置）。
- * 收起改为在头部或封面上向下滑动、或右滑返回（平板同样适用）。
+ * 左侧收起按钮、中间歌曲名/歌手、右侧「更多」下拉（定时退出 / 音效 / 播放器设置）。
+ * 同时保留在头部或封面上向下滑动、右滑返回的收起方式。
  */
 export default memo(() => {
   const t = useI18n()
@@ -37,6 +38,9 @@ export default memo(() => {
   const [menuVisible, setMenuVisible] = useState(false)
   const moreAnchorRef = useRef<ViewType>(null)
   const { colors, accent, spacing } = useIOSTheme()
+  const handleClose = () => {
+    void pop(commonState.componentIds.playDetail!)
+  }
   // Android 没有安全区包装，状态栏高度手动留出（iOS 由 PageContent 的 SafeAreaView 处理）
   const statusBarHeight = useStatusbarHeight()
   const statusBarPadding = Platform.OS == 'android' ? statusBarHeight : 0
@@ -85,8 +89,27 @@ export default memo(() => {
         alignItems: 'center',
         paddingHorizontal: spacing.xl,
       }}>
-        {/* 播放页不显示收起按钮，改为在封面上向下滑动收起 */}
-        <View style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }} />
+        {/* 收起按钮（同时保留下拉 / 右滑手势） */}
+        <Pressable
+          onPress={handleClose}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t('close')}
+          style={({ pressed }) => ({
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <IOSIcon
+            name="chevron-right"
+            size={20}
+            color={accent}
+            style={{ transform: [{ rotate: '90deg' }] }}
+          />
+        </Pressable>
         <View style={{ flex: 1, paddingHorizontal: spacing.sm, alignItems: 'center' }}>
           <IOSText variant="headline" numberOfLines={1} align="center">{musicInfo.name}</IOSText>
           <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1} align="center" style={{ marginTop: 1 }}>

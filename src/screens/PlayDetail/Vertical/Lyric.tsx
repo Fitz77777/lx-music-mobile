@@ -6,6 +6,7 @@ import { createStyle } from '@/utils/tools'
 // import { useComponentIds } from '@/store/common/hook'
 import { useTheme } from '@/store/theme/hook'
 import { useSettingValue } from '@/store/setting/hook'
+import useIsPad from '@/utils/hooks/useIsPad'
 import Text, { AnimatedColorText } from '@/components/common/Text'
 import { setSpText } from '@/utils/pixelRatio'
 import playerState from '@/store/player/state'
@@ -71,7 +72,15 @@ const LrcLine = memo(({ line, lineNum, activeLine, activeWordIndex, activeWordPr
   const theme = useTheme()
   const lrcFontSize = useSettingValue('playDetail.vertical.style.lrcFontSize')
   const textAlign = useSettingValue('playDetail.style.align')
-  const size = lrcFontSize / 10
+  const isPad = useIsPad()
+  // setSpText 会按屏幕尺寸放大字号，平板上系数约 1.5，歌词会明显偏大；
+  // 抵消屏幕系数（保留用户的字号设置），平板上歌词回到与手机一致的观感
+  const size = useMemo(() => {
+    const baseSize = lrcFontSize / 10
+    if (!isPad) return baseSize
+    const screenScale = setSpText(1) / (global.lx.fontSize || 1)
+    return screenScale > 1 ? baseSize / screenScale : baseSize
+  }, [lrcFontSize, isPad])
   const lineHeight = setSpText(size) * 1.3
 
   const colors = useMemo(() => {

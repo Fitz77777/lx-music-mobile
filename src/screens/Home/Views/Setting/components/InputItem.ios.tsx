@@ -4,6 +4,7 @@ import { Keyboard, StyleSheet, View } from 'react-native'
 import type { InputType, InputProps } from '@/components/common/Input'
 import Input from '@/components/common/Input'
 import IOSText from '@/components/ios/Text'
+import { iosTypography } from '@/theme/ios/tokens'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 
 export interface InputItemProps extends InputProps {
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
     height: 34,
     paddingHorizontal: 0,
     paddingVertical: 0,
-    fontSize: 17,
+    fontSize: iosTypography.body.fontSize,
     textAlign: 'right',
   },
 })

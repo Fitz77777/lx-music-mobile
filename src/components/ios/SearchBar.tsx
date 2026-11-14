@@ -35,7 +35,7 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
   style,
 }, ref) => {
   const t = useI18n()
-  const { colors, radius } = useIOSTheme()
+  const { colors, radius, typography } = useIOSTheme()
   const inputRef = useRef<TextInput>(null)
 
   useImperativeHandle(ref, () => ({
@@ -80,12 +80,12 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
           onBlur={handleBlur}
           style={{
             height: 38,
-            borderRadius: radius.medium,
+            borderRadius: radius.control,
             paddingLeft: 35,
             paddingRight: 11,
             paddingVertical: 0,
             backgroundColor: colors.fill,
-            fontSize: 16,
+            fontSize: typography.callout.fontSize,
             color: colors.label,
           }}
         />

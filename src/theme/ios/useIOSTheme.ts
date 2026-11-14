@@ -11,6 +11,7 @@ import {
   iosMotion,
   iosRadius,
   iosRowHeight,
+  iosShadow,
   iosSpacing,
   iosTypography,
   resolveIOSAccent,
@@ -30,6 +31,7 @@ export interface IOSTheme {
   spacing: typeof iosSpacing
   radius: typeof iosRadius
   rowHeight: typeof iosRowHeight
+  shadow: typeof iosShadow
   barHeight: typeof iosBarHeight
   hairline: number
   motion: typeof iosMotion
@@ -82,6 +84,7 @@ export const useIOSTheme = (): IOSTheme => {
     spacing: iosSpacing,
     radius: iosRadius,
     rowHeight: iosRowHeight,
+    shadow: iosShadow,
     barHeight: iosBarHeight,
     hairline: iosHairline,
     motion: iosMotion,

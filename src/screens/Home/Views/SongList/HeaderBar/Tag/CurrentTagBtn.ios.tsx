@@ -17,7 +17,7 @@ export interface CurrentTagBtnType {
 export default forwardRef<CurrentTagBtnType, CurrentTagBtnProps>(({ onShowList }, ref) => {
   const t = useI18n()
   const [active, setActive] = useState(false)
-  const { colors, accent } = useIOSTheme()
+  const { colors, accent, radius, shadow } = useIOSTheme()
 
   useImperativeHandle(ref, () => ({
     setCurrentTagInfo(name) {
@@ -34,18 +34,15 @@ export default forwardRef<CurrentTagBtnType, CurrentTagBtnProps>(({ onShowList }
       style={{
         width: 29,
         height: 29,
-        borderRadius: 15,
+        borderRadius: radius.pill,
         marginRight: 8,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: active ? accent : colors.secondaryGroupedBackground,
-        shadowColor: '#000000',
-        shadowOpacity: active ? 0 : 0.06,
-        shadowRadius: 3,
-        shadowOffset: { width: 0, height: 1 },
+        ...(active ? null : shadow.chip),
       }}
     >
-      <IOSIcon name="slider" size={16} color={active ? '#FFFFFF' : colors.secondaryLabel} />
+      <IOSIcon name="slider" size={16} color={active ? colors.onAccent : colors.secondaryLabel} />
     </Pressable>
   )
 })

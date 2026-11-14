@@ -42,7 +42,7 @@ export default memo(({ variant, children, style }: IOSBadgeProps) => {
       backgroundColor: variant == 'source' ? colors.fill : withAlpha(color, 0.12),
     }, style]}>
       <IOSText
-        size={10}
+        variant="caption2"
         weight={variant == 'source' ? '400' : '700'}
         color={color}
         numberOfLines={1}

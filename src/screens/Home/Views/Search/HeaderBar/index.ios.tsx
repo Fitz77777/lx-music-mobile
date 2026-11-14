@@ -118,7 +118,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
             gap: 3,
           }}
         >
-          <IOSText size={14} color={accent} numberOfLines={1}>{activeSourceLabel}</IOSText>
+          <IOSText variant="subheadline" color={accent} numberOfLines={1}>{activeSourceLabel}</IOSText>
           <IOSIcon
             name="chevron-right"
             size={13}

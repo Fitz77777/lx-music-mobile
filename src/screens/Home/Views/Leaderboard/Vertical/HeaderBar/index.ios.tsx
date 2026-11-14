@@ -25,7 +25,7 @@ const QUICK_BOARD_COUNT = 3
 
 /** iOS 排行榜工具条：三个常驻榜单 chips + 音源链接（原型 .chips） */
 export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourceChange, onSelectBoard }, ref) => {
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, accent, spacing, radius, shadow } = useIOSTheme()
   const [source, setSource] = useState<Source>('kw')
   const [activeId, setActiveId] = useState('')
   const [boards, setBoards] = useState<BoardItem[]>([])
@@ -115,19 +115,16 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
                   paddingHorizontal: 14,
                   paddingVertical: 6,
                   marginRight: spacing.sm,
-                  borderRadius: 16,
+                  borderRadius: radius.pill,
                   backgroundColor: active ? accent : colors.secondaryGroupedBackground,
-                  shadowColor: '#000000',
-                  shadowOpacity: active ? 0 : 0.06,
-                  shadowRadius: 3,
-                  shadowOffset: { width: 0, height: 1 },
+                  ...(active ? null : shadow.chip),
                   opacity: pressed ? 0.7 : 1,
                 })}
               >
                 <IOSText
-                  size={14}
+                  variant="subheadline"
                   weight={active ? '600' : '400'}
-                  color={active ? '#FFFFFF' : colors.label}
+                  color={active ? colors.onAccent : colors.label}
                   numberOfLines={1}
                 >{item.name}</IOSText>
               </Pressable>
@@ -143,7 +140,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
         hitSlop={8}
         style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.sm }}
       >
-        <IOSText size={14} color={accent} numberOfLines={1}>{sourceLabel}</IOSText>
+        <IOSText variant="subheadline" color={accent} numberOfLines={1}>{sourceLabel}</IOSText>
         <IOSIcon
           name="chevron-right"
           size={12}

@@ -31,7 +31,7 @@ export default forwardRef<DialogType, DialogProps>(({
   children,
   height,
 }, ref) => {
-  const { colors, hairline } = useIOSTheme()
+  const { colors, hairline, radius } = useIOSTheme()
   const { keyboardShown, keyboardHeight } = useKeyboard()
   const modalRef = useRef<ModalType>(null)
 
@@ -50,7 +50,7 @@ export default forwardRef<DialogType, DialogProps>(({
       onHide={onHide}
       keyHide={keyHide}
       bgHide={bgHide}
-      bgColor="rgba(0, 0, 0, 0.3)"
+      bgColor={colors.overlay}
       ref={modalRef}
     >
       <View style={{
@@ -65,7 +65,7 @@ export default forwardRef<DialogType, DialogProps>(({
           maxWidth: 360,
           maxHeight: '78%',
           height,
-          borderRadius: 14,
+          borderRadius: radius.card,
           overflow: 'hidden',
           backgroundColor: colors.secondaryGroupedBackground,
         }}>

@@ -84,8 +84,8 @@ export default memo(() => {
         {/* 播放页不再显示收起按钮，改为在封面上向下滑动收起 */}
         <View style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }} />
         <View style={{ flex: 1, paddingHorizontal: spacing.sm, alignItems: 'center' }}>
-          <IOSText size={16} weight="600" numberOfLines={1} align="center">{musicInfo.name}</IOSText>
-          <IOSText size={12} color={colors.secondaryLabel} numberOfLines={1} align="center" style={{ marginTop: 1 }}>
+          <IOSText variant="headline" numberOfLines={1} align="center">{musicInfo.name}</IOSText>
+          <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1} align="center" style={{ marginTop: 1 }}>
             {musicInfo.singer}
           </IOSText>
         </View>
@@ -99,7 +99,7 @@ export default memo(() => {
             height: BUTTON_SIZE,
             alignItems: 'center',
             justifyContent: 'center',
-            opacity: pressed ? 0.5 : 1,
+            opacity: pressed ? 0.6 : 1,
           })}
         >
           <IOSIcon name="dots-vertical" size={22} color={accent} />

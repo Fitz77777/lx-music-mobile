@@ -52,7 +52,7 @@ export default ({ name, list, onTagChange, activeId }: TagGroupProps) => {
                 <IOSText
                   variant="subheadline"
                   weight={active ? '600' : '400'}
-                  color={active ? '#FFFFFF' : colors.label}
+                  color={active ? colors.onAccent : colors.label}
                 >{item.name}</IOSText>
               </Pressable>
             )

@@ -27,7 +27,7 @@ export default ({ icon, color, onPress, onLongPress, children }: {
         height: BTN_WIDTH,
         justifyContent: 'center',
         alignItems: 'center',
-        opacity: pressed ? 0.5 : 1,
+        opacity: pressed ? 0.6 : 1,
       })}
       onPress={onPress}
       onLongPress={onLongPress}

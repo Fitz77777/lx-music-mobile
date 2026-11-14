@@ -166,7 +166,7 @@ const BoardsSheet = forwardRef<BoardsSheetType, BoardsSheetProps>(({ onSelect, o
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <IOSText size={17} color={accent}>{t('cancel')}</IOSText>
+          <IOSText color={accent}>{t('cancel')}</IOSText>
         </Pressable>
       </IOSBottomSheet>
       <ListMenu
@@ -214,7 +214,7 @@ const BoardCell = ({ item, index, width, active, highlight, pressedBackground, o
       })}
     >
       <IOSText
-        size={14.5}
+        variant="subheadline"
         weight={active ? '600' : '400'}
         color={active ? accent : colors.label}
         numberOfLines={1}

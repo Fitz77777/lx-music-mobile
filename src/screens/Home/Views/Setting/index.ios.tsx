@@ -12,12 +12,12 @@ import commonState from '@/store/common/state'
 import { IOS_SETTING_GROUPS, type IOSSettingSection } from './iosSections'
 
 const IconTile = memo(({ section }: { section: IOSSettingSection }) => {
-  const { colors } = useIOSTheme()
+  const { colors, radius } = useIOSTheme()
   return (
     <View style={{
       width: 29,
       height: 29,
-      borderRadius: 7,
+      borderRadius: radius.cover,
       backgroundColor: colors.iconTileBackground,
       alignItems: 'center',
       justifyContent: 'center',

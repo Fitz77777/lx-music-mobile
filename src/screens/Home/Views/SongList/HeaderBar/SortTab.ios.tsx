@@ -18,7 +18,7 @@ export default forwardRef<SortTabType, SortTabProps>(({ onSortChange }, ref) => 
   const [sortList, setSortList] = useState<SortInfo[]>([])
   const [activeId, setActiveId] = useState<SortInfo['id']>('')
   const t = useI18n()
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, accent, spacing, radius, shadow } = useIOSTheme()
   const scrollViewRef = useRef<ScrollView>(null)
 
   useImperativeHandle(ref, () => ({
@@ -56,20 +56,17 @@ export default forwardRef<SortTabType, SortTabProps>(({ onSortChange }, ref) => 
               onPress={() => { handleSortChange(s.id) }}
               style={{
                 paddingHorizontal: 14,
-                paddingVertical: 6,
+                paddingVertical: 8,
                 marginRight: spacing.sm,
-                borderRadius: 16,
+                borderRadius: radius.pill,
                 backgroundColor: active ? accent : colors.secondaryGroupedBackground,
-                shadowColor: '#000000',
-                shadowOpacity: active ? 0 : 0.06,
-                shadowRadius: 3,
-                shadowOffset: { width: 0, height: 1 },
+                ...(active ? null : shadow.chip),
               }}
             >
               <IOSText
-                size={14}
+                variant="subheadline"
                 weight={active ? '600' : '400'}
-                color={active ? '#FFFFFF' : colors.label}
+                color={active ? colors.onAccent : colors.label}
                 numberOfLines={1}
               >{s.label}</IOSText>
             </Pressable>

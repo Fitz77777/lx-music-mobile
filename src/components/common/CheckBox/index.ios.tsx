@@ -94,7 +94,7 @@ export default memo(({
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          {check ? <CheckMark size={boxSize * 0.5} color="#FFFFFF" thickness={2} /> : null}
+          {check ? <CheckMark size={boxSize * 0.5} color={colors.onAccent} thickness={2} /> : null}
         </View>
       </Pressable>
       <Pressable

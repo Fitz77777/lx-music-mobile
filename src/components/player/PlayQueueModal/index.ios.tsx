@@ -37,7 +37,7 @@ const ListItem = memo(({ item, index, active, onPress }: {
             : 'transparent',
       })}
     >
-      <IOSText size={12} color={colors.tertiaryLabel} style={{ width: 15, textAlign: 'center' }}>
+      <IOSText variant="caption1" color={colors.tertiaryLabel} style={{ width: 15, textAlign: 'center' }}>
         {index + 1}
       </IOSText>
       <Image
@@ -51,17 +51,17 @@ const ListItem = memo(({ item, index, active, onPress }: {
       />
       <View style={{ flex: 1, minWidth: 0 }}>
         <IOSText
-          size={14.5}
+          variant="subheadline"
           weight="500"
           color={colors.label}
           numberOfLines={1}
         >{item.name}</IOSText>
-        <IOSText size={12} color={colors.secondaryLabel} numberOfLines={1} style={{ marginTop: 2 }}>
+        <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1} style={{ marginTop: 2 }}>
           {item.singer}
         </IOSText>
       </View>
       {active
-        ? <IOSText size={11.5} color={accent}>{t('playing')}</IOSText>
+        ? <IOSText variant="caption1" color={accent}>{t('playing')}</IOSText>
         : null}
     </Pressable>
   )
@@ -154,7 +154,7 @@ export default forwardRef<PlayQueueModalType, {}>((props, ref) => {
           opacity: pressed ? 0.6 : 1,
         })}
       >
-        <IOSText size={17} color={accent}>{t('close')}</IOSText>
+        <IOSText color={accent}>{t('close')}</IOSText>
       </Pressable>
     </IOSBottomSheet>
   )

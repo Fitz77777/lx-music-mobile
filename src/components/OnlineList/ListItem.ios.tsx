@@ -50,7 +50,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
   isShowInterval: boolean
   isLast?: boolean
 }) => {
-  const { colors, accent, spacing, hairline, withAlpha } = useIOSTheme()
+  const { colors, accent, spacing, hairline, withAlpha, radius } = useIOSTheme()
 
   const isSelected = selectedList.includes(item)
 
@@ -90,12 +90,12 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
           }}
         />
         <View style={{ flex: 1, marginLeft: spacing.md, justifyContent: 'center' }}>
-          <IOSText size={16} weight="500" numberOfLines={1}>{item.name}</IOSText>
+          <IOSText weight="500" numberOfLines={1}>{item.name}</IOSText>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 6 }}>
             {tagInfo.variant ? <IOSBadge variant={tagInfo.variant}>{tagInfo.text}</IOSBadge> : null}
             {showSource ? <IOSBadge variant="source">{item.source}</IOSBadge> : null}
             <IOSText
-              size={13}
+              variant="footnote"
               color={colors.secondaryLabel}
               numberOfLines={1}
               style={{ flexShrink: 1 }}
@@ -104,7 +104,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         </View>
         {
           isShowInterval
-            ? <IOSText size={15} color={colors.secondaryLabel} numberOfLines={1}>{item.interval}</IOSText>
+            ? <IOSText variant="subheadline" color={colors.secondaryLabel} numberOfLines={1}>{item.interval}</IOSText>
             : null
         }
       </TouchableOpacity>
@@ -115,7 +115,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         style={{
           width: 32,
           height: 32,
-          borderRadius: 16,
+          borderRadius: radius.pill,
           marginHorizontal: 6,
           alignItems: 'center',
           justifyContent: 'center',

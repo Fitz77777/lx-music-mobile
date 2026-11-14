@@ -10,12 +10,12 @@ import { useBufferProgress } from '@/plugins/player'
 
 const PlayTimeCurrent = ({ timeStr }: { timeStr: string }) => {
   const { colors } = useIOSTheme()
-  return <IOSText size={11} color={colors.secondaryLabel}>{timeStr}</IOSText>
+  return <IOSText variant="caption2" color={colors.secondaryLabel}>{timeStr}</IOSText>
 }
 
 const PlayTimeMax = memo(({ timeStr }: { timeStr: string }) => {
   const { colors } = useIOSTheme()
-  return <IOSText size={11} color={colors.secondaryLabel}>{timeStr}</IOSText>
+  return <IOSText variant="caption2" color={colors.secondaryLabel}>{timeStr}</IOSText>
 })
 
 /** iOS 播放进度（原型 .progress / .times）：左右 30pt，时间标签 11pt */

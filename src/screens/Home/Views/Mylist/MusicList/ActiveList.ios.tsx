@@ -25,7 +25,7 @@ export interface ActiveListType {
  * 长按当前 chip 回到列表顶部。
  */
 export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, ref) => {
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, accent, spacing, radius, shadow } = useIOSTheme()
   const currentListId = useActiveListId()
   const fetching = useListFetching(currentListId)
   const allList = useMyList()
@@ -99,19 +99,16 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
                   paddingHorizontal: 14,
                   paddingVertical: 6,
                   marginRight: spacing.sm,
-                  borderRadius: 16,
+                  borderRadius: radius.pill,
                   backgroundColor: active ? accent : colors.secondaryGroupedBackground,
-                  shadowColor: '#000000',
-                  shadowOpacity: active ? 0 : 0.06,
-                  shadowRadius: 3,
-                  shadowOffset: { width: 0, height: 1 },
+                  ...(active ? null : shadow.chip),
                   opacity: pressed ? 0.7 : 1,
                 })}
               >
                 <IOSText
-                  size={14}
+                  variant="subheadline"
                   weight={active ? '600' : '400'}
-                  color={active ? '#FFFFFF' : colors.label}
+                  color={active ? colors.onAccent : colors.label}
                   numberOfLines={1}
                   style={{ maxWidth: 150 }}
                 >{item.name}</IOSText>
@@ -130,14 +127,11 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
         style={{
           width: 32,
           height: 32,
-          borderRadius: 16,
+          borderRadius: radius.pill,
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: colors.secondaryGroupedBackground,
-          shadowColor: '#000000',
-          shadowOpacity: 0.06,
-          shadowRadius: 3,
-          shadowOffset: { width: 0, height: 1 },
+          ...shadow.chip,
         }}
       >
         <IOSIcon name="list-order" size={18} color={accent} />

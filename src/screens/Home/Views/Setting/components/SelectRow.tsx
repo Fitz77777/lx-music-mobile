@@ -68,7 +68,7 @@ export default memo(({ label, value, options, onSelect, disabled = false }: Sele
               <View style={{
                 width: 13,
                 height: 13,
-                borderRadius: 6.5,
+                borderRadius: 8,
                 marginRight: 7,
                 backgroundColor: selected.color,
                 borderWidth: hairline,

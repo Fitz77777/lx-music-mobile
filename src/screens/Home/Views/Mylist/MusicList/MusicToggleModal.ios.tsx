@@ -35,7 +35,7 @@ const ROW_HEIGHT = 62
  */
 export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
   const t = useI18n()
-  const { colors, accent, spacing, withAlpha } = useIOSTheme()
+  const { colors, accent, spacing, withAlpha, radius } = useIOSTheme()
   const { height: windowHeight } = useWindowDimensions()
   const isUnmountedRef = useUnmounted()
   const requestIdRef = useRef(0)
@@ -132,7 +132,7 @@ export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
             height: 30,
             paddingHorizontal: 11,
             marginRight: spacing.sm,
-            borderRadius: 15,
+            borderRadius: radius.pill,
             backgroundColor: active ? accent : colors.fill,
             opacity: pressed ? 0.7 : 1,
           })}
@@ -141,12 +141,12 @@ export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
             width: 7,
             height: 7,
             borderRadius: 4,
-            backgroundColor: active ? '#FFFFFF' : getSourceColor(item.action),
+            backgroundColor: active ? colors.onAccent : getSourceColor(item.action),
           }} />
           <IOSText
-            size={13}
+            variant="footnote"
             weight={active ? '600' : '400'}
-            color={active ? '#FFFFFF' : colors.label}
+            color={active ? colors.onAccent : colors.label}
           >{item.label}</IOSText>
         </Pressable>
       )
@@ -214,17 +214,17 @@ export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
                             />
                             <View style={{ flex: 1, marginLeft: spacing.md, marginRight: spacing.sm }}>
                               <IOSText
-                                size={15}
+                                variant="subheadline"
                                 weight={active ? '600' : '400'}
                                 color={active ? accent : colors.label}
                                 numberOfLines={1}
                               >{item.name}</IOSText>
-                              <IOSText size={12} color={colors.secondaryLabel} numberOfLines={1} style={{ marginTop: 3 }}>
+                              <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1} style={{ marginTop: 3 }}>
                                 {item.singer}
                                 {item.meta.albumName ? ` · ${item.meta.albumName}` : ''}
                               </IOSText>
                             </View>
-                            <IOSText size={12} color={colors.secondaryLabel}>{item.interval}</IOSText>
+                            <IOSText variant="caption1" color={colors.secondaryLabel}>{item.interval}</IOSText>
                             <Pressable
                               onPress={() => { handleShowDetail(item) }}
                               hitSlop={6}
@@ -235,7 +235,7 @@ export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
                                 marginLeft: 6,
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                opacity: pressed ? 0.5 : 1,
+                                opacity: pressed ? 0.6 : 1,
                               })}
                             >
                               <IOSIcon name="share" size={15} color={colors.secondaryLabel} />
@@ -250,7 +250,7 @@ export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
                                 marginRight: -6,
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                opacity: pressed ? 0.5 : 1,
+                                opacity: pressed ? 0.6 : 1,
                               })}
                             >
                               <IOSIcon name="play" size={17} color={active ? accent : colors.secondaryLabel} />
@@ -272,7 +272,7 @@ export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
                   </View>
                 </ScrollView>
                 <IOSText
-                  size={12}
+                  variant="caption1"
                   color={colors.secondaryLabel}
                   align="center"
                   style={{ marginTop: spacing.sm }}
@@ -283,14 +283,14 @@ export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
               <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 40 }}>
                 {
                   loading
-                    ? <IOSText size={15} color={colors.secondaryLabel}>{t('list_loading')}</IOSText>
+                    ? <IOSText variant="subheadline" color={colors.secondaryLabel}>{t('list_loading')}</IOSText>
                     : error
                       ? (
                           <Pressable onPress={() => { if (infoRef.current) loadData(infoRef.current) }}>
-                            <IOSText size={15} color={colors.secondaryLabel}>{t('list_error')}</IOSText>
+                            <IOSText variant="subheadline" color={colors.secondaryLabel}>{t('list_error')}</IOSText>
                           </Pressable>
                         )
-                      : <IOSText size={15} color={colors.secondaryLabel}>{t('no_item')}</IOSText>
+                      : <IOSText variant="subheadline" color={colors.secondaryLabel}>{t('no_item')}</IOSText>
                 }
               </View>
             )
@@ -301,7 +301,7 @@ export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
         accessibilityRole="button"
         style={({ pressed }) => ({
           height: 50,
-          borderRadius: 13,
+          borderRadius: radius.control,
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: accent,
@@ -309,7 +309,7 @@ export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
           opacity: !selected ? 0.4 : pressed ? 0.85 : 1,
         })}
       >
-        <IOSText size={17} weight="600" color="#FFFFFF">{t('music_toggle__confirm')}</IOSText>
+        <IOSText variant="headline" color={colors.onAccent}>{t('music_toggle__confirm')}</IOSText>
       </Pressable>
       <Pressable
         onPress={handleClose}
@@ -322,7 +322,7 @@ export default forwardRef<MusicToggleModalType, {}>((props, ref) => {
           opacity: pressed ? 0.6 : 1,
         })}
       >
-        <IOSText size={17} color={accent}>{t('cancel')}</IOSText>
+        <IOSText color={accent}>{t('cancel')}</IOSText>
       </Pressable>
     </IOSBottomSheet>
   )

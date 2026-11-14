@@ -54,7 +54,7 @@ export default memo(({
   children,
   minWidth = 164,
 }: IOSPopoverProps) => {
-  const { colors, accent, radius, hairline } = useIOSTheme()
+  const { colors, accent, radius, hairline, shadow } = useIOSTheme()
   const { width: windowWidth, height: windowHeight } = useWindowDimensions()
   const [mounted, setMounted] = useState(visible)
   const [anchor, setAnchor] = useState<Rect | null>(null)
@@ -157,14 +157,11 @@ export default memo(({
             maxWidth: windowWidth - MARGIN * 2,
             maxHeight: windowHeight - MARGIN * 2 - ARROW_SAFE_BOTTOM,
             padding: 5,
-            borderRadius: radius.popover,
+            borderRadius: radius.card,
             backgroundColor: colors.secondaryGroupedBackground,
             borderWidth: hairline,
             borderColor: colors.rowSeparator,
-            shadowColor: '#000000',
-            shadowOpacity: 0.14,
-            shadowRadius: 10,
-            shadowOffset: { width: 0, height: 8 },
+            ...shadow.raised,
             opacity: anim,
             transform: [{ scale }],
           }}
@@ -197,7 +194,7 @@ export default memo(({
                     gap: 9,
                     paddingHorizontal: 10,
                     paddingVertical: 6,
-                    borderRadius: 9,
+                    borderRadius: radius.control,
                     backgroundColor: pressed ? colors.tertiaryFill : 'transparent',
                   })}
                 >
@@ -206,7 +203,7 @@ export default memo(({
                     : null}
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <IOSText
-                      size={15}
+                      variant="subheadline"
                       weight={item.selected ? '600' : '400'}
                       color={item.selected ? accent : colors.label}
                       numberOfLines={1}
@@ -214,7 +211,7 @@ export default memo(({
                     {item.description
                       ? (
                           <IOSText
-                            size={11.5}
+                            variant="caption1"
                             color={colors.secondaryLabel}
                             numberOfLines={1}
                             style={{ marginTop: 1 }}

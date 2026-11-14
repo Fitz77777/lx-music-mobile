@@ -12,7 +12,7 @@ const FADE_OUT = 200
  * 挂载在页面容器里，通过 toastEvent 接收 showIOSToast 的消息。
  */
 export default memo(({ bottomOffset = 100 }: { bottomOffset?: number }) => {
-  const { colors, spacing } = useIOSTheme()
+  const { colors, spacing, radius } = useIOSTheme()
   const [message, setMessage] = useState('')
   const [visible, setVisible] = useState(false)
   const opacity = useRef(new Animated.Value(0)).current
@@ -64,7 +64,7 @@ export default memo(({ bottomOffset = 100 }: { bottomOffset?: number }) => {
         opacity,
         maxWidth: '100%',
         backgroundColor: colors.toastBackground,
-        borderRadius: 20,
+        borderRadius: radius.sheet,
         paddingHorizontal: spacing.lg,
         paddingVertical: spacing.sm + 2,
       }}>

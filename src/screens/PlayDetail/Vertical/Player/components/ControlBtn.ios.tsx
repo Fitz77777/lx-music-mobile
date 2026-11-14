@@ -25,7 +25,7 @@ const PrevBtn = () => {
         height: SIDE_BTN_SIZE,
         justifyContent: 'center',
         alignItems: 'center',
-        opacity: pressed ? 0.5 : 1,
+        opacity: pressed ? 0.6 : 1,
       })}
       onPress={handlePlayPrev}
     >
@@ -48,7 +48,7 @@ const NextBtn = () => {
         height: SIDE_BTN_SIZE,
         justifyContent: 'center',
         alignItems: 'center',
-        opacity: pressed ? 0.5 : 1,
+        opacity: pressed ? 0.6 : 1,
       })}
       onPress={handlePlayNext}
     >
@@ -68,7 +68,7 @@ const TogglePlayBtn = () => {
         height: PLAY_BTN_SIZE,
         justifyContent: 'center',
         alignItems: 'center',
-        opacity: pressed ? 0.5 : 1,
+        opacity: pressed ? 0.6 : 1,
       })}
       onPress={() => {
         markTimeoutExitInteraction()

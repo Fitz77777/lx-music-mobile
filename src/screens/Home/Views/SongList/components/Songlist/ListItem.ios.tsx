@@ -16,7 +16,7 @@ export default memo(({ item, index, width, showSource, onPress }: {
   width: number
   onPress: (item: ListInfoItem, index: number) => void
 }) => {
-  const { colors, spacing } = useIOSTheme()
+  const { colors, spacing, radius } = useIOSTheme()
 
   if (!item.source) return <View style={{ width, marginBottom: spacing.xl }} />
 
@@ -30,7 +30,7 @@ export default memo(({ item, index, width, showSource, onPress }: {
         <View style={{
           width,
           height: width,
-          borderRadius: 14,
+          borderRadius: radius.card,
           overflow: 'hidden',
           backgroundColor: colors.tertiaryFill,
         }}>
@@ -47,10 +47,10 @@ export default memo(({ item, index, width, showSource, onPress }: {
                   left: 6,
                   paddingHorizontal: 6,
                   paddingVertical: 1,
-                  borderRadius: 6,
-                  backgroundColor: 'rgba(0, 0, 0, 0.28)',
+                  borderRadius: radius.cover,
+                  backgroundColor: colors.imageOverlay,
                 }}>
-                  <IOSText size={10} color="#FFFFFF">{item.source}</IOSText>
+                  <IOSText variant="caption2" color={colors.onAccent}>{item.source}</IOSText>
                 </View>
               )
             : null}
@@ -65,10 +65,10 @@ export default memo(({ item, index, width, showSource, onPress }: {
                   paddingHorizontal: 7,
                   paddingVertical: 2,
                   borderRadius: 8,
-                  backgroundColor: 'rgba(0, 0, 0, 0.28)',
+                  backgroundColor: colors.imageOverlay,
                 }}>
-                  <IOSIcon name="play" size={9} color="#FFFFFF" style={{ marginRight: 3 }} />
-                  <IOSText size={10.5} weight="500" color="#FFFFFF" numberOfLines={1}>{item.play_count}</IOSText>
+                  <IOSIcon name="play" size={9} color={colors.onAccent} style={{ marginRight: 3 }} />
+                  <IOSText variant="caption2" weight="500" color={colors.onAccent} numberOfLines={1}>{item.play_count}</IOSText>
                 </View>
               )
             : null}
@@ -76,7 +76,7 @@ export default memo(({ item, index, width, showSource, onPress }: {
       </TouchableOpacity>
       <TouchableOpacity activeOpacity={0.6} onPress={handlePress}>
         <IOSText
-          size={14}
+          variant="subheadline"
           weight="500"
           numberOfLines={2}
           style={{ marginTop: spacing.sm, lineHeight: 19 }}

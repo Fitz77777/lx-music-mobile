@@ -34,7 +34,7 @@ export default memo(({ host, setHost }: {
   setHost: (host: string) => void
 }) => {
   const t = useI18n()
-  const { colors, spacing } = useIOSTheme()
+  const { colors, spacing, typography } = useIOSTheme()
   const syncStatus = useStatus()
   const isEnableSync = useSettingValue('sync.enable')
   const isUnmountedRef = useRef(true)
@@ -181,7 +181,7 @@ export default memo(({ host, setHost }: {
               minWidth: 0,
               marginLeft: spacing.md,
               padding: 0,
-              fontSize: 17,
+              fontSize: typography.body.fontSize,
               textAlign: 'right',
               color: isEnableSync ? colors.tertiaryLabel : colors.label,
             }}

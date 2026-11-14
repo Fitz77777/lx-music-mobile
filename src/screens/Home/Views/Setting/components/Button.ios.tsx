@@ -35,7 +35,7 @@ export default memo(({ disabled, onPress, children, style }: ButtonProps) => {
         style,
       ])}
     >
-      <IOSText size={16} weight="600" color={accent} numberOfLines={1}>{children}</IOSText>
+      <IOSText variant="headline" color={accent} numberOfLines={1}>{children}</IOSText>
     </Pressable>
   )
 })

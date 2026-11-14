@@ -20,7 +20,7 @@ const ListItem = ({ keyword, index, onSearch }: {
   index: number
   onSearch: (keyword: string) => void
 }) => {
-  const { colors, accent, isDark, withAlpha } = useIOSTheme()
+  const { colors, accent, isDark, withAlpha, radius, shadow } = useIOSTheme()
   const top = index < 3
   return (
     <Pressable
@@ -31,22 +31,19 @@ const ListItem = ({ keyword, index, onSearch }: {
         gap: 6,
         paddingHorizontal: 15,
         paddingVertical: 10,
-        borderRadius: 18,
+        borderRadius: radius.pill,
         backgroundColor: top ? withAlpha(accent, 0.1) : colors.secondaryGroupedBackground,
-        shadowColor: '#000000',
-        shadowOpacity: top || isDark ? 0 : 0.07,
-        shadowRadius: 3,
-        shadowOffset: { width: 0, height: 1 },
-        opacity: pressed ? 0.62 : 1,
+        ...(top || isDark ? null : shadow.chip),
+        opacity: pressed ? 0.6 : 1,
       })}
     >
       <IOSText
-        size={10.5}
+        variant="caption2"
         weight="700"
         color={top ? accent : colors.secondaryLabel}
         style={{ opacity: top ? 0.8 : 1 }}
       >{index + 1}</IOSText>
-      <IOSText size={14} weight={top ? '600' : '400'} color={top ? accent : colors.label} numberOfLines={1}>
+      <IOSText variant="subheadline" weight={top ? '600' : '400'} color={top ? accent : colors.label} numberOfLines={1}>
         {keyword}
       </IOSText>
     </Pressable>
@@ -87,10 +84,10 @@ export default forwardRef<HotSearchType, ListProps>((props, ref) => {
         marginTop: spacing.xl,
         marginBottom: spacing.md,
       }}>
-        <IOSText size={20} weight="700" color={colors.label} style={{ letterSpacing: 0.2 }}>
+        <IOSText variant="title3" weight="700" color={colors.label} style={{ letterSpacing: 0.2 }}>
           {t('search_hot_search')}
         </IOSText>
-        <IOSText size={12.5} color={colors.secondaryLabel}>{t('search_hot_search_sub')}</IOSText>
+        <IOSText variant="footnote" color={colors.secondaryLabel}>{t('search_hot_search_sub')}</IOSText>
       </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {

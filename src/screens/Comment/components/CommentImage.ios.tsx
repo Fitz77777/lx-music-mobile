@@ -48,7 +48,7 @@ export default ({ url, maxWidth }: { url: string, maxWidth: number }) => {
     <View style={{ height: wh.height, width: wh.width }}>
       {
         show
-          ? <Image url={url} style={{ height: wh.height, width: wh.width, borderRadius: 6 }} />
+          ? <Image url={url} style={{ height: wh.height, width: wh.width, borderRadius: 8 }} />
           : (
               <Pressable
                 onPress={() => { setShow(true) }}
@@ -57,7 +57,7 @@ export default ({ url, maxWidth }: { url: string, maxWidth: number }) => {
                   height: '100%',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: 6,
+                  borderRadius: 8,
                   backgroundColor: colors.tertiaryFill,
                 }}
               >

@@ -36,7 +36,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
   /** 点击音源标签换源 */
   onToggleSource?: (item: LX.Music.MusicInfo) => void
 }) => {
-  const { colors, accent, hairline, withAlpha } = useIOSTheme()
+  const { colors, accent, hairline, withAlpha, radius } = useIOSTheme()
   const isSupported = useAssertApiSupport(item.source)
 
   const isSelected = selectedList.includes(item)
@@ -79,7 +79,6 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         />
         <View style={{ flex: 1, marginLeft: TEXT_GAP, justifyContent: 'center' }}>
           <IOSText
-            size={16}
             weight="500"
             color={active ? accent : colors.label}
             numberOfLines={1}
@@ -94,7 +93,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
               <IOSBadge variant="source">{item.source.toUpperCase()}</IOSBadge>
             </TouchableOpacity>
             <IOSText
-              size={13}
+              variant="footnote"
               color={colors.secondaryLabel}
               numberOfLines={1}
               style={{ flexShrink: 1 }}
@@ -103,7 +102,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         </View>
         {
           isShowInterval
-            ? <IOSText size={15} color={colors.secondaryLabel} numberOfLines={1}>{item.interval}</IOSText>
+            ? <IOSText variant="subheadline" color={colors.secondaryLabel} numberOfLines={1}>{item.interval}</IOSText>
             : null
         }
       </TouchableOpacity>
@@ -114,7 +113,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         style={{
           width: 32,
           height: 32,
-          borderRadius: 16,
+          borderRadius: radius.pill,
           marginHorizontal: 6,
           alignItems: 'center',
           justifyContent: 'center',

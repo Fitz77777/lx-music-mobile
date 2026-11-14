@@ -37,7 +37,7 @@ export default memo(({
   const textColor = (() => {
     switch (variant) {
       case 'filled':
-      case 'destructive': return '#FFFFFF'
+      case 'destructive': return colors.onAccent
       case 'tinted':
       case 'plain': return accent
     }
@@ -50,7 +50,7 @@ export default memo(({
       onPress={onPress}
       style={({ pressed }) => [{
         height,
-        borderRadius: variant == 'plain' ? radius.small : radius.medium,
+        borderRadius: radius.control,
         paddingHorizontal: 16,
         alignItems: 'center',
         justifyContent: 'center',

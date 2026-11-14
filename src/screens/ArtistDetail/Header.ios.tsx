@@ -13,7 +13,7 @@ interface Props {
 
 /** iOS 歌手详情头部：模糊背景 + 头像 + 简介（点击展开） */
 export default memo(({ artist, componentId }: Props) => {
-  const { colors, spacing } = useIOSTheme()
+  const { colors, spacing, radius } = useIOSTheme()
   const [isDescExpanded, setDescExpanded] = useState(false)
 
   const artistName = artist?.name || ''
@@ -27,12 +27,12 @@ export default memo(({ artist, componentId }: Props) => {
       style={{ backgroundColor: colors.tertiaryFill }}
       blurRadius={24}
     >
-      <View style={{ backgroundColor: 'rgba(0, 0, 0, 0.45)', paddingBottom: spacing.lg }}>
+      <View style={{ backgroundColor: colors.scrim, paddingBottom: spacing.lg }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg }}>
-          <Image url={artistPic} style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: colors.tertiaryFill }} />
+          <Image url={artistPic} style={{ width: 88, height: 88, borderRadius: radius.pill, backgroundColor: colors.tertiaryFill }} />
           <View style={{ flex: 1, marginLeft: spacing.lg }}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-              <IOSText variant="title3" weight="700" color="#FFFFFF" numberOfLines={2} style={{ flexShrink: 1 }}>{artistName}</IOSText>
+              <IOSText variant="title3" weight="700" color={colors.onAccent} numberOfLines={2} style={{ flexShrink: 1 }}>{artistName}</IOSText>
               {artistAlias
                 ? <IOSText variant="footnote" color="rgba(255,255,255,0.8)" numberOfLines={1} style={{ marginLeft: spacing.sm, flexShrink: 1 }}>{artistAlias}</IOSText>
                 : null}

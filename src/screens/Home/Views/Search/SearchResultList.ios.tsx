@@ -133,7 +133,7 @@ const AlbumItemComp = memo(({ item, showSource }: { item: AlbumItem, showSource:
         style={{
           width: IMG_SIZE,
           height: IMG_SIZE,
-          borderRadius: 6,
+          borderRadius: 8,
           backgroundColor: colors.tertiaryFill,
         }}
         resizeMode="cover"

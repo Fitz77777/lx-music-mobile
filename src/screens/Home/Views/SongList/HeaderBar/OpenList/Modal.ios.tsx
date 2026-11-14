@@ -22,7 +22,7 @@ export interface ModalType {
  */
 export default forwardRef<ModalType, ModalProps>(({ onOpenId }, ref) => {
   const t = useI18n()
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, accent, spacing, radius } = useIOSTheme()
   const inputRef = useRef<TextInput>(null)
   const [visible, setVisible] = useState(false)
   const [text, setText] = useState('')
@@ -75,7 +75,7 @@ export default forwardRef<ModalType, ModalProps>(({ onOpenId }, ref) => {
         flexDirection: 'row',
         alignItems: 'center',
         height: 46,
-        borderRadius: 12,
+        borderRadius: radius.card,
         backgroundColor: colors.fill,
         paddingLeft: 14,
         paddingRight: 4,
@@ -106,17 +106,17 @@ export default forwardRef<ModalType, ModalProps>(({ onOpenId }, ref) => {
           style={({ pressed }) => ({
             paddingHorizontal: 12,
             paddingVertical: 7,
-            borderRadius: 9,
+            borderRadius: radius.control,
             backgroundColor: colors.secondaryGroupedBackground,
             marginLeft: spacing.sm,
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <IOSText size={13} weight="600" color={accent}>{t('paste')}</IOSText>
+          <IOSText variant="footnote" weight="600" color={accent}>{t('paste')}</IOSText>
         </Pressable>
       </View>
       <IOSText
-        size={12}
+        variant="caption1"
         color={colors.secondaryLabel}
         style={{ marginTop: 9, marginBottom: 18, lineHeight: 17 }}
       >{t('songlist_open_input_tip')}</IOSText>
@@ -126,14 +126,14 @@ export default forwardRef<ModalType, ModalProps>(({ onOpenId }, ref) => {
         accessibilityRole="button"
         style={({ pressed }) => ({
           height: 50,
-          borderRadius: 13,
+          borderRadius: radius.control,
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: accent,
           opacity: !canSubmit ? 0.4 : pressed ? 0.85 : 1,
         })}
       >
-        <IOSText size={17} weight="600" color="#FFFFFF">{t('songlist_open')}</IOSText>
+        <IOSText variant="headline" color={colors.onAccent}>{t('songlist_open')}</IOSText>
       </Pressable>
       <Pressable
         onPress={handleClose}
@@ -146,7 +146,7 @@ export default forwardRef<ModalType, ModalProps>(({ onOpenId }, ref) => {
           opacity: pressed ? 0.6 : 1,
         })}
       >
-        <IOSText size={17} color={accent}>{t('cancel')}</IOSText>
+        <IOSText color={accent}>{t('cancel')}</IOSText>
       </Pressable>
     </IOSBottomSheet>
   )

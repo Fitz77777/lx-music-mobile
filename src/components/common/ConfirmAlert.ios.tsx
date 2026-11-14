@@ -48,7 +48,7 @@ export default forwardRef<ConfirmAlertType, ConfirmAlertProps>(({
   children,
   reverseBtn = false,
 }, ref) => {
-  const { colors, accent, hairline } = useIOSTheme()
+  const { colors, accent, hairline, radius } = useIOSTheme()
   const { keyboardShown, keyboardHeight } = useKeyboard()
   const modalRef = useRef<ModalType>(null)
 
@@ -76,7 +76,7 @@ export default forwardRef<ConfirmAlertType, ConfirmAlertProps>(({
         opacity: disabled ? 0.4 : pressed ? 0.5 : 1,
       })}
     >
-      <IOSText size={17} weight={bold ? '600' : '400'} color={accent} numberOfLines={1}>{label}</IOSText>
+      <IOSText weight={bold ? '600' : '400'} color={accent} numberOfLines={1}>{label}</IOSText>
     </Pressable>
   )
 
@@ -90,7 +90,7 @@ export default forwardRef<ConfirmAlertType, ConfirmAlertProps>(({
       onHide={onHide}
       keyHide={keyHide}
       bgHide={bgHide}
-      bgColor="rgba(0, 0, 0, 0.3)"
+      bgColor={colors.overlay}
       ref={modalRef}
     >
       <View style={{
@@ -103,14 +103,13 @@ export default forwardRef<ConfirmAlertType, ConfirmAlertProps>(({
         <View style={{
           width: '100%',
           maxWidth: 290,
-          borderRadius: 14,
+          borderRadius: radius.card,
           overflow: 'hidden',
           backgroundColor: colors.secondaryGroupedBackground,
         }}>
           {title
             ? (
                 <IOSText
-                  size={17}
                   weight="600"
                   align="center"
                   style={{ marginHorizontal: 16, marginTop: 19 }}
@@ -127,7 +126,7 @@ export default forwardRef<ConfirmAlertType, ConfirmAlertProps>(({
             keyboardShouldPersistTaps="handled"
           >
             {children ?? (
-              <IOSText size={13} align="center" color={colors.secondaryLabel} style={{ lineHeight: 18 }}>{text}</IOSText>
+              <IOSText variant="footnote" align="center" color={colors.secondaryLabel} style={{ lineHeight: 18 }}>{text}</IOSText>
             )}
           </ScrollView>
           <View style={{ flexDirection: 'row', borderTopWidth: hairline, borderTopColor: colors.rowSeparator }}>

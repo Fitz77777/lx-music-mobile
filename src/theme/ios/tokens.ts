@@ -77,6 +77,13 @@ export interface IOSColors {
   // Toast
   toastBackground: string
   toastLabel: string
+
+  /** 强调色 / 深色蒙版上的文字与图标 */
+  onAccent: string
+  /** 封面、图片上的小角标蒙版 */
+  imageOverlay: string
+  /** 页面级深色蒙版（歌手页头部等） */
+  scrim: string
 }
 
 export const iosColorsLight: IOSColors = {
@@ -123,6 +130,10 @@ export const iosColorsLight: IOSColors = {
 
   toastBackground: 'rgba(28, 28, 30, 0.92)',
   toastLabel: '#FFFFFF',
+
+  onAccent: '#FFFFFF',
+  imageOverlay: 'rgba(0, 0, 0, 0.28)',
+  scrim: 'rgba(0, 0, 0, 0.45)',
 }
 
 export const iosColorsDark: IOSColors = {
@@ -169,6 +180,10 @@ export const iosColorsDark: IOSColors = {
 
   toastBackground: 'rgba(58, 58, 60, 0.94)',
   toastLabel: '#FFFFFF',
+
+  onAccent: '#FFFFFF',
+  imageOverlay: 'rgba(0, 0, 0, 0.28)',
+  scrim: 'rgba(0, 0, 0, 0.45)',
 }
 
 export const getIOSColors = (isDark: boolean): IOSColors => isDark ? iosColorsDark : iosColorsLight
@@ -220,20 +235,32 @@ export const iosSpacing = {
   huge: 40,
 } as const
 
+/**
+ * 统一圆角阶梯（HIG）：全 app 只有这三档 + 两个特例。
+ * - control：按钮 / 输入框 / 菜单等小控件
+ * - card：卡片 / 分组列表 / 弹窗
+ * - sheet：Sheet / 大浮层（顶部圆角）
+ */
 export const iosRadius = {
-  small: 6,
-  medium: 10,
-  large: 14,
-  /** 列表卡片 */
+  control: 10,
   card: 12,
-  /** 歌曲行封面 */
+  sheet: 20,
+  /** 封面类图片 */
   cover: 8,
-  /** 歌单网格封面 */
-  coverLarge: 14,
-  sheet: 22,
-  popover: 14,
-  miniPlayer: 16,
+  /** 胶囊 / 圆形（全高圆角） */
   pill: 999,
+} as const
+
+/**
+ * 阴影只给真正悬浮的元素；列表内卡片不加阴影（分层靠底色与分隔线）。
+ */
+export const iosShadow = {
+  /** 顶部导航小胶囊 / 小按钮 */
+  chip: { shadowColor: '#000000', shadowOpacity: 0.07, shadowRadius: 3, shadowOffset: { width: 0, height: 1 } },
+  /** 悬浮卡片：迷你播放器等 */
+  float: { shadowColor: '#000000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
+  /** 菜单 / 弹窗等临时浮层 */
+  raised: { shadowColor: '#000000', shadowOpacity: 0.14, shadowRadius: 10, shadowOffset: { width: 0, height: 8 } },
 } as const
 
 /** 1 物理像素（2x/3x 屏为 0.5pt） */

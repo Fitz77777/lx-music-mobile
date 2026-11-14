@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useI18n } from '@/lang'
 import { useNavActiveId } from '@/store/common/hook'
+import { useHorizontalMode } from '@/utils/hooks'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import IOSIcon from '@/components/ios/Icon'
 import IOSLink from '@/components/ios/Link'
@@ -16,6 +17,9 @@ export default () => {
   const t = useI18n()
   const id = useNavActiveId()
   const { colors, accent, spacing } = useIOSTheme()
+  // 横屏排行榜把全部榜单平铺在左栏，不再需要「全部榜单」入口
+  const isHorizontalMode = useHorizontalMode()
+  const showBoardsButton = id == 'nav_top' && !isHorizontalMode
   const [boardName, setBoardName] = useState('')
 
   useEffect(() => {
@@ -43,7 +47,7 @@ export default () => {
       backgroundColor: colors.canvas,
     }}>
       <IOSText variant="largeTitle" numberOfLines={1} style={{ flex: 1 }}>{title}</IOSText>
-      {id == 'nav_songlist' || id == 'nav_top'
+      {id == 'nav_songlist' || showBoardsButton
         ? (
             <Pressable
               onPress={() => {

@@ -1,11 +1,10 @@
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react'
-import { Pressable, View, type View as ViewType } from 'react-native'
+import { View, type View as ViewType } from 'react-native'
 
-import IOSIcon from '@/components/ios/Icon'
 import IOSPopover from '@/components/ios/Popover'
+import IOSSourcePill from '@/components/ios/SourcePill'
 import IOSSearchBar, { type SearchBarType } from '@/components/ios/SearchBar'
 import { getSourceColor } from '@/components/ios/sourceColor'
-import IOSText from '@/components/ios/Text'
 import { useSourceListI18n } from '@/components/SourceSelector'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import SearchTypeSelector from '../SearchTypeSelector'
@@ -39,7 +38,7 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
   onHideTipList,
   onShowTipList,
 }, ref) => {
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, spacing } = useIOSTheme()
   const searchBarRef = useRef<SearchBarType>(null)
   const [text, setText] = useState('')
   const [sources, setSources] = useState<Sources>([])
@@ -103,29 +102,14 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({
           onBlur={onHideTipList}
           style={{ flex: 1 }}
         />
-        <Pressable
-          ref={sourceAnchorRef}
+        <IOSSourcePill
+          source={source}
+          label={activeSourceLabel}
+          anchorRef={sourceAnchorRef}
           onPress={handleShowSourceMenu}
           disabled={!sourceList.length}
-          hitSlop={8}
-          style={{
-            marginLeft: 10,
-            minWidth: 72,
-            height: 38,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            gap: 3,
-          }}
-        >
-          <IOSText variant="subheadline" color={accent} numberOfLines={1}>{activeSourceLabel}</IOSText>
-          <IOSIcon
-            name="chevron-right"
-            size={13}
-            color={accent}
-            style={{ transform: [{ rotate: '90deg' }] }}
-          />
-        </Pressable>
+          style={{ marginLeft: 10 }}
+        />
         <IOSPopover
           visible={popoverVisible}
           anchorRef={sourceAnchorRef}

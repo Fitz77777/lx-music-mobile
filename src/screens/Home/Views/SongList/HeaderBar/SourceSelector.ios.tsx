@@ -1,12 +1,10 @@
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react'
-import { Pressable, View, type ViewStyle, type View as ViewType } from 'react-native'
+import { View, type ViewStyle, type View as ViewType } from 'react-native'
 
-import IOSIcon from '@/components/ios/Icon'
 import IOSPopover from '@/components/ios/Popover'
+import IOSSourcePill from '@/components/ios/SourcePill'
 import { getSourceColor } from '@/components/ios/sourceColor'
-import IOSText from '@/components/ios/Text'
 import { useSourceListI18n } from '@/components/SourceSelector'
-import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import songlistState, { type Source } from '@/store/songlist/state'
 
 export interface SourceSelectorProps {
@@ -20,7 +18,6 @@ export interface SourceSelectorType {
 
 /** iOS 歌单音源：点击弹出下拉菜单（原型 .src-pop） */
 export default forwardRef<SourceSelectorType, SourceSelectorProps>(({ style, onSourceChange }, ref) => {
-  const { accent, spacing } = useIOSTheme()
   const [source, setSource] = useState<Source>('kw')
   const [visible, setVisible] = useState(false)
   const anchorRef = useRef<ViewType>(null)
@@ -47,24 +44,13 @@ export default forwardRef<SourceSelectorType, SourceSelectorProps>(({ style, onS
 
   return (
     <View style={style}>
-      <Pressable
-        ref={anchorRef}
+      <IOSSourcePill
+        source={source}
+        label={label}
+        anchorRef={anchorRef}
         onPress={() => { if (sourceList.length) setVisible(true) }}
-        hitSlop={8}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: spacing.md,
-        }}
-      >
-        <IOSText variant="subheadline" color={accent} numberOfLines={1}>{label}</IOSText>
-        <IOSIcon
-          name="chevron-right"
-          size={10}
-          color={accent}
-          style={{ marginLeft: 2, transform: [{ rotate: '90deg' }] }}
-        />
-      </Pressable>
+        disabled={!sourceList.length}
+      />
       <IOSPopover
         visible={visible}
         anchorRef={anchorRef}

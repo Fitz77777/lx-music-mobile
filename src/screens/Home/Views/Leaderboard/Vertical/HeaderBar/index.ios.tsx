@@ -1,8 +1,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Pressable, ScrollView, View, type View as ViewType } from 'react-native'
 
-import IOSIcon from '@/components/ios/Icon'
 import IOSPopover from '@/components/ios/Popover'
+import IOSSourcePill from '@/components/ios/SourcePill'
 import { getSourceColor } from '@/components/ios/sourceColor'
 import IOSText from '@/components/ios/Text'
 import { useSourceListI18n } from '@/components/SourceSelector'
@@ -133,21 +133,14 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
         }
       </ScrollView>
       <View style={{ flex: 1 }} />
-      <Pressable
-        ref={sourceAnchorRef}
+      <IOSSourcePill
+        source={source}
+        label={sourceLabel}
+        anchorRef={sourceAnchorRef}
         onPress={handleShowSourceMenu}
         onLongPress={onShowBound}
-        hitSlop={8}
-        style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.sm }}
-      >
-        <IOSText variant="subheadline" color={accent} numberOfLines={1}>{sourceLabel}</IOSText>
-        <IOSIcon
-          name="chevron-right"
-          size={12}
-          color={accent}
-          style={{ marginLeft: 3, transform: [{ rotate: '90deg' }] }}
-        />
-      </Pressable>
+        disabled={!sourceList.length}
+      />
       <IOSPopover
         visible={popoverVisible}
         anchorRef={sourceAnchorRef}

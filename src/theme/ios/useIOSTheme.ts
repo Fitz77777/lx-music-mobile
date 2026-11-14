@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useColorScheme, type ImageSourcePropType } from 'react-native'
+import { Platform, useColorScheme, type ImageSourcePropType } from 'react-native'
 import { useTheme } from '@/store/theme/hook'
 import { useSettingValue } from '@/store/setting/hook'
 import { useBgPic } from '@/store/common/hook'
@@ -48,8 +48,9 @@ export const useIOSTheme = (): IOSTheme => {
   const theme = useTheme()
   // iOS 始终跟随系统外观：不使用 LX 主题里的亮暗标记，也不依赖「自动主题」开关。
   // LX 主题在这里只提供强调色。
+  // Android 平板没有独立的 iOS 主题体系，跟随 LX 主题自身的亮暗（与 Android 手机一致）。
   const scheme = useColorScheme()
-  const isDark = scheme == 'dark'
+  const isDark = Platform.OS == 'ios' ? scheme == 'dark' : theme.isDark
   const bgPic = useBgPic()
 
   // 自定义背景图优先，其次使用主题配置里的背景图

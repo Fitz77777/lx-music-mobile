@@ -1,7 +1,7 @@
-import { SafeAreaView, View } from 'react-native'
+import { Platform, SafeAreaView, View } from 'react-native'
 import { useI18n } from '@/lang'
 import { NAV_MENUS } from '@/config/constant'
-import { useNavActiveId } from '@/store/common/hook'
+import { useNavActiveId, useStatusbarHeight } from '@/store/common/hook'
 import { setNavActiveId } from '@/core/common'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { isHorizontalMode, isPadDevice } from '@/utils/tools'
@@ -28,6 +28,9 @@ export default () => {
   const activeId = useNavActiveId()
   const { colors } = useIOSTheme()
   const { width: winWidth, height: winHeight } = useWindowSize()
+  // Android 的 SafeAreaView 不生效，状态栏高度需要手动留出（iOS 由 SafeAreaView 处理）
+  const statusBarHeight = useStatusbarHeight()
+  const statusBarPadding = Platform.OS == 'android' ? statusBarHeight : 0
   // 宽屏（横屏 / 大内容区）下列表限宽居中；窄内容区不额外限宽
   const isLandscape = isPadDevice(winWidth, winHeight) && isHorizontalMode(winWidth, winHeight)
 
@@ -56,7 +59,7 @@ export default () => {
     <View style={{ flex: 1, backgroundColor: colors.canvas }}>
       <IOSBackdrop />
       <SizeView />
-      <View style={{ flex: 1, flexDirection: 'row' }}>
+      <View style={{ flex: 1, flexDirection: 'row', paddingTop: statusBarPadding }}>
         <SafeAreaView style={{ width: iosPad.sidebarWidth }}>
           <Sidebar
             groups={groups}

@@ -1,5 +1,5 @@
 import { memo, useMemo, useRef, useState } from 'react'
-import { Pressable, View, type View as ViewType } from 'react-native'
+import { Pressable, Platform, View, type View as ViewType } from 'react-native'
 
 import StatusBar from '@/components/common/StatusBar'
 import TimeoutExitEditModal, { type TimeoutExitEditModalType, useTimeInfo } from '@/components/TimeoutExitEditModal'
@@ -9,6 +9,7 @@ import IOSText from '@/components/ios/Text'
 import { useI18n } from '@/lang'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { usePlayerMusicInfo } from '@/store/player/hook'
+import { useStatusbarHeight } from '@/store/common/hook'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 import commonState from '@/store/common/state'
 import { useIOSPanDown } from '@/navigation/iosGestures'
@@ -36,6 +37,9 @@ export default memo(() => {
   const [menuVisible, setMenuVisible] = useState(false)
   const moreAnchorRef = useRef<ViewType>(null)
   const { colors, accent, spacing } = useIOSTheme()
+  // Android 没有安全区包装，状态栏高度手动留出（iOS 由 PageContent 的 SafeAreaView 处理）
+  const statusBarHeight = useStatusbarHeight()
+  const statusBarPadding = Platform.OS == 'android' ? statusBarHeight : 0
   const musicInfo = usePlayerMusicInfo()
   const setting = useSetting()
   const timeInfo = useTimeInfo()
@@ -73,7 +77,7 @@ export default memo(() => {
   }
 
   return (
-    <View nativeID={NAV_SHEAR_NATIVE_IDS.playDetail_header} {...panDown.panHandlers}>
+    <View nativeID={NAV_SHEAR_NATIVE_IDS.playDetail_header} style={{ paddingTop: statusBarPadding }} {...panDown.panHandlers}>
       <StatusBar />
       <View style={{
         height: HEADER_HEIGHT,

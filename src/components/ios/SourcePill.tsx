@@ -1,5 +1,5 @@
 import { memo, type Ref } from 'react'
-import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native'
+import { Pressable, type View, type StyleProp, type ViewStyle } from 'react-native'
 
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import IOSIcon from './Icon'

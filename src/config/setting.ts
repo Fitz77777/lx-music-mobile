@@ -1,3 +1,4 @@
+import { Platform } from 'react-native'
 import { storageDataPrefix, storageDataPrefixOld } from '@/config/constant'
 import defaultSetting from '@/config/defaultSetting'
 import { getData, removeData, saveData } from '@/plugins/storage'
@@ -5,6 +6,9 @@ import migrateSetting from './migrateSetting'
 import settingState from '@/store/setting/state'
 import { migrateMetaData, migrateListData } from './migrate'
 import { exitApp, tipDialog } from '@/utils/tools'
+
+// iOS 搜索页默认展示热门/历史搜索的一次性迁移标记
+const iosSearchDefaultMigratedKey = 'ios_search_default_migrated_v1'
 
 // 业务相关工具方法
 
@@ -105,6 +109,18 @@ export const initSetting = async() => {
 
   // console.log(setting)
   const updatedSetting = updateSetting(setting, true)
+
+  // iOS 搜索页空状态改为默认展示热门搜索与历史搜索：
+  // 旧版本默认关闭并已写入存储，这里做一次性的迁移（设置里仍可关闭）
+  if (Platform.OS == 'ios') {
+    const migrated = await getData<boolean>(iosSearchDefaultMigratedKey)
+    if (!migrated) {
+      updatedSetting.setting['search.isShowHotSearch'] = true
+      updatedSetting.setting['search.isShowHistorySearch'] = true
+      void saveData(iosSearchDefaultMigratedKey, true)
+    }
+  }
+
   void saveData(storageDataPrefix.setting, updatedSetting.setting)
 
   return updatedSetting

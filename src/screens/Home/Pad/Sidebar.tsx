@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { Pressable, SafeAreaView, ScrollView, View } from 'react-native'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { iosBarHeight, iosPad } from '@/theme/ios/tokens'
+import { iosPad } from '@/theme/ios/tokens'
 import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 
@@ -109,9 +109,9 @@ export default memo(({ groups, bottomItems, activeId, onChange }: Props) => {
         {groups.map(renderGroup)}
       </ScrollView>
       <View style={{
-        // 与右下角迷你播放器垂直居中对齐；不加分割线，保持主界面干净
+        // 底边与右下角迷你播放器卡片底边对齐（同为 miniPlayerBottom），不加分割线
         paddingTop: spacing.sm,
-        paddingBottom: iosPad.miniPlayerBottom + (iosBarHeight.miniPlayer - 44) / 2,
+        paddingBottom: iosPad.miniPlayerBottom,
       }}>
         {bottomItems.map(renderTab)}
       </View>

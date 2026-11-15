@@ -8,6 +8,7 @@ import settingState from '@/store/setting/state'
 import musicSdk from '@/utils/musicSdk'
 import { toOldMusicInfo } from '@/utils'
 
+import { setCachedMusicPic } from './picCache'
 import {
   buildLyricInfo,
   getPlayQuality,
@@ -93,6 +94,7 @@ export const getPicUrl = async({ musicInfo, listId, isRefresh, allowToggleSource
     }
     return reqPromise.then((url: string) => {
       if (!url) throw new Error('pic url is empty')
+      setCachedMusicPic(musicInfo.source, musicInfo.id, url)
       if (listId) {
         musicInfo.meta.picUrl = url
         void updateListMusics([{ id: listId, musicInfo }])
@@ -105,6 +107,7 @@ export const getPicUrl = async({ musicInfo, listId, isRefresh, allowToggleSource
   }
   return handleGetOnlinePicUrl({ musicInfo, onToggleSource, isRefresh, allowToggleSource }).then(({ url, musicInfo: targetMusicInfo, isFromCache }) => {
     // picRequest = null
+    setCachedMusicPic(musicInfo.source, musicInfo.id, url)
     if (listId) {
       musicInfo.meta.picUrl = url
       void updateListMusics([{ id: listId, musicInfo }])

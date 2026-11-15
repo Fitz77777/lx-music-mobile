@@ -90,6 +90,11 @@ export class StateEvent extends Event {
     this.emit('mylistToggled', id)
   }
 
+  /** 在线歌曲封面解析完成（source_id） */
+  musicPicUpdated(key: string) {
+    this.emit('musicPicUpdated', key)
+  }
+
   fetchingListStatusUpdated(fetchingListStatus: ListState['fetchingListStatus']) {
     this.emit('fetchingListStatusUpdated', fetchingListStatus)
   }

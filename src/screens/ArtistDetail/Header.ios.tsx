@@ -1,10 +1,11 @@
 import { memo, useState } from 'react'
-import { Pressable, SafeAreaView, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 import ImageBackground from '@/components/common/ImageBackground'
 import Image from '@/components/common/Image'
 import IOSText from '@/components/ios/Text'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { getIOSStatusBarHeight } from '@/theme/ios/insets'
 
 interface Props {
   artist: any
@@ -28,9 +29,8 @@ export default memo(({ artist, componentId }: Props) => {
       blurRadius={24}
     >
       <View style={{ backgroundColor: colors.scrim, paddingBottom: spacing.lg }}>
-        {/* 显式安全区避让：背景仍通铺到状态栏后面，内容下移 */}
-        <SafeAreaView>
-          <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg }}>
+        {/* 背景仍通铺到状态栏后面，内容用原生状态栏高度下移 */}
+        <View style={{ paddingTop: getIOSStatusBarHeight(), flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg }}>
           <Image url={artistPic} style={{ width: 88, height: 88, borderRadius: radius.pill, backgroundColor: colors.tertiaryFill }} />
           <View style={{ flex: 1, marginLeft: spacing.lg }}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
@@ -59,8 +59,7 @@ export default memo(({ artist, componentId }: Props) => {
                 )
               : null}
           </View>
-          </View>
-        </SafeAreaView>
+        </View>
       </View>
     </ImageBackground>
   )

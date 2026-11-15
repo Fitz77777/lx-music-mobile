@@ -3,6 +3,7 @@ import { View, TouchableOpacity } from 'react-native'
 
 import { Icon } from '@/components/common/Icon'
 import Image from '@/components/common/Image'
+import useMusicPic from '@/utils/hooks/useMusicPic'
 import IOSBadge from '@/components/ios/Badge'
 import IOSText from '@/components/ios/Text'
 import { useI18n } from '@/lang'
@@ -63,6 +64,8 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
     }
   }
   const tagInfo = useQualityTag(item)
+  // 歌单/排行榜里的歌曲常常没带封面，播放解析到封面后这里会跟着显示
+  const picUrl = useMusicPic(item.source, item.id, item.meta.picUrl)
 
   const singer = `${item.singer}${isShowAlbumName && item.meta.albumName ? ` · ${item.meta.albumName}` : ''}`
 
@@ -81,7 +84,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         onLongPress={() => { onLongPress(item, index) }}
       >
         <Image
-          url={item.meta.picUrl}
+          url={picUrl}
           style={{
             width: PIC_SIZE,
             height: PIC_SIZE,

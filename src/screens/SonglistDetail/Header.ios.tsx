@@ -1,10 +1,11 @@
 import { forwardRef, memo, useEffect, useImperativeHandle, useState } from 'react'
-import { SafeAreaView, View } from 'react-native'
+import { View } from 'react-native'
 
 import Image from '@/components/common/Image'
 import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { getIOSStatusBarHeight } from '@/theme/ios/insets'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 import { useNavigationComponentDidAppear } from '@/navigation'
 import { useListInfo } from './state'
@@ -98,9 +99,8 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
   }), [])
 
   return (
-    /* 显式安全区避让：外层（PageContent）未生效时这里补上，已生效时不叠加 */
-    <SafeAreaView>
-      <View style={{ paddingBottom: spacing.sm }}>
+    /* 二级页里 RN SafeAreaView 拿不到安全区，用原生状态栏高度显式下移 */
+    <View style={{ paddingTop: getIOSStatusBarHeight() + spacing.sm }}>
         <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
           <Pic componentId={componentId} playCount={detailInfo.playCount} imgUrl={detailInfo.imgUrl} />
           <View
@@ -117,7 +117,6 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
           </View>
         </View>
         <ActionBar />
-      </View>
-    </SafeAreaView>
+    </View>
   )
 })

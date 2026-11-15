@@ -1,9 +1,10 @@
 import { memo } from 'react'
-import { Pressable, SafeAreaView, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 import Image from '@/components/common/Image'
 import IOSText from '@/components/ios/Text'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { getIOSStatusBarHeight } from '@/theme/ios/insets'
 import { dateFormat } from '@/utils/common'
 import { navigations } from '@/navigation'
 
@@ -41,9 +42,8 @@ export default memo(({ albumInfo, componentId }: Props) => {
   }
 
   return (
-    // 显式安全区避让：外层（PageContent）未生效时这里补上，已生效时不叠加
-    <SafeAreaView>
-      <View style={{ paddingBottom: spacing.sm }}>
+    // 二级页里 RN SafeAreaView 拿不到安全区，用原生状态栏高度显式下移
+    <View style={{ paddingTop: getIOSStatusBarHeight() + spacing.sm, paddingBottom: spacing.sm }}>
         <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
           <Image
             url={albumPic}
@@ -73,7 +73,6 @@ export default memo(({ albumInfo, componentId }: Props) => {
           </IOSText>
           </View>
         </View>
-      </View>
-    </SafeAreaView>
+    </View>
   )
 })

@@ -3,6 +3,7 @@ import { View, TouchableOpacity } from 'react-native'
 
 import { Icon } from '@/components/common/Icon'
 import Image from '@/components/common/Image'
+import useMusicPic from '@/utils/hooks/useMusicPic'
 import IOSBadge from '@/components/ios/Badge'
 import IOSText from '@/components/ios/Text'
 import { useAssertApiSupport } from '@/store/common/hook'
@@ -38,6 +39,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
 }) => {
   const { colors, accent, hairline, withAlpha, radius } = useIOSTheme()
   const isSupported = useAssertApiSupport(item.source)
+  const picUrl = useMusicPic(item.source, item.id, item.meta.picUrl)
 
   const isSelected = selectedList.includes(item)
 
@@ -69,7 +71,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         onLongPress={() => { onLongPress(item, index) }}
       >
         <Image
-          url={item.meta.picUrl}
+          url={picUrl}
           style={{
             width: PIC_SIZE,
             height: PIC_SIZE,

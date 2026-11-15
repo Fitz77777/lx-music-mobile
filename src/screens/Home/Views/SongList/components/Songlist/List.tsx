@@ -11,6 +11,7 @@ import { scaleSizeW } from '@/utils/pixelRatio'
 import { createStyle } from '@/utils/tools'
 import Text from '@/components/common/Text'
 import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
+import useIsPad from '@/utils/hooks/useIsPad'
 
 type FlatListType = FlatListProps<ListInfoItem>
 
@@ -118,12 +119,14 @@ export default forwardRef<ListType, ListProps>(({ onRefresh, onLoadMore, onOpenD
   // }, [width])
   // console.log(Math.trunc(width * 0.125), itemWidth)
   // console.log(itemWidth, MIN_WIDTH, GAP, width)
-  // 平板（内容区 >= 600pt）：歌单网格按宽度自适应列数（原型 minmax(150px,1fr)，上限 6 列）
-  const PAD_MIN_WIDTH = 150
+  // 平板：歌单网格按宽度自适应列数（原型 minmax(150px,1fr)，上限 6 列）。
+  // 最小列宽取 130：iPad 竖屏内容区约 480-550pt 可得 3 列，避免卡片过大
+  const PAD_MIN_WIDTH = 130
   const PAD_MAX_COLUMNS = 6
+  const isPad = useIsPad()
 
   const rowInfo = useMemo(() => {
-    if (width >= 600) {
+    if (isPad) {
       // iOS 网格左右各留 IOS_PADDING，列间 IOS_GAP；Android 网格用 space-evenly，无左右留白
       const padPadding = Platform.OS == 'ios' ? IOS_PADDING : 0
       const padGap = Platform.OS == 'ios' ? IOS_GAP : 20
@@ -150,8 +153,7 @@ export default forwardRef<ListType, ListProps>(({ onRefresh, onLoadMore, onOpenD
       num,
       width: (width - GAP) / num,
     }
-  }, [width])
-  // console.log(rowNum)
+  }, [width, isPad])
   const list = useMemo(() => {
     const list = [...currentList]
     let whiteItemNum = (list.length % rowInfo.num)

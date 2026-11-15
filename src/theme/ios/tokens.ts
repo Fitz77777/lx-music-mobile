@@ -17,8 +17,7 @@ export interface IOSColors {
    */
   canvas: string
   /**
-   * 页面底色（原型 --bg，分组灰）。
-   * 亮色 #F2F2F7 / 暗色 #000000，卡片用 secondaryGroupedBackground。
+   * 页面底色。亮色纯白 / 暗色纯黑（不铺分组灰，分层靠 hairline 分隔线）。
    */
   groupedBackground: string
   /** 卡片底色（原型 --card） */
@@ -86,8 +85,8 @@ export const iosColorsLight: IOSColors = {
   background: '#FFFFFF',
   secondaryBackground: '#F2F2F7',
   tertiaryBackground: '#FFFFFF',
-  canvas: '#F2F2F7',
-  groupedBackground: '#F2F2F7',
+  canvas: '#FFFFFF',
+  groupedBackground: '#FFFFFF',
   secondaryGroupedBackground: '#FFFFFF',
   tertiaryGroupedBackground: '#F2F2F7',
   cardPressed: '#F2F2F7',

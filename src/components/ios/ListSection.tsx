@@ -1,6 +1,7 @@
 import { Children, cloneElement, isValidElement, memo, type ReactElement, type ReactNode } from 'react'
 import { View, type StyleProp, type ViewStyle } from 'react-native'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { iosHairline } from '@/theme/ios/tokens'
 import IOSText from './Text'
 
 export interface ListSectionProps {
@@ -38,6 +39,8 @@ export default memo(({ title, footer, children, style }: ListSectionProps) => {
       <View style={{
         marginHorizontal: spacing.lg,
         borderRadius: 12,
+        borderWidth: iosHairline,
+        borderColor: colors.rowSeparator,
         overflow: 'hidden',
         backgroundColor: colors.secondaryGroupedBackground,
       }}>

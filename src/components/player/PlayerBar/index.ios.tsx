@@ -25,7 +25,7 @@ const CARD_HEIGHT = 60
  * 左右 16pt、圆角 16、封面 44，右侧三个按钮（播放/暂停、下一首、播放列表）。
  */
 export default memo(({ isHome = false }: { isHome?: boolean }) => {
-  const { colors, spacing, hairline, isDark, radius, shadow } = useIOSTheme()
+  const { colors, spacing, hairline, radius, shadow } = useIOSTheme()
   const musicInfo = usePlayerMusicInfo()
   const isPlay = useIsPlay()
   const autoHidePlayBar = useSettingValue('common.autoHidePlayBar')
@@ -71,9 +71,9 @@ export default memo(({ isHome = false }: { isHome?: boolean }) => {
         paddingRight: spacing.sm,
         borderRadius: radius.card,
         backgroundColor: colors.secondaryGroupedBackground,
-        borderWidth: isDark ? hairline : 0,
-        borderColor: colors.separator,
-        ...(isDark ? null : shadow.float),
+        borderWidth: hairline,
+        borderColor: colors.rowSeparator,
+        ...shadow.float,
       }}>
         <Pressable
           onPress={openDetail}

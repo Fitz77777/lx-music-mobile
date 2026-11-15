@@ -27,7 +27,7 @@ const CARD_HEIGHT = iosBarHeight.miniPlayer + 12
  * 平板组件不区分平台；外层（Home/Pad）负责浮动定位与留白。
  */
 export default memo(() => {
-  const { colors, spacing, hairline, isDark, shadow } = useIOSTheme()
+  const { colors, spacing, hairline, shadow } = useIOSTheme()
   const musicInfo = usePlayerMusicInfo()
   const isPlay = useIsPlay()
   const autoHidePlayBar = useSettingValue('common.autoHidePlayBar')
@@ -64,8 +64,8 @@ export default memo(() => {
         paddingRight: spacing.sm,
         borderRadius: 16,
         backgroundColor: colors.secondaryGroupedBackground,
-        borderWidth: isDark ? hairline : 0,
-        borderColor: colors.separator,
+        borderWidth: hairline,
+        borderColor: colors.rowSeparator,
         ...shadow.float,
       }}>
         <Pressable

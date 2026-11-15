@@ -27,14 +27,36 @@ interface DragController {
   end: () => void
 }
 
-const ListHeader = memo(() => {
+const ListHeader = memo(({ sortMode, onToggleSortMode }: {
+  sortMode: boolean
+  onToggleSortMode: () => void
+}) => {
   const t = useI18n()
-  const { colors, spacing } = useIOSTheme()
+  const { colors, accent, spacing, radius } = useIOSTheme()
   return (
     <SafeAreaView style={{ backgroundColor: colors.groupedBackground }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', height: 44, paddingHorizontal: spacing.lg }}>
         <IOSText variant="headline">{t('nav_love')}</IOSText>
         <View style={{ flex: 1 }} />
+        <Pressable
+          onPress={onToggleSortMode}
+          hitSlop={6}
+          accessibilityRole="button"
+          style={({ pressed }) => ({
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: radius.control,
+            backgroundColor: sortMode ? colors.quaternaryFill : pressed ? colors.secondaryFill : 'transparent',
+          })}
+        >
+          <IOSIcon name="list-order" size={15} color={sortMode ? accent : colors.secondaryLabel} />
+          <IOSText variant="subheadline" weight={sortMode ? '600' : '400'} color={sortMode ? accent : colors.secondaryLabel}>
+            {sortMode ? t('fine') : t('list_position_sort')}
+          </IOSText>
+        </Pressable>
       </View>
     </SafeAreaView>
   )
@@ -305,7 +327,10 @@ export default ({ onShowMenu, sortMode }: ListProps) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
-      <ListHeader />
+      <ListHeader
+        sortMode={sortMode}
+        onToggleSortMode={() => { global.app_event.changeMyListSortMode(!sortMode) }}
+      />
       <View style={{ width: '100%', height: iosHairline, backgroundColor: colors.rowSeparator }} />
       <FlatList
         ref={flatListRef}

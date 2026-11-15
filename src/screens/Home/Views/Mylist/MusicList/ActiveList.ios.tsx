@@ -65,16 +65,6 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
     global.app_event.changeLoveListVisible(true)
   }
 
-  // 打开抽屉并进入拖动排序模式；已在排序模式时再点即退出
-  const showSort = () => {
-    if (global.lx.myListSortMode) {
-      global.app_event.changeMyListSortMode(false)
-      return
-    }
-    global.lx.myListSortMode = true
-    global.app_event.changeMyListSortMode(true)
-    global.app_event.changeLoveListVisible(true)
-  }
 
   useEffect(() => {
     void getListPrevSelectId().then((id) => {
@@ -130,24 +120,7 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
         {fetching ? <Loading color={colors.secondaryLabel} style={{ marginRight: spacing.sm }} /> : null}
       </ScrollView>
       <View style={{ flex: 1 }} />
-      <Pressable
-        onPress={showSort}
-        hitSlop={8}
-        accessibilityRole="button"
-        accessibilityLabel={t('list_position_sort')}
-        style={{
-          width: 32,
-          height: 32,
-          marginRight: spacing.sm,
-          borderRadius: radius.pill,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: colors.secondaryGroupedBackground,
-          ...shadow.chip,
-        }}
-      >
-        <IOSIcon name="menu" size={18} color={accent} />
-      </Pressable>
+      {/* 单一入口：打开全部列表面板（面板内可切换歌单手动排序） */}
       <Pressable
         onPress={showList}
         hitSlop={8}

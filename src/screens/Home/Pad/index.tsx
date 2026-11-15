@@ -55,7 +55,7 @@ export default () => {
       <IOSBackdrop />
       <SizeView />
       <View style={{ flex: 1, flexDirection: 'row', paddingTop: statusBarPadding }}>
-        <SafeAreaView style={{ width: iosPad.sidebarWidth, backgroundColor: colors.barBackgroundOpaque }}>
+        <SafeAreaView style={{ width: iosPad.sidebarWidth, alignSelf: 'stretch', backgroundColor: colors.barBackgroundOpaque }}>
           <Sidebar
             groups={groups}
             bottomItems={bottomItems}

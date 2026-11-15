@@ -6,7 +6,7 @@ import Pic from './components/Pic'
 import PlayInfo from './components/PlayInfo'
 import ControlBtn from './components/ControlBtn'
 import MoreBtn from './components/MoreBtn'
-import CommentModal from './components/CommentModal'
+import CommentPanel from './components/CommentPanel'
 import Lyric from '../Vertical/Lyric'
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view'
 import { screenkeepAwake, screenUnkeepAwake } from '@/utils/nativeModules/utils'
@@ -125,7 +125,7 @@ export default memo(({ componentId }: { componentId: string }) => {
             <Player onShowComment={showComment} />
           </View>
         </View>
-        <CommentModal visible={commentVisible} componentId={componentId} onClose={hideComment} />
+        <CommentPanel visible={commentVisible} componentId={componentId} onClose={hideComment} />
       </>
     )
   }
@@ -148,7 +148,7 @@ export default memo(({ componentId }: { componentId: string }) => {
         </PagerView>
         <Player onShowComment={showComment} />
       </View>
-      <CommentModal visible={commentVisible} componentId={componentId} onClose={hideComment} />
+      <CommentPanel visible={commentVisible} componentId={componentId} onClose={hideComment} />
     </>
   )
 })

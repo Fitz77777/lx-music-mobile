@@ -1,7 +1,6 @@
 import { memo } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { iosPad } from '@/theme/ios/tokens'
 import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 
@@ -80,8 +79,7 @@ export default memo(({ groups, bottomItems, activeId, onChange }: Props) => {
 
   return (
     <View style={{
-      width: iosPad.sidebarWidth,
-      height: '100%',
+      flex: 1,
       backgroundColor: colors.barBackgroundOpaque,
       borderRightWidth: hairline,
       borderRightColor: colors.separator,
@@ -97,14 +95,14 @@ export default memo(({ groups, bottomItems, activeId, onChange }: Props) => {
         <IOSIcon name="logo" size={20} color={accent} />
         <IOSText size={19} weight="700" style={{ letterSpacing: 0.6 }}>LX Music</IOSText>
       </View>
+      {/* 分组列表占据剩余空间；底部设置块始终固定在侧边栏底部 */}
       <ScrollView
-        style={{ flexGrow: 0 }}
+        style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: spacing.sm }}
         showsVerticalScrollIndicator={false}
       >
         {groups.map(renderGroup)}
       </ScrollView>
-      <View style={{ flex: 1 }} />
       <View style={{
         borderTopWidth: hairline,
         borderTopColor: colors.separator,

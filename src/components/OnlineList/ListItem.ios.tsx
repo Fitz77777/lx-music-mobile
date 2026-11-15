@@ -2,20 +2,19 @@ import { memo, useRef } from 'react'
 import { View, TouchableOpacity } from 'react-native'
 
 import { Icon } from '@/components/common/Icon'
-import Image from '@/components/common/Image'
-import useMusicPic from '@/utils/hooks/useMusicPic'
 import IOSBadge from '@/components/ios/Badge'
 import IOSText from '@/components/ios/Text'
 import { useI18n } from '@/lang'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import type { RowInfo } from '@/utils/tools'
 
-/** iOS 歌曲行高（pt，原型 68pt），封面缩小为 44pt 并垂直居中 */
+/** iOS 歌曲行高（pt，原型 68pt） */
 export const ITEM_HEIGHT = 68
-const PIC_SIZE = 44
+/** 序号列宽（替代封面位置） */
+const INDEX_WIDTH = 30
 const ROW_PADDING = 14
-/** 分隔线内缩到文字起点：左内边距 + 封面 + 间距 */
-const SEPARATOR_INSET = ROW_PADDING + PIC_SIZE + 12
+/** 分隔线内缩到文字起点：左内边距 + 序号列 + 间距 */
+const SEPARATOR_INSET = ROW_PADDING + INDEX_WIDTH + 12
 
 const useQualityTag = (musicInfo: LX.Music.MusicInfoOnline) => {
   const t = useI18n()
@@ -34,7 +33,8 @@ const useQualityTag = (musicInfo: LX.Music.MusicInfoOnline) => {
 }
 
 /**
- * iOS 在线歌曲行：封面 56 + 标题 + 音质徽标/音源/歌手 + 时长 + 更多。
+ * iOS 在线歌曲行：序号 + 标题 + 音质徽标/音源/歌手 + 时长 + 更多。
+ * 不展示封面（在线列表接口多数不回封面），用序号标识行位置。
  * 与 Android 版共用 props 与 memo 比较逻辑。
  */
 export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval, showSource, isLast = false }: {
@@ -64,8 +64,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
     }
   }
   const tagInfo = useQualityTag(item)
-  // 歌单/排行榜里的歌曲常常没带封面，播放解析到封面后这里会跟着显示
-  const picUrl = useMusicPic(item.source, item.id, item.meta.picUrl)
+  const active = activeIndex == index
 
   const singer = `${item.singer}${isShowAlbumName && item.meta.albumName ? ` · ${item.meta.albumName}` : ''}`
 
@@ -83,15 +82,12 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         onPress={() => { onPress(item, index) }}
         onLongPress={() => { onLongPress(item, index) }}
       >
-        <Image
-          url={picUrl}
-          style={{
-            width: PIC_SIZE,
-            height: PIC_SIZE,
-            borderRadius: 8,
-            backgroundColor: colors.tertiaryFill,
-          }}
-        />
+        <IOSText
+          variant="subheadline"
+          color={active ? accent : colors.tertiaryLabel}
+          numberOfLines={1}
+          style={{ width: INDEX_WIDTH, textAlign: 'center' }}
+        >{index + 1}</IOSText>
         <View style={{ flex: 1, marginLeft: spacing.md, justifyContent: 'center' }}>
           <IOSText weight="500" numberOfLines={1}>{item.name}</IOSText>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 6 }}>

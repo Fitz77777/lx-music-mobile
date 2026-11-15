@@ -1,6 +1,7 @@
 import { memo } from 'react'
-import { Platform, Pressable, SafeAreaView, ScrollView, View } from 'react-native'
+import { Pressable, SafeAreaView, ScrollView, View } from 'react-native'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { iosBarHeight, iosPad } from '@/theme/ios/tokens'
 import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 
@@ -82,7 +83,7 @@ export default memo(({ groups, bottomItems, activeId, onChange }: Props) => {
       flex: 1,
       backgroundColor: colors.barBackgroundOpaque,
       borderRightWidth: hairline,
-      borderRightColor: colors.separator,
+      borderRightColor: colors.rowSeparator,
     }}>
       {/* 顶部品牌行单独做安全区避让（刘海/状态栏）；
           分组列表与底部设置延伸到屏幕底缘——Home 指示条会自动隐藏，不再为其留白 */}
@@ -108,10 +109,9 @@ export default memo(({ groups, bottomItems, activeId, onChange }: Props) => {
         {groups.map(renderGroup)}
       </ScrollView>
       <View style={{
-        borderTopWidth: hairline,
-        borderTopColor: colors.separator,
-        paddingTop: spacing.md,
-        paddingBottom: Platform.OS == 'ios' ? spacing.sm : spacing.lg,
+        // 与右下角迷你播放器垂直居中对齐；不加分割线，保持主界面干净
+        paddingTop: spacing.sm,
+        paddingBottom: iosPad.miniPlayerBottom + (iosBarHeight.miniPlayer - 44) / 2,
       }}>
         {bottomItems.map(renderTab)}
       </View>

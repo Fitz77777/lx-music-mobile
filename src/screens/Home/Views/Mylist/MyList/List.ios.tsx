@@ -1,5 +1,5 @@
-import { memo, useEffect, useRef, useState } from 'react'
-import { Animated, FlatList, PanResponder, Pressable, SafeAreaView, View, type GestureResponderEvent, type NativeScrollEvent, type NativeSyntheticEvent, type FlatListProps } from 'react-native'
+import { memo, useEffect, useRef, useState, type MutableRefObject } from 'react'
+import { Animated, FlatList, PanResponder, Pressable, SafeAreaView, View, type NativeScrollEvent, type NativeSyntheticEvent, type FlatListProps } from 'react-native'
 
 import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
@@ -13,6 +13,7 @@ import { setActiveList, updateUserListPosition } from '@/core/list'
 import { type Position } from './ListMenu'
 import Loading from '@/components/common/Loading'
 import { useI18n } from '@/lang'
+import { iosHairline, iosMotion } from '@/theme/ios/tokens'
 
 type FlatListType = FlatListProps<LX.List.MyListInfo>
 
@@ -20,61 +21,76 @@ const ITEM_HEIGHT = 48
 /** 列表前固定的两个内置列表（试听 / 收藏），不可拖动、不可越过 */
 const FIXED_COUNT = 2
 
-interface DragInfo {
-  id: string
-  fromIndex: number
+interface DragController {
+  start: (item: LX.List.MyListInfo, slot: number) => void
+  move: (dy: number) => void
+  end: () => void
 }
 
-const ListHeader = memo(({ sortMode, onToggleSortMode }: {
-  sortMode: boolean
-  onToggleSortMode: () => void
-}) => {
+const ListHeader = memo(() => {
   const t = useI18n()
-  const { colors, accent, spacing, radius } = useIOSTheme()
+  const { colors, spacing } = useIOSTheme()
   return (
     <SafeAreaView style={{ backgroundColor: colors.groupedBackground }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', height: 44, paddingHorizontal: spacing.lg }}>
         <IOSText variant="headline">{t('nav_love')}</IOSText>
         <View style={{ flex: 1 }} />
-        <Pressable
-          onPress={onToggleSortMode}
-          hitSlop={6}
-          accessibilityRole="button"
-          style={({ pressed }) => ({
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 4,
-            paddingHorizontal: 10,
-            paddingVertical: 6,
-            borderRadius: radius.control,
-            backgroundColor: sortMode ? colors.quaternaryFill : pressed ? colors.secondaryFill : 'transparent',
-          })}
-        >
-          <IOSIcon name="list-order" size={15} color={sortMode ? accent : colors.secondaryLabel} />
-          <IOSText variant="subheadline" weight={sortMode ? '600' : '400'} color={sortMode ? accent : colors.secondaryLabel}>
-            {sortMode ? t('fine') : t('list_position_sort')}
-          </IOSText>
-        </Pressable>
       </View>
     </SafeAreaView>
   )
 })
 
-const ListItem = memo(({ item, index, activeId, sortMode, isDragging, onPress, onShowMenu, onDragStart }: {
+/** 拖动把手：触摸即开始拖动，由它独占手势，因此不会和列表滚动冲突 */
+const DragHandle = memo(({ item, slot, ctlRef }: {
+  item: LX.List.MyListInfo
+  slot: number
+  ctlRef: MutableRefObject<DragController | null>
+}) => {
+  const { colors } = useIOSTheme()
+  const infoRef = useRef({ item, slot })
+  infoRef.current = { item, slot }
+
+  const pan = useRef(PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponderCapture: () => true,
+    onPanResponderTerminationRequest: () => false,
+    onPanResponderGrant: () => {
+      ctlRef.current?.start(infoRef.current.item, infoRef.current.slot)
+    },
+    onPanResponderMove: (_e, g) => {
+      ctlRef.current?.move(g.dy)
+    },
+    onPanResponderRelease: () => {
+      ctlRef.current?.end()
+    },
+    onPanResponderTerminate: () => {
+      ctlRef.current?.end()
+    },
+  })).current
+
+  return (
+    <View {...pan.panHandlers} style={{ width: 44, height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+      <IOSIcon name="menu" size={18} color={colors.tertiaryLabel} />
+    </View>
+  )
+})
+
+const ListItem = memo(({ item, index, activeId, sortMode, isDragging, ctlRef, onPress, onShowMenu }: {
   item: LX.List.MyListInfo
   index: number
   activeId: string
   sortMode: boolean
   isDragging: boolean
+  ctlRef: MutableRefObject<DragController | null>
   onPress: (item: LX.List.MyListInfo) => void
   onShowMenu: (item: LX.List.MyListInfo, index: number, position: Position) => void
-  onDragStart: (item: LX.List.MyListInfo, index: number, e: GestureResponderEvent) => void
 }) => {
   const { colors, accent, spacing } = useIOSTheme()
   const moreButtonRef = useRef<View>(null)
   const fetching = useListFetching(item.id)
 
   const active = activeId == item.id
+  const fixed = index < FIXED_COUNT
 
   const handleShowMenu = () => {
     moreButtonRef.current?.measure((fx, fy, width, height, px, py) => {
@@ -82,9 +98,8 @@ const ListItem = memo(({ item, index, activeId, sortMode, isDragging, onPress, o
     })
   }
 
-  const handleLongPress = (e: GestureResponderEvent) => {
-    onDragStart(item, index, e)
-  }
+  // 排序模式下固定的试听/收藏用强调色提示不可移动，且不显示拖动把手
+  const labelColor = sortMode && fixed ? accent : active ? accent : colors.label
 
   return (
     <View style={{
@@ -95,13 +110,12 @@ const ListItem = memo(({ item, index, activeId, sortMode, isDragging, onPress, o
     }}>
       <Pressable
         onPress={sortMode ? undefined : () => { onPress(item) }}
-        onLongPress={sortMode ? handleLongPress : undefined}
-        delayLongPress={280}
         style={{ flex: 1, height: '100%', flexDirection: 'row', alignItems: 'center', paddingLeft: spacing.lg }}
       >
         <IOSText
           variant="body"
-          color={active ? accent : colors.label}
+          weight={sortMode && fixed ? '600' : '400'}
+          color={labelColor}
           numberOfLines={1}
           style={{ flexShrink: 1 }}
         >{item.name}</IOSText>
@@ -110,11 +124,7 @@ const ListItem = memo(({ item, index, activeId, sortMode, isDragging, onPress, o
       </Pressable>
       {
         sortMode
-          ? (
-              <View style={{ width: 44, height: '100%', alignItems: 'center', justifyContent: 'center' }}>
-                <IOSIcon name="menu" size={18} color={colors.secondaryLabel} />
-              </View>
-            )
+          ? (fixed ? null : <DragHandle item={item} slot={index} ctlRef={ctlRef} />)
           : (
               <Pressable
                 ref={moreButtonRef}
@@ -128,12 +138,6 @@ const ListItem = memo(({ item, index, activeId, sortMode, isDragging, onPress, o
       }
     </View>
   )
-}, (prev, next) => {
-  return !!(prev.item === next.item &&
-    prev.index === next.index &&
-    prev.activeId == next.activeId &&
-    prev.sortMode == next.sortMode &&
-    prev.isDragging == next.isDragging)
 })
 
 export interface ListProps {
@@ -141,7 +145,7 @@ export interface ListProps {
   sortMode: boolean
 }
 
-/** iOS 我的列表抽屉：头部（标题 + 手动排序开关）+ 歌单列表（排序模式下长按拖动调序） */
+/** iOS 我的列表抽屉：歌单列表；排序模式下按住右侧把手可拖动调序 */
 export default ({ onShowMenu, sortMode }: ListProps) => {
   const flatListRef = useRef<FlatList>(null)
   const allList = useMyList()
@@ -149,72 +153,106 @@ export default ({ onShowMenu, sortMode }: ListProps) => {
   const { colors } = useIOSTheme()
   const bottomInset = useIOSHomeBottomInset()
 
-  // 排序拖动期间的本地顺序（避免与 store 更新互相打断）；非拖动时与 allList 保持一致
+  // 拖动期间的本地顺序（避免与 store 更新互相打断）；非拖动时与 allList 保持一致
   const [order, setOrder] = useState(allList)
   const orderRef = useRef(allList)
   const [draggingId, setDraggingId] = useState<string | null>(null)
-  const draggingRef = useRef<DragInfo | null>(null)
-  const [scrollEnabled, setScrollEnabled] = useState(true)
-  const translateY = useRef(new Animated.Value(0)).current
+  const draggingRef = useRef<{ id: string, startSlot: number } | null>(null)
+  const ctlRef = useRef<DragController | null>(null)
+  const offsetsRef = useRef(new Map<string, Animated.Value>())
+  /** 刚松手的行：让它的回弹动画跑完，不要在列表同步时被重置 */
+  const settlingRef = useRef(new Set<string>())
+
+  const getOffset = (id: string) => {
+    let value = offsetsRef.current.get(id)
+    if (!value) {
+      value = new Animated.Value(0)
+      offsetsRef.current.set(id, value)
+    }
+    return value
+  }
 
   useEffect(() => {
-    if (draggingRef.current == null) {
-      orderRef.current = allList
-      setOrder(allList)
-    }
+    if (draggingRef.current) return
+    orderRef.current = allList
+    setOrder(allList)
+    // 列表外部变化时清掉残留位移（刚松手的行除外，让回弹动画自然结束）
+    offsetsRef.current.forEach((value, id) => {
+      if (settlingRef.current.delete(id)) return
+      value.stopAnimation()
+      value.setValue(0)
+    })
   }, [allList])
 
-  const finishDrag = () => {
+  /** 其他行让位：从旧位置滑到新位置（回弹到 0 位移） */
+  const animateShift = (id: string, fromSlot: number, toSlot: number) => {
+    const value = getOffset(id)
+    value.stopAnimation()
+    value.setValue((fromSlot - toSlot) * ITEM_HEIGHT)
+    Animated.spring(value, {
+      toValue: 0,
+      useNativeDriver: false,
+      friction: iosMotion.spring.damping / 2,
+      tension: iosMotion.spring.stiffness / 2.6,
+    }).start()
+  }
+
+  const handleDragStart = (item: LX.List.MyListInfo, slot: number) => {
+    draggingRef.current = { id: item.id, startSlot: slot }
+    setDraggingId(item.id)
+    getOffset(item.id).setValue(0)
+  }
+
+  const handleDragMove = (dy: number) => {
     const drag = draggingRef.current
+    if (!drag) return
+    const list = orderRef.current
+    const currentSlot = list.findIndex(m => m.id == drag.id)
+    const target = Math.min(
+      Math.max(drag.startSlot + Math.round(dy / ITEM_HEIGHT), FIXED_COUNT),
+      list.length - 1,
+    )
+    if (target != currentSlot) {
+      const next = [...list]
+      const [moved] = next.splice(currentSlot, 1)
+      next.splice(target, 0, moved)
+      orderRef.current = next
+      setOrder(next)
+      // 其余行平滑让位
+      next.forEach((m, newSlot) => {
+        if (m.id == drag.id) return
+        const oldSlot = list.findIndex(x => x.id == m.id)
+        if (oldSlot != newSlot) animateShift(m.id, oldSlot, newSlot)
+      })
+    }
+    const renderedSlot = orderRef.current.findIndex(m => m.id == drag.id)
+    // 拖动行跟手：(起始槽位到当前槽位的位移) + 手指位移
+    getOffset(drag.id).setValue((drag.startSlot - renderedSlot) * ITEM_HEIGHT + dy)
+  }
+
+  const handleDragEnd = () => {
+    const drag = draggingRef.current
+    if (!drag) return
     draggingRef.current = null
     setDraggingId(null)
-    setScrollEnabled(true)
-    translateY.setValue(0)
-    if (drag) {
-      const index = orderRef.current.findIndex(m => m.id == drag.id)
-      if (index != drag.fromIndex) {
-        // 抽屉里前两位是固定的试听/收藏，可移动歌单从第 3 行开始
-        void updateUserListPosition(index - FIXED_COUNT, [drag.id])
-      }
+    const index = orderRef.current.findIndex(m => m.id == drag.id)
+    settlingRef.current.add(drag.id)
+    Animated.spring(getOffset(drag.id), {
+      toValue: 0,
+      useNativeDriver: false,
+      friction: iosMotion.spring.damping / 2,
+      tension: iosMotion.spring.stiffness / 2.6,
+    }).start()
+    if (index != drag.startSlot) {
+      // 前两位是固定的试听/收藏，可移动歌单从第 3 行开始
+      void updateUserListPosition(index - FIXED_COUNT, [drag.id])
     }
   }
 
-  const panResponderRef = useRef(PanResponder.create({
-    // 只在长按进入排序拖动后接管，避免影响正常滚动
-    onMoveShouldSetPanResponderCapture: () => draggingRef.current != null,
-    onPanResponderTerminationRequest: () => false,
-    onPanResponderMove: (_e, g) => {
-      const drag = draggingRef.current
-      if (!drag) return
-      const fromIndex = orderRef.current.findIndex(m => m.id == drag.id)
-      const target = Math.min(
-        Math.max(fromIndex + Math.round(g.dy / ITEM_HEIGHT), FIXED_COUNT),
-        orderRef.current.length - 1,
-      )
-      if (target == fromIndex) {
-        translateY.setValue(g.dy)
-        return
-      }
-      const next = [...orderRef.current]
-      const [item] = next.splice(fromIndex, 1)
-      next.splice(target, 0, item)
-      orderRef.current = next
-      setOrder(next)
-      // 行渲染位置随插入点变化，平移补偿保持手指下的视觉连续
-      translateY.setValue((fromIndex - target) * ITEM_HEIGHT + g.dy)
-    },
-    onPanResponderRelease: finishDrag,
-    onPanResponderTerminate: finishDrag,
-  }))
-
-  const handleDragStart = (item: LX.List.MyListInfo, index: number, e: GestureResponderEvent) => {
-    if (!sortMode || index < FIXED_COUNT) return
-    const drag = { id: item.id, fromIndex: index }
-    draggingRef.current = drag
-    orderRef.current = order
-    setDraggingId(item.id)
-    setScrollEnabled(false)
-    translateY.setValue(0)
+  ctlRef.current = {
+    start: handleDragStart,
+    move: handleDragMove,
+    end: handleDragEnd,
   }
 
   const handleToggleList = (item: LX.List.MyListInfo) => {
@@ -241,23 +279,23 @@ export default ({ onShowMenu, sortMode }: ListProps) => {
 
   const renderItem: FlatListType['renderItem'] = ({ item, index }) => {
     const isDragging = draggingId != null && draggingId == item.id
-    const row = (
-      <ListItem
-        item={item}
-        index={index}
-        activeId={activeListId}
-        sortMode={sortMode}
-        isDragging={isDragging}
-        onPress={handleToggleList}
-        onShowMenu={showMenu}
-        onDragStart={handleDragStart}
-      />
-    )
-    if (!isDragging) return <View collapsable={false} style={{ height: ITEM_HEIGHT }}>{row}</View>
     return (
-      <View collapsable={false} style={{ height: ITEM_HEIGHT, zIndex: 10 }}>
-        <Animated.View style={{ transform: [{ translateY }] }}>{row}</Animated.View>
-      </View>
+      <Animated.View style={{
+        height: ITEM_HEIGHT,
+        zIndex: isDragging ? 10 : 0,
+        transform: [{ translateY: getOffset(item.id) }],
+      }}>
+        <ListItem
+          item={item}
+          index={index}
+          activeId={activeListId}
+          sortMode={sortMode}
+          isDragging={isDragging}
+          ctlRef={ctlRef}
+          onPress={handleToggleList}
+          onShowMenu={showMenu}
+        />
+      </Animated.View>
     )
   }
   const getkey: FlatListType['keyExtractor'] = item => item.id
@@ -267,29 +305,21 @@ export default ({ onShowMenu, sortMode }: ListProps) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.groupedBackground }}>
-      <ListHeader
-        sortMode={sortMode}
-        onToggleSortMode={() => {
-          global.app_event.changeMyListSortMode(!sortMode)
-        }}
+      <ListHeader />
+      <View style={{ width: '100%', height: iosHairline, backgroundColor: colors.rowSeparator }} />
+      <FlatList
+        ref={flatListRef}
+        onScroll={handleScroll}
+        style={{ flexShrink: 1, flexGrow: 0, backgroundColor: colors.groupedBackground }}
+        data={order}
+        maxToRenderPerBatch={9}
+        windowSize={9}
+        initialNumToRender={18}
+        renderItem={renderItem}
+        keyExtractor={getkey}
+        getItemLayout={getItemLayout}
+        contentContainerStyle={{ paddingTop: 8, paddingBottom: 8 + bottomInset }}
       />
-      <View style={{ height: 1, backgroundColor: colors.rowSeparator }} />
-      <View style={{ flex: 1 }} {...panResponderRef.current.panHandlers}>
-        <FlatList
-          ref={flatListRef}
-          onScroll={handleScroll}
-          scrollEnabled={scrollEnabled}
-          style={{ flexShrink: 1, flexGrow: 0, backgroundColor: colors.groupedBackground }}
-          data={order}
-          maxToRenderPerBatch={9}
-          windowSize={9}
-          initialNumToRender={18}
-          renderItem={renderItem}
-          keyExtractor={getkey}
-          getItemLayout={getItemLayout}
-          contentContainerStyle={{ paddingTop: 8, paddingBottom: 8 + bottomInset }}
-        />
-      </View>
     </View>
   )
 }

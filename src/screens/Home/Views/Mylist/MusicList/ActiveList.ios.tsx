@@ -65,8 +65,12 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
     global.app_event.changeLoveListVisible(true)
   }
 
-  // 打开抽屉并直接进入长按拖动排序模式
+  // 打开抽屉并进入拖动排序模式；已在排序模式时再点即退出
   const showSort = () => {
+    if (global.lx.myListSortMode) {
+      global.app_event.changeMyListSortMode(false)
+      return
+    }
     global.lx.myListSortMode = true
     global.app_event.changeMyListSortMode(true)
     global.app_event.changeLoveListVisible(true)

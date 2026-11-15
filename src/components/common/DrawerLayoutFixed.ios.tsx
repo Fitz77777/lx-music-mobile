@@ -21,6 +21,8 @@ interface Props {
   drawerPosition?: 'left' | 'right'
   drawerBackgroundColor?: string
   style?: StyleProp<ViewStyle>
+  /** 面板开始关闭时触发（用于退出临时模式，如歌单排序） */
+  onDrawerClose?: () => void
 }
 
 export interface DrawerLayoutFixedType {
@@ -38,6 +40,7 @@ const DrawerLayoutFixed = forwardRef<DrawerLayoutFixedType, Props>(({
   renderNavigationView,
   drawerBackgroundColor,
   style,
+  onDrawerClose,
 }, ref) => {
   const { colors, radius, spacing } = useIOSTheme()
   const [containerHeight, setContainerHeight] = useState(0)
@@ -57,6 +60,7 @@ const DrawerLayoutFixed = forwardRef<DrawerLayoutFixedType, Props>(({
   }, [animation])
 
   const closeDrawer = useCallback(() => {
+    onDrawerClose?.()
     Animated.timing(animation, {
       toValue: 0,
       duration: 200,
@@ -65,7 +69,7 @@ const DrawerLayoutFixed = forwardRef<DrawerLayoutFixedType, Props>(({
       if (finished) setVisible(false)
       global.app_event.changeHomePageScrollEnabled(true)
     })
-  }, [animation])
+  }, [animation, onDrawerClose])
 
   useImperativeHandle(ref, () => ({
     openDrawer,

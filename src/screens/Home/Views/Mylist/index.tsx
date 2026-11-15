@@ -57,6 +57,7 @@ export default () => {
       widthPercentage={widthPercentage}
       widthPercentageMax={maxWidth}
       drawerPosition={settingState.setting['common.drawerLayoutPosition']}
+      onDrawerClose={() => { global.app_event.changeMyListSortMode(false) }}
       renderNavigationView={navigationView}
       drawerBackgroundColor={drawerBackgroundColor}
       style={{ elevation: 1 }}

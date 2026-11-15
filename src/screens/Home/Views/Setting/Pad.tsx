@@ -102,7 +102,7 @@ export default () => {
           ))
         }
       </ScrollView>
-      <View style={{ width: hairline, backgroundColor: colors.separator }} />
+      <View style={{ width: hairline, backgroundColor: colors.rowSeparator }} />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingTop: spacing.xs, paddingBottom: spacing.xxl, paddingHorizontal: 24 }}

@@ -65,6 +65,13 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
     global.app_event.changeLoveListVisible(true)
   }
 
+  // 打开抽屉并直接进入长按拖动排序模式
+  const showSort = () => {
+    global.lx.myListSortMode = true
+    global.app_event.changeMyListSortMode(true)
+    global.app_event.changeLoveListVisible(true)
+  }
+
   useEffect(() => {
     void getListPrevSelectId().then((id) => {
       setActiveList(id)
@@ -119,6 +126,24 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, r
         {fetching ? <Loading color={colors.secondaryLabel} style={{ marginRight: spacing.sm }} /> : null}
       </ScrollView>
       <View style={{ flex: 1 }} />
+      <Pressable
+        onPress={showSort}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={t('list_position_sort')}
+        style={{
+          width: 32,
+          height: 32,
+          marginRight: spacing.sm,
+          borderRadius: radius.pill,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.secondaryGroupedBackground,
+          ...shadow.chip,
+        }}
+      >
+        <IOSIcon name="menu" size={18} color={accent} />
+      </Pressable>
       <Pressable
         onPress={showList}
         hitSlop={8}

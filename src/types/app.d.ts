@@ -41,6 +41,9 @@ interface GlobalData {
 
   jumpMyListPosition: boolean
 
+  /** 我的列表歌单手动排序模式 */
+  myListSortMode: boolean
+
   settingActiveId: SettingScreenIds
 
   /**

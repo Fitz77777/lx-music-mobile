@@ -12,6 +12,8 @@
   "change_position_list_title": "调整列表位置",
   "change_position_music_multi_title": "将已选的 {num} 首歌曲的位置调整到",
   "change_position_music_title": "将「{name}」的位置调整到",
+  "list_position_sort": "手动排序",
+  "fine": "完成",
   "change_position_tip": "请输入新的位置",
   "close": "关闭",
   "collect": "收藏",

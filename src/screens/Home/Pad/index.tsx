@@ -55,14 +55,14 @@ export default () => {
       <IOSBackdrop />
       <SizeView />
       <View style={{ flex: 1, flexDirection: 'row', paddingTop: statusBarPadding }}>
-        <SafeAreaView style={{ width: iosPad.sidebarWidth, alignSelf: 'stretch', backgroundColor: colors.barBackgroundOpaque }}>
+        <View style={{ width: iosPad.sidebarWidth, alignSelf: 'stretch', backgroundColor: colors.barBackgroundOpaque }}>
           <Sidebar
             groups={groups}
             bottomItems={bottomItems}
             activeId={activeId}
             onChange={handleChange}
           />
-        </SafeAreaView>
+        </View>
         <View style={{ flex: 1, backgroundColor: colors.canvas }}>
           <SafeAreaView>
             <Header />

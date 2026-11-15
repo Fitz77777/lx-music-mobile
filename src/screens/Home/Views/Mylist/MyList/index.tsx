@@ -12,6 +12,7 @@ import DuplicateMusic, { type DuplicateMusicType } from './DuplicateMusic'
 
 export default () => {
   const [visible, setVisible] = useState(false)
+  const [sortMode, setSortMode] = useState(() => global.lx.myListSortMode)
   const listMenuRef = useRef<ListMenuType>(null)
   const listNameEditRef = useRef<ListNameEditType>(null)
   const listMusicSortRef = useRef<ListMusicSortType>(null)
@@ -31,15 +32,22 @@ export default () => {
     }
     global.app_event.on('changeLoveListVisible', changeVisible)
 
+    const changeSortMode = (mode: boolean) => {
+      global.lx.myListSortMode = mode
+      setSortMode(mode)
+    }
+    global.app_event.on('changeMyListSortMode', changeSortMode)
+
     return () => {
       global.app_event.off('changeLoveListVisible', changeVisible)
+      global.app_event.off('changeMyListSortMode', changeSortMode)
     }
   }, [])
 
   return (
     visible
       ? <>
-          <List onShowMenu={(info, position) => listMenuRef.current?.show(info, position)} />
+          <List onShowMenu={(info, position) => listMenuRef.current?.show(info, position)} sortMode={sortMode} />
           <ListNameEdit ref={listNameEditRef} />
           <ListMusicSort ref={listMusicSortRef} />
           <ListPositionModal ref={listPositionModalRef} />

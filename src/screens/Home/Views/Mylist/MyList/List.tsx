@@ -70,8 +70,10 @@ const ListItem = memo(({ item, index, activeId, onPress, onShowMenu }: {
 })
 
 
-export default ({ onShowMenu }: {
+export default ({ onShowMenu, sortMode: _sortMode }: {
   onShowMenu: (info: { listInfo: LX.List.MyListInfo, index: number }, position: Position) => void
+  /** 排序模式（长按拖动），目前仅 iOS 抽屉实现；Android 走菜单「调整位置」 */
+  sortMode?: boolean
 }) => {
   const flatListRef = useRef<FlatList>(null)
   const allList = useMyList()

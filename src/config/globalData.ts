@@ -58,6 +58,8 @@ global.lx = {
 
   jumpMyListPosition: false,
 
+  myListSortMode: false,
+
   settingActiveId: 'basic',
 
   homePagerIdle: true,

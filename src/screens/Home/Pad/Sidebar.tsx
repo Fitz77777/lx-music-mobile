@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Platform, Pressable, ScrollView, View } from 'react-native'
+import { Platform, Pressable, SafeAreaView, ScrollView, View } from 'react-native'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
@@ -84,17 +84,21 @@ export default memo(({ groups, bottomItems, activeId, onChange }: Props) => {
       borderRightWidth: hairline,
       borderRightColor: colors.separator,
     }}>
-      <View style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        paddingHorizontal: 24,
-        paddingTop: 12,
-        paddingBottom: spacing.xl,
-      }}>
-        <IOSIcon name="logo" size={20} color={accent} />
-        <IOSText size={19} weight="700" style={{ letterSpacing: 0.6 }}>LX Music</IOSText>
-      </View>
+      {/* 顶部品牌行单独做安全区避让（刘海/状态栏）；
+          分组列表与底部设置延伸到屏幕底缘——Home 指示条会自动隐藏，不再为其留白 */}
+      <SafeAreaView style={{ backgroundColor: colors.barBackgroundOpaque }}>
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          paddingHorizontal: 24,
+          paddingTop: 12,
+          paddingBottom: spacing.xl,
+        }}>
+          <IOSIcon name="logo" size={20} color={accent} />
+          <IOSText size={19} weight="700" style={{ letterSpacing: 0.6 }}>LX Music</IOSText>
+        </View>
+      </SafeAreaView>
       {/* 分组列表占据剩余空间；底部设置块始终固定在侧边栏底部 */}
       <ScrollView
         style={{ flex: 1 }}
@@ -107,9 +111,7 @@ export default memo(({ groups, bottomItems, activeId, onChange }: Props) => {
         borderTopWidth: hairline,
         borderTopColor: colors.separator,
         paddingTop: spacing.md,
-        // iPad 的 SafeAreaView 已留出 Home 指示条内缩，这里只需很小的余量；
-        // Android 平板 SafeAreaView 不生效，多留一点避免贴到手势条
-        paddingBottom: Platform.OS == 'ios' ? spacing.xs : spacing.lg,
+        paddingBottom: Platform.OS == 'ios' ? spacing.sm : spacing.lg,
       }}>
         {bottomItems.map(renderTab)}
       </View>

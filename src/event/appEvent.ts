@@ -190,6 +190,11 @@ export class AppEvent extends Event {
     this.emit('changeLoveListVisible', visible)
   }
 
+  /** 进入 / 退出「我的列表」歌单手动排序模式（长按拖动） */
+  changeMyListSortMode(sortMode: boolean) {
+    this.emit('changeMyListSortMode', sortMode)
+  }
+
   /** 打开「我的列表」当前列表的搜索栏（iOS 导航栏按钮触发） */
   showMylistSearchBar() {
     this.emit('showMylistSearchBar')

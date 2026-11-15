@@ -70,9 +70,9 @@ export default memo(({ values, selectedIndex, onChange, style, small = false }: 
                 backgroundColor: isDark ? '#636366' : '#FFFFFF',
                 transform: [{ translateX }],
                 shadowColor: '#000',
-                shadowOpacity: isDark ? 0 : 0.12,
-                shadowRadius: 3,
-                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0,
+                shadowRadius: 0,
+                shadowOffset: { width: 0, height: 0 },
               }}
             />
           )

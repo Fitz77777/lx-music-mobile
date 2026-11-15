@@ -53,7 +53,7 @@ export default ({ componentId }: { componentId: string }) => {
         backgroundColor: 'transparent',
         shadowColor: '#000000',
         shadowOffset: { width: 0, height: animated ? 10 : 0 },
-        shadowOpacity: animated ? 0.24 : 0,
+        shadowOpacity: animated ? 0.15 : 0,
         shadowRadius: animated ? 18 : 0,
       }}>
         <Image

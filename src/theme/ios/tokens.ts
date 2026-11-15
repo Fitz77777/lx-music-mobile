@@ -252,15 +252,16 @@ export const iosRadius = {
 } as const
 
 /**
- * 阴影只给真正悬浮的元素；列表内卡片不加阴影（分层靠底色与分隔线）。
+ * 扁平化：常规元素一律不加阴影，分层靠底色、hairline 分隔线与按压反馈；
+ * 只给菜单 / 弹窗这类真正临时浮层保留极轻的投影。
  */
 export const iosShadow = {
-  /** 顶部导航小胶囊 / 小按钮 */
-  chip: { shadowColor: '#000000', shadowOpacity: 0.07, shadowRadius: 3, shadowOffset: { width: 0, height: 1 } },
-  /** 悬浮卡片：迷你播放器等 */
-  float: { shadowColor: '#000000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
-  /** 菜单 / 弹窗等临时浮层 */
-  raised: { shadowColor: '#000000', shadowOpacity: 0.14, shadowRadius: 10, shadowOffset: { width: 0, height: 8 } },
+  /** 顶部导航小胶囊 / 小按钮：不加投影，用底色区分 */
+  chip: { shadowColor: '#000000', shadowOpacity: 0, shadowRadius: 0, shadowOffset: { width: 0, height: 0 } },
+  /** 悬浮卡片：迷你播放器等：不加投影，靠 hairline / 底色与内容分层 */
+  float: { shadowColor: '#000000', shadowOpacity: 0, shadowRadius: 0, shadowOffset: { width: 0, height: 0 } },
+  /** 菜单 / 弹窗等临时浮层：仅极轻投影 */
+  raised: { shadowColor: '#000000', shadowOpacity: 0.09, shadowRadius: 6, shadowOffset: { width: 0, height: 3 } },
 } as const
 
 /** 1 物理像素（2x/3x 屏为 0.5pt） */

@@ -116,8 +116,8 @@ const Progress = ({ progress, duration, buffered }: {
       ...knobStyle,
       backgroundColor: '#FFFFFF',
       shadowColor: '#000000',
-      shadowOpacity: 0.25,
-      shadowRadius: 2,
+      shadowOpacity: 0.14,
+      shadowRadius: 1,
       shadowOffset: { width: 0, height: 1 },
     }} />
   ), [])

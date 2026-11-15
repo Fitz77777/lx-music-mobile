@@ -27,6 +27,7 @@ export interface ListMenuProps {
   onExport: (listInfo: LX.List.MyListInfo, index: number) => void
   onSync: (listInfo: LX.List.UserListInfo) => void
   onSelectLocalFile: (listInfo: LX.List.MyListInfo, index: number) => void
+  onListPosition: (listInfo: LX.List.UserListInfo, position: number) => void
   onRemove: (listInfo: LX.List.UserListInfo) => void
 }
 export interface ListMenuType {
@@ -46,6 +47,7 @@ export default forwardRef<ListMenuType, ListMenuProps>(({
   onExport,
   onSync,
   onSelectLocalFile,
+  onListPosition,
   onRemove,
 }, ref) => {
   const t = useI18n()
@@ -72,6 +74,7 @@ export default forwardRef<ListMenuType, ListMenuProps>(({
     let rename = false
     let sync = false
     let remove = false
+    let change_position = false
     let local_file = !listState.fetchingListStatus[listInfo.id]
     let userList: LX.List.UserListInfo
     switch (listInfo.id) {
@@ -82,6 +85,7 @@ export default forwardRef<ListMenuType, ListMenuProps>(({
         userList = listInfo as LX.List.UserListInfo
         rename = true
         remove = true
+        change_position = true
         sync = !!(userList.source && musicSdk[userList.source]?.songList)
         break
     }
@@ -95,7 +99,7 @@ export default forwardRef<ListMenuType, ListMenuProps>(({
       { action: 'sync', disabled: !sync || !local_file, label: t('list_sync') },
       { action: 'import', label: t('list_import') },
       { action: 'export', label: t('list_export') },
-      // { action: 'changePosition', label: t('change_position') },
+      { action: 'changePosition', disabled: !change_position, label: t('change_position') },
       { action: 'remove', disabled: !remove, label: t('list_remove') },
     ])
   }
@@ -124,9 +128,10 @@ export default forwardRef<ListMenuType, ListMenuProps>(({
       case 'sync':
         onSync(selectInfo.listInfo as LX.List.UserListInfo)
         break
-        // case 'changePosition':
-
-        //   break
+      case 'changePosition':
+        // index 是抽屉列表（含固定在前面的试听/收藏两行）里的下标，直接透传给弹窗换算
+        onListPosition(selectInfo.listInfo as LX.List.UserListInfo, selectInfo.index)
+        break
       case 'local_file':
         onSelectLocalFile(selectInfo.listInfo, selectInfo.index)
         break

@@ -6,6 +6,7 @@ import List from './List'
 import ListImportExport, { type ListImportExportType } from './ListImportExport'
 import { handleRemove, handleSync } from './listAction'
 import ListMusicSort, { type ListMusicSortType } from './ListMusicSort'
+import ListPositionModal, { type ListPositionModalType } from './ListPositionModal'
 import DuplicateMusic, { type DuplicateMusicType } from './DuplicateMusic'
 
 
@@ -14,6 +15,7 @@ export default () => {
   const listMenuRef = useRef<ListMenuType>(null)
   const listNameEditRef = useRef<ListNameEditType>(null)
   const listMusicSortRef = useRef<ListMusicSortType>(null)
+  const listPositionModalRef = useRef<ListPositionModalType>(null)
   const duplicateMusicRef = useRef<DuplicateMusicType>(null)
   const listImportExportRef = useRef<ListImportExportType>(null)
 
@@ -40,6 +42,7 @@ export default () => {
           <List onShowMenu={(info, position) => listMenuRef.current?.show(info, position)} />
           <ListNameEdit ref={listNameEditRef} />
           <ListMusicSort ref={listMusicSortRef} />
+          <ListPositionModal ref={listPositionModalRef} />
           <DuplicateMusic ref={duplicateMusicRef} />
           <ListImportExport ref={listImportExportRef} />
           <ListMenu
@@ -53,6 +56,7 @@ export default () => {
             onRemove={info => { handleRemove(info) }}
             onSync={info => { handleSync(info) }}
             onSelectLocalFile={(info, position) => listImportExportRef.current?.selectFile(info, position)}
+            onListPosition={(info, position) => listPositionModalRef.current?.show(info, position)}
           />
           {/* <ImportExport actionType={actionType} visible={isShowChoosePath} hide={() => setShowChoosePath(false)} selectedListRef={selectedListRef} /> */}
         </>

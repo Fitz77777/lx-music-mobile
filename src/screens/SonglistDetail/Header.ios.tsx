@@ -1,5 +1,5 @@
 import { forwardRef, memo, useEffect, useImperativeHandle, useState } from 'react'
-import { View } from 'react-native'
+import { SafeAreaView, View } from 'react-native'
 
 import Image from '@/components/common/Image'
 import IOSIcon from '@/components/ios/Icon'
@@ -98,23 +98,26 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
   }), [])
 
   return (
-    <View style={{ paddingBottom: spacing.sm }}>
-      <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
-        <Pic componentId={componentId} playCount={detailInfo.playCount} imgUrl={detailInfo.imgUrl} />
-        <View
-          style={{ flex: 1, marginLeft: spacing.lg, justifyContent: 'center' }}
-          nativeID={NAV_SHEAR_NATIVE_IDS.songlistDetail_title}
-        >
-          <IOSText variant="headline" numberOfLines={2}>{detailInfo.name}</IOSText>
-          <IOSText
-            variant="footnote"
-            color={colors.secondaryLabel}
-            numberOfLines={3}
-            style={{ marginTop: spacing.xs }}
-          >{cleanDesc(detailInfo.desc)}</IOSText>
+    /* 显式安全区避让：外层（PageContent）未生效时这里补上，已生效时不叠加 */
+    <SafeAreaView>
+      <View style={{ paddingBottom: spacing.sm }}>
+        <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
+          <Pic componentId={componentId} playCount={detailInfo.playCount} imgUrl={detailInfo.imgUrl} />
+          <View
+            style={{ flex: 1, marginLeft: spacing.lg, justifyContent: 'center' }}
+            nativeID={NAV_SHEAR_NATIVE_IDS.songlistDetail_title}
+          >
+            <IOSText variant="headline" numberOfLines={2}>{detailInfo.name}</IOSText>
+            <IOSText
+              variant="footnote"
+              color={colors.secondaryLabel}
+              numberOfLines={3}
+              style={{ marginTop: spacing.xs }}
+            >{cleanDesc(detailInfo.desc)}</IOSText>
+          </View>
         </View>
+        <ActionBar />
       </View>
-      <ActionBar />
-    </View>
+    </SafeAreaView>
   )
 })

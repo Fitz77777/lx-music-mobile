@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, SafeAreaView, View } from 'react-native'
 
 import Image from '@/components/common/Image'
 import IOSText from '@/components/ios/Text'
@@ -41,18 +41,20 @@ export default memo(({ albumInfo, componentId }: Props) => {
   }
 
   return (
-    <View style={{ paddingBottom: spacing.sm }}>
-      <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
-        <Image
-          url={albumPic}
-          style={{
-            width: 96,
-            height: 96,
-            borderRadius: 8,
-            backgroundColor: colors.tertiaryFill,
-          }}
-        />
-        <View style={{ flex: 1, marginLeft: spacing.lg, justifyContent: 'center' }}>
+    // 显式安全区避让：外层（PageContent）未生效时这里补上，已生效时不叠加
+    <SafeAreaView>
+      <View style={{ paddingBottom: spacing.sm }}>
+        <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
+          <Image
+            url={albumPic}
+            style={{
+              width: 96,
+              height: 96,
+              borderRadius: 8,
+              backgroundColor: colors.tertiaryFill,
+            }}
+          />
+          <View style={{ flex: 1, marginLeft: spacing.lg, justifyContent: 'center' }}>
           <IOSText variant="headline" numberOfLines={2}>{albumInfo.name}</IOSText>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.xs }}>
             {
@@ -69,8 +71,9 @@ export default memo(({ albumInfo, componentId }: Props) => {
             {albumInfo.publishTime ? dateFormat(albumInfo.publishTime, 'Y.M.D') : ''}
             {albumInfo.size ? ` • ${global.i18n.t('album_song_count', { num: albumInfo.size })}` : ''}
           </IOSText>
+          </View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   )
 })

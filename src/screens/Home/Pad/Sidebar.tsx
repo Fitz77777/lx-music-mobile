@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { Platform, Pressable, ScrollView, View } from 'react-native'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
@@ -107,7 +107,9 @@ export default memo(({ groups, bottomItems, activeId, onChange }: Props) => {
         borderTopWidth: hairline,
         borderTopColor: colors.separator,
         paddingTop: spacing.md,
-        paddingBottom: spacing.xl,
+        // iPad 的 SafeAreaView 已留出 Home 指示条内缩，这里只需很小的余量；
+        // Android 平板 SafeAreaView 不生效，多留一点避免贴到手势条
+        paddingBottom: Platform.OS == 'ios' ? spacing.xs : spacing.lg,
       }}>
         {bottomItems.map(renderTab)}
       </View>

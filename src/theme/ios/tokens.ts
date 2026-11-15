@@ -55,11 +55,7 @@ export interface IOSColors {
   systemPurple: string
   systemGray: string
 
-  // 设置图标 / 开关
-  /** 设置行图标底色（中性灰） */
-  iconTileBackground: string
-  /** 设置行图标颜色 */
-  iconTileForeground: string
+  // 开关
   /** 开关关闭态轨道色 */
   switchTrackOff: string
 
@@ -119,8 +115,6 @@ export const iosColorsLight: IOSColors = {
   systemPurple: '#AF52DE',
   systemGray: '#8E8E93',
 
-  iconTileBackground: 'rgba(120, 120, 128, 0.13)',
-  iconTileForeground: '#6E6E73',
   switchTrackOff: '#E9E9EB',
 
   barBackgroundOpaque: '#F9F9F9',
@@ -169,8 +163,6 @@ export const iosColorsDark: IOSColors = {
   systemPurple: '#BF5AF2',
   systemGray: '#8E8E93',
 
-  iconTileBackground: 'rgba(120, 120, 128, 0.24)',
-  iconTileForeground: '#AEAEB2',
   switchTrackOff: 'rgba(120, 120, 128, 0.32)',
 
   barBackgroundOpaque: '#161618',

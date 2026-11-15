@@ -28,11 +28,10 @@ const buildGroups = (): IOSSettingGroup[] => {
   })
 }
 
-const TILE_SIZE = 26
 
 export default () => {
   const t = useI18n()
-  const { colors, accent, spacing, radius, hairline, withAlpha } = useIOSTheme()
+  const { colors, accent, spacing, radius, hairline } = useIOSTheme()
   const mainRef = useRef<MainType>(null)
   const groups = useMemo(buildGroups, [])
   const [activeId, setActiveId] = useState(() => global.lx.settingActiveId || groups[0].items[0].id)
@@ -62,7 +61,7 @@ export default () => {
         style={({ pressed }) => ({
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 10,
+          gap: 12,
           minHeight: 44,
           marginRight: spacing.sm,
           paddingHorizontal: 10,
@@ -70,16 +69,7 @@ export default () => {
           backgroundColor: active ? colors.quaternaryFill : pressed ? colors.secondaryFill : 'transparent',
         })}
       >
-        <View style={{
-          width: TILE_SIZE,
-          height: TILE_SIZE,
-          borderRadius: 6,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: active ? withAlpha(accent, 0.16) : colors.iconTileBackground,
-        }}>
-          <IOSIcon name={item.icon} size={17} color={active ? accent : colors.iconTileForeground} />
-        </View>
+        <IOSIcon name={item.icon} size={20} color={active ? accent : colors.secondaryLabel} />
         <IOSText size={15} weight={active ? '600' : '500'} color={active ? accent : colors.label} numberOfLines={1}>
           {t(item.titleKey)}
         </IOSText>

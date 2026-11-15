@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { ScrollView, View } from 'react-native'
+import { ScrollView } from 'react-native'
 import { Navigation } from 'react-native-navigation'
 
 import { useI18n } from '@/lang'
@@ -12,19 +12,9 @@ import commonState from '@/store/common/state'
 import { IOS_SETTING_GROUPS, type IOSSettingSection } from './iosSections'
 
 const IconTile = memo(({ section }: { section: IOSSettingSection }) => {
-  const { colors, radius } = useIOSTheme()
-  return (
-    <View style={{
-      width: 29,
-      height: 29,
-      borderRadius: radius.cover,
-      backgroundColor: colors.iconTileBackground,
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
-      <IOSIcon name={section.icon} size={17} color={colors.iconTileForeground} />
-    </View>
-  )
+  const { colors } = useIOSTheme()
+  // 无底色：纯图标与文字同灰度，视觉更扁平统一
+  return <IOSIcon name={section.icon} size={20} color={colors.secondaryLabel} />
 })
 
 /**

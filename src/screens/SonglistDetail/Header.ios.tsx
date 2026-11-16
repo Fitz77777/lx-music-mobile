@@ -95,6 +95,9 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
   const info = useListInfo()
   const [detailInfo, setDetailInfo] = useState<DetailInfo>({ name: '', desc: '', playCount: '', imgUrl: info.img })
   const [descVisible, setDescVisible] = useState(false)
+  const [coverH, setCoverH] = useState(0)
+  const [descBoxH, setDescBoxH] = useState(0)
+  const [descTextH, setDescTextH] = useState(0)
 
   useImperativeHandle(ref, () => ({
     setInfo(info) {
@@ -106,21 +109,32 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
     /* 二级页里 RN SafeAreaView 拿不到安全区，用原生状态栏高度显式下移 */
     <View style={{ paddingTop: getIOSStatusBarHeight() }}>
         <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
-          <Pic componentId={componentId} playCount={detailInfo.playCount} imgUrl={detailInfo.imgUrl} />
+          <View onLayout={e => { setCoverH(e.nativeEvent.layout.height) }}>
+            <Pic componentId={componentId} playCount={detailInfo.playCount} imgUrl={detailInfo.imgUrl} />
+          </View>
           <View
-            style={{ flex: 1, marginLeft: spacing.lg, justifyContent: 'center' }}
+            style={{ flex: 1, marginLeft: spacing.lg, height: coverH || undefined, overflow: 'hidden' }}
             nativeID={NAV_SHEAR_NATIVE_IDS.songlistDetail_title}
           >
             <IOSText variant="headline" numberOfLines={2}>{detailInfo.name}</IOSText>
-            <View style={{ marginTop: spacing.xs, position: 'relative' }}>
+            <View
+              style={{ flex: 1, marginTop: spacing.xs }}
+              onLayout={e => { setDescBoxH(e.nativeEvent.layout.height) }}
+            >
               <IOSText
                 variant="footnote"
                 color={colors.secondaryLabel}
-                numberOfLines={3}
-                style={{ paddingRight: 22 }}
+                style={{ paddingRight: 20 }}
+              >{cleanDesc(detailInfo.desc)}</IOSText>
+              {/* 隐藏的完整文本用于测量实际高度，超出可视区才显示三点按钮 */}
+              <IOSText
+                variant="footnote"
+                color="transparent"
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', opacity: 0 }}
+                onLayout={e => { setDescTextH(e.nativeEvent.layout.height) }}
               >{cleanDesc(detailInfo.desc)}</IOSText>
               {
-                cleanDesc(detailInfo.desc)
+                descTextH > descBoxH + 1 && descBoxH > 0
                   ? (
                       <Pressable
                         onPress={() => { setDescVisible(true) }}

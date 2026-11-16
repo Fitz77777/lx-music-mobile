@@ -162,7 +162,8 @@ android {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
-            minifyEnabled enableProguardInReleaseBuilds
+            // -PnoMinify 时关闭 R8，用于排查代码混淆导致的崩溃
+            minifyEnabled enableProguardInReleaseBuilds && !project.hasProperty('noMinify')
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
 
             signingConfig signingConfigs.release

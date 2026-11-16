@@ -33,6 +33,7 @@ export interface ListProps {
   ListHeaderComponent?: FlatListType['ListEmptyComponent']
   checkHomePagerIdle: boolean
   rowType?: RowInfoType
+  showCover?: boolean
 }
 export interface ListType {
   setList: (list: LX.Music.MusicInfoOnline[], isAppend: boolean, showSource: boolean) => void
@@ -57,6 +58,7 @@ const List = forwardRef<ListType, ListProps>(({
   ListHeaderComponent,
   checkHomePagerIdle,
   rowType,
+  showCover,
 }, ref) => {
   // const t = useI18n()
   const theme = useTheme()
@@ -189,6 +191,7 @@ const List = forwardRef<ListType, ListProps>(({
       item={item}
       index={index}
       showSource={showSource}
+      showCover={showCover}
       onPress={handlePress}
       onLongPress={handleLongPress}
       onShowMenu={onShowMenu}

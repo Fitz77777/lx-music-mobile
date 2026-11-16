@@ -32,7 +32,7 @@ const useQualityTag = (musicInfo: LX.Music.MusicInfoOnline) => {
   return info
 }
 
-export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu, selectedList, rowInfo, isShowAlbumName, isShowInterval, isLast }: {
+export default memo(({ item, index, showSource, showCover = true, onPress, onLongPress, onShowMenu, selectedList, rowInfo, isShowAlbumName, isShowInterval, isLast }: {
   item: LX.Music.MusicInfoOnline
   index: number
   showSource?: boolean
@@ -43,6 +43,8 @@ export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu
   rowInfo: RowInfo
   isShowAlbumName: boolean
   isShowInterval: boolean
+  /** 是否展示封面（否则只展示序号，歌单详情等接口无封面的列表用） */
+  showCover?: boolean
   /** iOS 用于隐藏最后一行分隔线，Android 忽略 */
   isLast?: boolean
 }) => {
@@ -68,7 +70,7 @@ export default memo(({ item, index, showSource, onPress, onLongPress, onShowMenu
     <View style={{ ...styles.listItem, width: rowInfo.rowWidth, height: ITEM_HEIGHT, backgroundColor: isSelected ? theme['c-primary-background-hover'] : 'rgba(0,0,0,0)' }}>
       <TouchableOpacity style={styles.listItemLeft} onPress={() => { onPress(item, index) }} onLongPress={() => { onLongPress(item, index) }}>
         <Text style={styles.sn} size={13} color={theme['c-300']}>{index + 1}</Text>
-        <Image url={picUrl} style={styles.pic} />
+        {showCover ? <Image url={picUrl} style={styles.pic} /> : null}
         <View style={styles.itemInfo}>
           <Text numberOfLines={1}>{item.name}</Text>
           <View style={styles.listItemSingle}>

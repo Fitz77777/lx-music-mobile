@@ -2,6 +2,8 @@ import { memo, useRef } from 'react'
 import { View, TouchableOpacity } from 'react-native'
 
 import { Icon } from '@/components/common/Icon'
+import Image from '@/components/common/Image'
+import useMusicPic from '@/utils/hooks/useMusicPic'
 import IOSBadge from '@/components/ios/Badge'
 import IOSText from '@/components/ios/Text'
 import { useI18n } from '@/lang'
@@ -10,11 +12,14 @@ import type { RowInfo } from '@/utils/tools'
 
 /** iOS 歌曲行高（pt，原型 68pt） */
 export const ITEM_HEIGHT = 68
-/** 序号列宽（替代封面位置） */
-const INDEX_WIDTH = 30
+const PIC_SIZE = 44
+/** 序号列宽（替代封面位置，压缩到与两位数字贴合） */
+const INDEX_WIDTH = 20
+const INDEX_GAP = 10
 const ROW_PADDING = 14
-/** 分隔线内缩到文字起点：左内边距 + 序号列 + 间距 */
-const SEPARATOR_INSET = ROW_PADDING + INDEX_WIDTH + 12
+/** 分隔线内缩到文字起点 */
+const SEPARATOR_INSET_COVER = ROW_PADDING + PIC_SIZE + 12
+const SEPARATOR_INSET_INDEX = ROW_PADDING + INDEX_WIDTH + INDEX_GAP
 
 const useQualityTag = (musicInfo: LX.Music.MusicInfoOnline) => {
   const t = useI18n()
@@ -33,11 +38,11 @@ const useQualityTag = (musicInfo: LX.Music.MusicInfoOnline) => {
 }
 
 /**
- * iOS 在线歌曲行：序号 + 标题 + 音质徽标/音源/歌手 + 时长 + 更多。
- * 不展示封面（在线列表接口多数不回封面），用序号标识行位置。
+ * iOS 在线歌曲行：封面 / 序号 + 标题 + 音质徽标/音源/歌手 + 时长 + 更多。
+ * 歌单详情这类接口不回封面的列表用序号（showCover=false），其余列表展示封面。
  * 与 Android 版共用 props 与 memo 比较逻辑。
  */
-export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval, showSource, isLast = false }: {
+export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval, showSource, showCover = true, isLast = false }: {
   item: LX.Music.MusicInfoOnline
   index: number
   activeIndex: number
@@ -49,6 +54,8 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
   rowInfo: RowInfo
   isShowAlbumName: boolean
   isShowInterval: boolean
+  /** 是否展示封面（否则展示序号） */
+  showCover?: boolean
   isLast?: boolean
 }) => {
   const { colors, accent, spacing, hairline, withAlpha, radius } = useIOSTheme()
@@ -65,6 +72,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
   }
   const tagInfo = useQualityTag(item)
   const active = activeIndex == index
+  const picUrl = useMusicPic(item.source, item.id, item.meta.picUrl)
 
   const singer = `${item.singer}${isShowAlbumName && item.meta.albumName ? ` · ${item.meta.albumName}` : ''}`
 
@@ -82,13 +90,29 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         onPress={() => { onPress(item, index) }}
         onLongPress={() => { onLongPress(item, index) }}
       >
-        <IOSText
-          variant="subheadline"
-          color={active ? accent : colors.tertiaryLabel}
-          numberOfLines={1}
-          style={{ width: INDEX_WIDTH, textAlign: 'center' }}
-        >{index + 1}</IOSText>
-        <View style={{ flex: 1, marginLeft: spacing.md, justifyContent: 'center' }}>
+        {
+          showCover
+            ? (
+                <Image
+                  url={picUrl}
+                  style={{
+                    width: PIC_SIZE,
+                    height: PIC_SIZE,
+                    borderRadius: 8,
+                    backgroundColor: colors.tertiaryFill,
+                  }}
+                />
+              )
+            : (
+                <IOSText
+                  variant="footnote"
+                  color={active ? accent : colors.tertiaryLabel}
+                  numberOfLines={1}
+                  style={{ width: INDEX_WIDTH, textAlign: 'center' }}
+                >{index + 1}</IOSText>
+              )
+        }
+        <View style={{ flex: 1, marginLeft: showCover ? spacing.md : INDEX_GAP, justifyContent: 'center' }}>
           <IOSText weight="500" numberOfLines={1}>{item.name}</IOSText>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 6 }}>
             {tagInfo.variant ? <IOSBadge variant={tagInfo.variant}>{tagInfo.text}</IOSBadge> : null}
@@ -126,7 +150,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         ? (
             <View style={{
               position: 'absolute',
-              left: SEPARATOR_INSET,
+              left: showCover ? SEPARATOR_INSET_COVER : SEPARATOR_INSET_INDEX,
               right: 0,
               bottom: 0,
               height: hairline,

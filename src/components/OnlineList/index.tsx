@@ -17,6 +17,8 @@ export interface OnlineListProps {
   ListHeaderComponent?: ListProps['ListHeaderComponent']
   checkHomePagerIdle?: boolean
   rowType?: RowInfoType
+  /** 是否展示歌曲封面（歌单详情等接口无封面的列表传 false，改展示序号） */
+  showCover?: boolean
 }
 export interface OnlineListType {
   setList: (list: LX.Music.MusicInfoOnline[], isAppend?: boolean, showSource?: boolean) => void
@@ -31,6 +33,7 @@ export default forwardRef<OnlineListType, OnlineListProps>(({
   ListHeaderComponent,
   checkHomePagerIdle = false,
   rowType,
+  showCover,
 }, ref) => {
   const listRef = useRef<ListType>(null)
   const multipleModeBarRef = useRef<MultipleModeBarType>(null)
@@ -91,6 +94,7 @@ export default forwardRef<OnlineListType, OnlineListProps>(({
           onPlayList={onPlayList}
           progressViewOffset={progressViewOffset}
           ListHeaderComponent={ListHeaderComponent}
+          showCover={showCover}
           checkHomePagerIdle={checkHomePagerIdle}
           rowType={rowType}
         />

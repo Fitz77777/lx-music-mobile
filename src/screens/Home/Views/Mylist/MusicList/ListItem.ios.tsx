@@ -2,20 +2,21 @@ import { memo, useRef } from 'react'
 import { View, TouchableOpacity } from 'react-native'
 
 import { Icon } from '@/components/common/Icon'
+import Image from '@/components/common/Image'
+import useMusicPic from '@/utils/hooks/useMusicPic'
 import IOSBadge from '@/components/ios/Badge'
 import IOSText from '@/components/ios/Text'
 import { useAssertApiSupport } from '@/store/common/hook'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import type { RowInfo } from '@/utils/tools'
 
-/** iOS 音乐行高（pt，原型 68pt） */
+/** iOS 音乐行高（pt，原型 68pt / 封面 44pt） */
 export const ITEM_HEIGHT = 68
-/** 序号列宽（替代封面位置） */
-const INDEX_WIDTH = 30
+const PIC_SIZE = 44
 const ROW_PADDING = 14
 const TEXT_GAP = 12
 /** 分隔线内缩到文字起点 */
-const SEPARATOR_INSET = ROW_PADDING + INDEX_WIDTH + TEXT_GAP
+const SEPARATOR_INSET = ROW_PADDING + PIC_SIZE + TEXT_GAP
 
 /**
  * iOS「我的列表」歌曲行：封面 + 标题 + 音源/歌手 + 时长 + 更多。
@@ -38,6 +39,7 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
 }) => {
   const { colors, accent, hairline, withAlpha, radius } = useIOSTheme()
   const isSupported = useAssertApiSupport(item.source)
+  const picUrl = useMusicPic(item.source, item.id, item.meta.picUrl)
 
   const isSelected = selectedList.includes(item)
 
@@ -68,12 +70,15 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
         onPress={() => { onPress(item, index) }}
         onLongPress={() => { onLongPress(item, index) }}
       >
-        <IOSText
-          variant="subheadline"
-          color={active ? accent : colors.tertiaryLabel}
-          numberOfLines={1}
-          style={{ width: INDEX_WIDTH, textAlign: 'center' }}
-        >{index + 1}</IOSText>
+        <Image
+          url={picUrl}
+          style={{
+            width: PIC_SIZE,
+            height: PIC_SIZE,
+            borderRadius: 8,
+            backgroundColor: colors.tertiaryFill,
+          }}
+        />
         <View style={{ flex: 1, marginLeft: TEXT_GAP, justifyContent: 'center' }}>
           <IOSText
             weight="500"

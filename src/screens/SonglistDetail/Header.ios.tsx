@@ -1,5 +1,5 @@
-import { forwardRef, memo, useEffect, useImperativeHandle, useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { ScrollView, Text, View } from 'react-native'
 
 import Image from '@/components/common/Image'
 import IOSBottomSheet from '@/components/ios/BottomSheet'
@@ -16,10 +16,16 @@ import { cleanDesc } from '@/utils'
 import ActionBar from './ActionBar'
 
 const PIC_SIZE = 96
-/** 播放量行恒定占位高（caption1 一行） */
-const COUNT_ROW_H = 18
+/** 播放量行恒定占位高（caption1 一行，上下留白居中） */
+const COUNT_ROW_H = 20
 /** 封面列总高恒定：封面 + 间距 + 播放量行，右侧文字列与其对齐，加载时不跳动 */
 const COVER_COLUMN_H = PIC_SIZE + 4 + COUNT_ROW_H
+/** 简介固定最多 4 行（footnote 行高 18） */
+const MAX_DESC_LINES = 4
+const DESC_LINE_H = 18
+const DESC_MAX_H = MAX_DESC_LINES * DESC_LINE_H
+/** 右侧文字列恒定高：歌名 2 行 + 间距 + 简介 4 行 */
+const TEXT_COLUMN_H = 22 * 2 + 4 + DESC_MAX_H
 
 const CountText = memo(({ count }: { count: string }) => {
   const [animFade] = useAnimateOnecNumber(0, 1, 250, false)
@@ -97,13 +103,68 @@ export interface DetailInfo {
 
 /** iOS 歌单详情头部：返回 + 封面/简介 + 操作按钮 */
 export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
-  const { colors, spacing } = useIOSTheme()
+  const { colors, accent, spacing } = useIOSTheme()
   const t = useI18n()
   const info = useListInfo()
   const [detailInfo, setDetailInfo] = useState<DetailInfo>({ name: '', desc: '', playCount: '', imgUrl: info.img })
   const [descVisible, setDescVisible] = useState(false)
-  const [descBoxH, setDescBoxH] = useState(0)
-  const [descTextH, setDescTextH] = useState(0)
+
+  // 简介截断：先用隐藏文本测全文高度，超 4 行时二分搜索最大可容纳前缀，
+  // 省略号「…」内联在文字末尾（强调色、可点击），不固定在角落
+  const descText = cleanDesc(detailInfo.desc)
+  const [displayText, setDisplayText] = useState('')
+  const [truncated, setTruncated] = useState(false)
+  const [searchText, setSearchText] = useState<string | null>(null)
+  const searchStateRef = useRef<{ lo: number, hi: number } | null>(null)
+  const probeMidRef = useRef(0)
+  const descWidthRef = useRef(0)
+  const [descWidth, setDescWidth] = useState(0)
+
+  const probeSearch = (full: string) => {
+    const { lo, hi } = searchStateRef.current!
+    const mid = Math.floor((lo + hi) / 2)
+    probeMidRef.current = mid
+    setSearchText(`${full.slice(0, mid)}…`)
+  }
+
+  const handleSearchMeasure = (h: number) => {
+    const full = descText
+    if (searchStateRef.current == null) {
+      // 全文测量阶段
+      if (h <= DESC_MAX_H + 1) {
+        setDisplayText(full)
+        setTruncated(false)
+        setSearchText(null)
+        return
+      }
+      searchStateRef.current = { lo: 0, hi: full.length }
+      probeSearch(full)
+      return
+    }
+    // 二分搜索阶段
+    const mid = probeMidRef.current
+    const fits = h <= DESC_MAX_H + 1
+    const state = { lo: fits ? mid : searchStateRef.current.lo, hi: fits ? searchStateRef.current.hi : mid }
+    searchStateRef.current = state
+    if (state.hi - state.lo <= 1) {
+      // 尾部空白收敛：去掉末尾空白，最多保留一个换行（省略号落在空行行首或上一行行尾）
+      const prefix = full.slice(0, state.lo).replace(/[ \t\r]+$/, '').replace(/\n+$/, '\n')
+      setDisplayText(prefix)
+      setTruncated(true)
+      setSearchText(null)
+      searchStateRef.current = null
+      return
+    }
+    probeSearch(full)
+  }
+
+  // 简介内容或可用宽度变化时重新测量
+  useEffect(() => {
+    searchStateRef.current = null
+    setTruncated(false)
+    setDisplayText(descText)
+    setSearchText(descText)
+  }, [descText, descWidth])
 
   useImperativeHandle(ref, () => ({
     setInfo(info) {
@@ -117,39 +178,45 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
         <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
           <Pic componentId={componentId} playCount={detailInfo.playCount} imgUrl={detailInfo.imgUrl} />
           <View
-            style={{ flex: 1, marginLeft: spacing.lg, height: COVER_COLUMN_H, overflow: 'hidden' }}
+            style={{ flex: 1, marginLeft: spacing.lg, height: TEXT_COLUMN_H, overflow: 'hidden' }}
             nativeID={NAV_SHEAR_NATIVE_IDS.songlistDetail_title}
           >
             <IOSText variant="headline" numberOfLines={2}>{detailInfo.name}</IOSText>
             <View
-              style={{ flex: 1, marginTop: spacing.xs, overflow: 'hidden' }}
-              onLayout={e => { setDescBoxH(e.nativeEvent.layout.height) }}
+              style={{ height: DESC_MAX_H, marginTop: spacing.xs, overflow: 'hidden' }}
+              onLayout={e => {
+                const w = e.nativeEvent.layout.width
+                if (Math.abs(w - descWidthRef.current) > 0.5) {
+                  descWidthRef.current = w
+                  setDescWidth(w)
+                }
+              }}
             >
               <IOSText
                 variant="footnote"
                 color={colors.secondaryLabel}
-                style={{ paddingRight: 20 }}
-              >{cleanDesc(detailInfo.desc)}</IOSText>
-              {/* 隐藏的完整文本用于测量实际高度，超出可视区才显示三点按钮 */}
-              <IOSText
-                variant="footnote"
-                color="transparent"
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', opacity: 0 }}
-                onLayout={e => { setDescTextH(e.nativeEvent.layout.height) }}
-              >{cleanDesc(detailInfo.desc)}</IOSText>
+                numberOfLines={MAX_DESC_LINES}
+              >
+                {displayText}
+                {
+                  truncated
+                    ? (
+                        // 省略号内联在文字末尾，带链接样式可点击查看全文
+                        <Text onPress={() => { setDescVisible(true) }} style={{ color: accent }}>…</Text>
+                      )
+                    : null
+                }
+              </IOSText>
+              {/* 隐藏文本用于测量（全文 / 二分候选） */}
               {
-                descTextH > descBoxH + 1 && descBoxH > 0
+                searchText != null
                   ? (
-                      <Pressable
-                        onPress={() => { setDescVisible(true) }}
-                        hitSlop={8}
-                        accessibilityRole="button"
-                        accessibilityLabel={t('songlist_desc')}
-                        style={{ position: 'absolute', right: 0, bottom: 0, paddingHorizontal: 2, alignItems: 'center', justifyContent: 'center' }}
-                      >
-                        {/* 截断提示直接用省略号字符，可点击查看全文 */}
-                        <IOSText variant="footnote" color={colors.secondaryLabel}>…</IOSText>
-                      </Pressable>
+                      <IOSText
+                        variant="footnote"
+                        color="transparent"
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', opacity: 0 }}
+                        onLayout={e => { handleSearchMeasure(e.nativeEvent.layout.height) }}
+                      >{searchText}</IOSText>
                     )
                   : null
               }

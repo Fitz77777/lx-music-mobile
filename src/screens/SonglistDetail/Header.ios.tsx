@@ -145,10 +145,10 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
                         hitSlop={8}
                         accessibilityRole="button"
                         accessibilityLabel={t('songlist_desc')}
-                        style={{ position: 'absolute', right: 0, bottom: 0, width: 20, height: 18, alignItems: 'center', justifyContent: 'center' }}
+                        style={{ position: 'absolute', right: 0, bottom: 0, paddingHorizontal: 2, alignItems: 'center', justifyContent: 'center' }}
                       >
-                        {/* 字体里只有竖向三点，旋转成横向 */}
-                        <IOSIcon name="dots-vertical" size={15} color={colors.secondaryLabel} style={{ transform: [{ rotate: '90deg' }] }} />
+                        {/* 截断提示直接用省略号字符，可点击查看全文 */}
+                        <IOSText variant="footnote" color={colors.secondaryLabel}>…</IOSText>
                       </Pressable>
                     )
                   : null

@@ -109,61 +109,69 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
   const [detailInfo, setDetailInfo] = useState<DetailInfo>({ name: '', desc: '', playCount: '', imgUrl: info.img })
   const [descVisible, setDescVisible] = useState(false)
 
-  // 简介截断：先用隐藏文本测全文高度，超 4 行时二分搜索最大可容纳前缀，
-  // 省略号「…」内联在文字末尾（强调色、可点击），不固定在角落
+  // 简介截断：渲染全文并用 onTextLayout 拿到实际换行结果，
+  // 超过 4 行时按行映射回原文截断，省略号内联在文字末尾（强调色、可点击）
   const descText = cleanDesc(detailInfo.desc)
   const [displayText, setDisplayText] = useState('')
   const [truncated, setTruncated] = useState(false)
-  const [searchText, setSearchText] = useState<string | null>(null)
-  const searchStateRef = useRef<{ lo: number, hi: number } | null>(null)
-  const probeMidRef = useRef(0)
+  const [measuring, setMeasuring] = useState(true)
+  const measuringRef = useRef(true)
   const descWidthRef = useRef(0)
   const [descWidth, setDescWidth] = useState(0)
 
-  const probeSearch = (full: string) => {
-    const { lo, hi } = searchStateRef.current!
-    const mid = Math.floor((lo + hi) / 2)
-    probeMidRef.current = mid
-    setSearchText(`${full.slice(0, mid)}…`)
-  }
-
-  const handleSearchMeasure = (h: number) => {
+  const handleDescLines = (lines: Array<{ text?: string }>) => {
+    if (!measuringRef.current) return
     const full = descText
-    if (searchStateRef.current == null) {
-      // 全文测量阶段
-      if (h <= DESC_MAX_H + 1) {
-        setDisplayText(full)
-        setTruncated(false)
-        setSearchText(null)
-        return
+    if (!full || lines.length <= MAX_DESC_LINES) {
+      measuringRef.current = false
+      setDisplayText(full)
+      setTruncated(false)
+      setMeasuring(false)
+      return
+    }
+    // 把前 4 行文本映射回原文字符串，得到第 4 行的起止位置
+    let idx = 0
+    let lineStart = 0
+    let cut = -1
+    for (let i = 0; i < lines.length; i++) {
+      const text = lines[i]?.text ?? ''
+      if (i == MAX_DESC_LINES - 1) {
+        // 第 4 行：空行则截到行首（省略号落在第 4 行），否则吃掉行尾 2 个字给省略号腾位
+        lineStart = idx
+        if (text.length) {
+          const at = full.indexOf(text, idx)
+          if (at < 0) break
+          idx = at + text.length
+        }
+        cut = text.trim() === '' ? lineStart : Math.max(idx - 2, lineStart)
+        break
       }
-      searchStateRef.current = { lo: 0, hi: full.length }
-      probeSearch(full)
-      return
+      if (text.length) {
+        const at = full.indexOf(text, idx)
+        if (at < 0) break
+        idx = at + text.length
+      }
+      if (i < lines.length - 1 && full[idx] == '\n') idx += 1
+      else if (i < lines.length - 1 && full[idx] == '\r' && full[idx + 1] == '\n') idx += 2
     }
-    // 二分搜索阶段
-    const mid = probeMidRef.current
-    const fits = h <= DESC_MAX_H + 1
-    const state = { lo: fits ? mid : searchStateRef.current.lo, hi: fits ? searchStateRef.current.hi : mid }
-    searchStateRef.current = state
-    if (state.hi - state.lo <= 1) {
-      // 尾部空白收敛：去掉末尾空白，最多保留一个换行（省略号落在空行行首或上一行行尾）
-      const prefix = full.slice(0, state.lo).replace(/[ \t\r]+$/, '').replace(/\n+$/, '\n')
-      setDisplayText(prefix)
+    measuringRef.current = false
+    if (cut >= 0) {
+      setDisplayText(full.slice(0, cut))
       setTruncated(true)
-      setSearchText(null)
-      searchStateRef.current = null
-      return
+    } else {
+      // 行文本对不上原文时退回整体裁切
+      setDisplayText(full)
+      setTruncated(false)
     }
-    probeSearch(full)
+    setMeasuring(false)
   }
 
   // 简介内容或可用宽度变化时重新测量
   useEffect(() => {
-    searchStateRef.current = null
+    measuringRef.current = true
     setTruncated(false)
     setDisplayText(descText)
-    setSearchText(descText)
+    setMeasuring(true)
   }, [descText, descWidth])
 
   useImperativeHandle(ref, () => ({
@@ -195,7 +203,8 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
               <IOSText
                 variant="footnote"
                 color={colors.secondaryLabel}
-                numberOfLines={MAX_DESC_LINES}
+                onTextLayout={e => { handleDescLines(e.nativeEvent.lines) }}
+                style={{ opacity: measuring ? 0 : 1 }}
               >
                 {displayText}
                 {
@@ -207,19 +216,6 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
                     : null
                 }
               </IOSText>
-              {/* 隐藏文本用于测量（全文 / 二分候选） */}
-              {
-                searchText != null
-                  ? (
-                      <IOSText
-                        variant="footnote"
-                        color="transparent"
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', opacity: 0 }}
-                        onLayout={e => { handleSearchMeasure(e.nativeEvent.layout.height) }}
-                      >{searchText}</IOSText>
-                    )
-                  : null
-              }
             </View>
           </View>
         </View>

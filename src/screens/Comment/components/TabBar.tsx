@@ -1,16 +1,11 @@
 import { memo, useMemo } from 'react'
-import { View, TouchableOpacity } from 'react-native'
+import { Pressable, View } from 'react-native'
 
-import { Icon } from '@/components/common/Icon'
-import Text from '@/components/common/Text'
-import { useTheme } from '@/store/theme/hook'
-import { createStyle } from '@/utils/tools'
-import { BorderWidths } from '@/theme'
-import { scaleSizeH } from '@/utils/pixelRatio'
+import IOSIcon from '@/components/ios/Icon'
+import IOSSegmentedControl from '@/components/ios/SegmentedControl'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 
 export type CommentTabId = 'hot' | 'new'
-
-const BAR_HEIGHT = scaleSizeH(34)
 
 export interface TabBarProps {
   tabs: ReadonlyArray<{ id: CommentTabId, label: string }>
@@ -19,61 +14,34 @@ export interface TabBarProps {
   onRefresh: () => void
 }
 
-const HeaderItem = ({ id, label, isActive, onPress }: {
-  id: CommentTabId
-  label: string
-  isActive: boolean
-  onPress: (id: CommentTabId) => void
-}) => {
-  const theme = useTheme()
-  const components = useMemo(() => (
-    <TouchableOpacity style={styles.tabBtn} onPress={() => { !isActive && onPress(id) }}>
-      <Text color={isActive ? theme['c-primary-font-active'] : theme['c-font']}>{label}</Text>
-    </TouchableOpacity>
-  ), [isActive, theme, label, onPress, id])
-
-  return components
-}
-
-/** 评论页标签栏：热门 / 最新 + 刷新 */
+/** iOS 评论页标签栏：分段控件 + 刷新按钮 */
 export default memo(({ tabs, activeId, onTabChange, onRefresh }: TabBarProps) => {
-  const theme = useTheme()
+  const { colors, spacing } = useIOSTheme()
+  const values = useMemo(() => tabs.map(tab => tab.label), [tabs])
+  const selectedIndex = useMemo(() => Math.max(tabs.findIndex(tab => tab.id == activeId), 0), [tabs, activeId])
 
   return (
-    <View style={{ ...styles.tabHeader, borderBottomColor: theme['c-border-background'], height: BAR_HEIGHT }}>
-      <View style={styles.left}>
-        {tabs.map(({ id, label }) => <HeaderItem id={id} label={label} key={id} isActive={activeId == id} onPress={onTabChange} />)}
+    <View style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+    }}>
+      <View style={{ flex: 1 }}>
+        <IOSSegmentedControl
+          values={values}
+          selectedIndex={selectedIndex}
+          onChange={index => { onTabChange(tabs[index].id) }}
+        />
       </View>
-      <View>
-        <TouchableOpacity onPress={onRefresh} style={{ ...styles.btn, width: BAR_HEIGHT }}>
-          <Icon name="available_updates" size={20} color={theme['c-600']} />
-        </TouchableOpacity>
-      </View>
+      <Pressable
+        onPress={onRefresh}
+        hitSlop={8}
+        accessibilityRole="button"
+        style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
+      >
+        <IOSIcon name="available_updates" size={20} color={colors.secondaryLabel} />
+      </Pressable>
     </View>
   )
-})
-
-const styles = createStyle({
-  tabHeader: {
-    flexDirection: 'row',
-    paddingRight: 10,
-    borderBottomWidth: BorderWidths.normal,
-  },
-  left: {
-    flex: 1,
-    flexDirection: 'row',
-    paddingLeft: 5,
-  },
-  tabBtn: {
-    paddingLeft: 10,
-    paddingRight: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-  },
-  btn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-  },
 })

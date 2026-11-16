@@ -1,16 +1,17 @@
 import { memo, useRef, useState, useEffect } from 'react'
 import { View } from 'react-native'
-import { getLogs, clearLogs } from '@/utils/log'
-// import { gzip, ungzip } from 'pako'
 
-import SubTitle from '../../components/SubTitle'
+import { getLogs, clearLogs } from '@/utils/log'
+
+import Section from '../../components/Section'
 import Button from '../../components/Button'
-import { createStyle, toast } from '@/utils/tools'
+import { toast } from '@/utils/tools'
 import ConfirmAlert, { type ConfirmAlertType } from '@/components/common/ConfirmAlert'
 import CheckBoxItem from '../../components/CheckBoxItem'
 import { useI18n } from '@/lang'
-import Text from '@/components/common/Text'
+import IOSText from '@/components/ios/Text'
 
+/** iOS 错误日志设置：两行开关 + 一个整行按钮 */
 export default memo(() => {
   const t = useI18n()
   const alertRef = useRef<ConfirmAlertType>(null)
@@ -23,7 +24,6 @@ export default memo(() => {
     void getLogs().then(log => {
       if (isUnmountedRef.current) return
       const logArr = log.split(/^----lx log----\n|\n----lx log----\n|\n----lx log----$/)
-      // console.log(logArr)
       logArr.reverse()
       setLogText(logArr.join('\n\n').replace(/^\n+|\n+$/, ''))
     })
@@ -51,7 +51,6 @@ export default memo(() => {
     global.lx.isEnableUserApiLog = enable
   }
 
-
   useEffect(() => {
     isUnmountedRef.current = false
     return () => {
@@ -61,15 +60,23 @@ export default memo(() => {
 
   return (
     <>
-      <SubTitle title={t('setting_other_log')}>
-        <View style={styles.checkBox}>
-          <CheckBoxItem check={isEnableSyncErrorLog} label={t('setting_other_log_sync_log')} onChange={handleSetEnableSyncErrorLog} />
-          <CheckBoxItem check={isEnableUserApiLog} label={t('setting_other_log_user_api_log')} onChange={handleSetEnableUserApiLog} />
+      <Section title={t('setting_other_log')}>
+        <CheckBoxItem
+          check={isEnableSyncErrorLog}
+          label={t('setting_other_log_sync_log')}
+          onChange={handleSetEnableSyncErrorLog}
+        />
+        <CheckBoxItem
+          check={isEnableUserApiLog}
+          label={t('setting_other_log_user_api_log')}
+          onChange={handleSetEnableUserApiLog}
+        />
+        <View style={{ paddingHorizontal: 16, paddingVertical: 10 }}>
+          <Button style={{ alignSelf: 'stretch' }} onPress={openLogModal}>
+            {t('setting_other_log_btn_show')}
+          </Button>
         </View>
-        <View style={styles.btn}>
-          <Button onPress={openLogModal}>{t('setting_other_log_btn_show')}</Button>
-        </View>
-      </SubTitle>
+      </Section>
       <ConfirmAlert
         ref={alertRef}
         cancelText={t('setting_other_log_btn_hide')}
@@ -77,26 +84,15 @@ export default memo(() => {
         onConfirm={handleCleanLog}
         showConfirm={!!logText}
         reverseBtn={true}
-        >
+      >
         <View onStartShouldSetResponder={() => true}>
           {
             logText
-              ? <Text selectable size={13}>{ logText }</Text>
-              : <Text size={13}>{t('setting_other_log_tip_null')}</Text>
+              ? <IOSText selectable variant="footnote">{logText}</IOSText>
+              : <IOSText variant="footnote">{t('setting_other_log_tip_null')}</IOSText>
           }
         </View>
       </ConfirmAlert>
     </>
   )
-})
-
-const styles = createStyle({
-  checkBox: {
-    // paddingTop: 10,
-    paddingBottom: 15,
-    marginLeft: -25,
-  },
-  btn: {
-    flexDirection: 'row',
-  },
 })

@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Platform, View } from 'react-native'
+import { View } from 'react-native'
 
 import CheckBoxItem from '../../components/CheckBoxItem'
 import { createStyle } from '@/utils/tools'
@@ -31,7 +31,7 @@ export default memo(() => {
 
 const styles = createStyle({
   content: {
-    marginTop: Platform.OS == 'ios' ? 0 : 5,
-    // marginBottom: Platform.OS == 'ios' ? 0 : 15,
+    marginTop: 0,
+
   },
 })

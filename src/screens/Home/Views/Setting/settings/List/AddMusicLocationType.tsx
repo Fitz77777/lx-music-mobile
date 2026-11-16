@@ -1,49 +1,26 @@
 import { memo, useMemo } from 'react'
 
-import { StyleSheet, View } from 'react-native'
-
-import SubTitle from '../../components/SubTitle'
-import CheckBox from '@/components/common/CheckBox'
 import { useSettingValue } from '@/store/setting/hook'
 import { useI18n } from '@/lang'
 import { updateSetting } from '@/core/common'
+import SelectRow, { type SelectRowOption } from '../../components/SelectRow'
 
-const setAddMusicLocationType = (type: LX.AddMusicLocationType) => {
-  updateSetting({ 'list.addMusicLocationType': type })
-}
-
-const useActive = (id: LX.AddMusicLocationType) => {
-  const addMusicLocationType = useSettingValue('list.addMusicLocationType')
-  const isActive = useMemo(() => addMusicLocationType == id, [addMusicLocationType, id])
-  return isActive
-}
-
-const Item = ({ id, name }: {
-  id: LX.AddMusicLocationType
-  name: string
-}) => {
-  const isActive = useActive(id)
-  // const [toggleCheckBox, setToggleCheckBox] = useState(false)
-  return <CheckBox marginRight={8} check={isActive} label={name} onChange={() => { setAddMusicLocationType(id) }} need />
-}
-
-
+/** iOS 添加歌曲位置选择：行内显示当前值，点击下拉切换。 */
 export default memo(() => {
   const t = useI18n()
+  const value = useSettingValue('list.addMusicLocationType')
+
+  const options = useMemo<SelectRowOption[]>(() => [
+    { value: 'top', label: t('setting_list_add_music_location_type_top') },
+    { value: 'bottom', label: t('setting_list_add_music_location_type_bottom') },
+  ], [t])
 
   return (
-    <SubTitle title={t('setting_list_add_music_location_type')}>
-      <View style={styles.list}>
-        <Item id="top" name={t('setting_list_add_music_location_type_top')} />
-        <Item id="bottom" name={t('setting_list_add_music_location_type_bottom')} />
-      </View>
-    </SubTitle>
+    <SelectRow
+      label={t('setting_list_add_music_location_type')}
+      value={value}
+      options={options}
+      onSelect={next => { updateSetting({ 'list.addMusicLocationType': next as LX.AddMusicLocationType }) }}
+    />
   )
-})
-
-const styles = StyleSheet.create({
-  list: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
 })

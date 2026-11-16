@@ -2,7 +2,7 @@ import { updateSetting } from '@/core/common'
 import { useI18n } from '@/lang'
 import { createStyle } from '@/utils/tools'
 import { memo } from 'react'
-import { Platform, View } from 'react-native'
+import { View } from 'react-native'
 import { useSettingValue } from '@/store/setting/hook'
 
 
@@ -27,8 +27,8 @@ export default memo(() => {
 
 const styles = createStyle({
   content: {
-    marginTop: Platform.OS == 'ios' ? 0 : 5,
-    marginBottom: Platform.OS == 'ios' ? 0 : 15,
+    marginTop: 0,
+    marginBottom: 0,
   },
 })
 

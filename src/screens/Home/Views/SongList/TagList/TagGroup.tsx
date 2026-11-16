@@ -1,10 +1,8 @@
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
-import Button from '@/components/common/Button'
 import { type TagInfoItem } from '@/store/songlist/state'
-import { useTheme } from '@/store/theme/hook'
-import { createStyle } from '@/utils/tools'
-import Text from '@/components/common/Text'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 
 export interface TagGroupProps {
   name: string
@@ -13,59 +11,56 @@ export interface TagGroupProps {
   activeId: string
 }
 
+/** iOS 歌单标签组：分组标题 + 胶囊标签 */
 export default ({ name, list, onTagChange, activeId }: TagGroupProps) => {
-  const theme = useTheme()
+  const { colors, accent, spacing, hairline } = useIOSTheme()
+
   return (
-    <View>
+    <View style={{ marginBottom: spacing.md }}>
       {
         name
-          ? <Text style={styles.tagTypeTitle} color={theme['c-font-label']}>{name}</Text>
+          ? (
+              <IOSText
+                variant="footnote"
+                color={colors.secondaryLabel}
+                style={{
+                  marginTop: spacing.lg,
+                  marginBottom: spacing.sm,
+                  textTransform: 'uppercase',
+                }}
+              >{name}</IOSText>
+            )
           : null
       }
-      <View style={styles.tagTypeList}>
-        {list.map(item => (
-          activeId == item.id
-            ? (
-                <View style={{ ...styles.tagButton, backgroundColor: theme['c-button-background'] }} key={item.id}>
-                  <Text style={styles.tagButtonText} color={theme['c-primary-font-active']}>{item.name}</Text>
-                </View>
-              )
-            : (
-                <Button
-                  style={{ ...styles.tagButton, backgroundColor: theme['c-button-background'] }}
-                  key={item.id}
-                  onPress={() => { onTagChange(item.name, item.id) }}
-                >
-                  <Text style={styles.tagButtonText} color={theme['c-font']} >{item.name}</Text>
-                </Button>
-              )
-
-        ))}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+        {
+          list.map(item => {
+            const active = activeId == item.id
+            return (
+              <Pressable
+                key={item.id}
+                onPress={() => { onTagChange(item.name, item.id) }}
+                style={({ pressed }) => ({
+                  paddingHorizontal: spacing.md,
+                  paddingVertical: spacing.sm - 1,
+                  marginRight: spacing.sm,
+                  marginBottom: spacing.sm,
+                  borderRadius: 999,
+                  borderWidth: active ? 0 : hairline,
+                  borderColor: colors.rowSeparator,
+                  backgroundColor: active ? accent : pressed ? colors.tertiaryFill : 'transparent',
+                })}
+              >
+                <IOSText
+                  variant="subheadline"
+                  weight={active ? '600' : '400'}
+                  color={active ? colors.onAccent : colors.label}
+                >{item.name}</IOSText>
+              </Pressable>
+            )
+          })
+        }
       </View>
     </View>
   )
 }
-
-const styles = createStyle({
-  tagTypeTitle: {
-    marginTop: 15,
-    marginBottom: 10,
-  },
-  tagTypeList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  tagButton: {
-    // marginRight: 10,
-    borderRadius: 4,
-    marginRight: 10,
-    marginBottom: 10,
-  },
-  tagButtonText: {
-    fontSize: 13,
-    paddingLeft: 12,
-    paddingRight: 12,
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-})

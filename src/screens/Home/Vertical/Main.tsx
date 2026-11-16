@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from 'react'
-import { Platform, View } from 'react-native'
+import { View } from 'react-native'
 import Search from '../Views/Search'
 import SongList from '../Views/SongList'
 import Mylist from '../Views/Mylist'
@@ -9,7 +9,6 @@ import commonState, { type InitState as CommonState } from '@/store/common/state
 import { createStyle } from '@/utils/tools'
 import PagerView, { type PageScrollStateChangedNativeEvent, type PagerViewOnPageSelectedEvent } from 'react-native-pager-view'
 import { setNavActiveId } from '@/core/common'
-import settingState from '@/store/setting/state'
 
 const hideKeys = [
   'list.isShowAlbumName',
@@ -196,8 +195,8 @@ const indexMap = [
 const Main = () => {
   const pagerViewRef = useRef<ComponentRef<typeof PagerView>>(null)
   let activeIndexRef = useRef(viewMap[commonState.navActiveId])
-  // iOS 标签栏不提供左右滑动切页，强制关闭分页滑动
-  const [scrollEnabled, setScrollEnabled] = useState(Platform.OS == 'ios' ? false : settingState.setting['common.homePageScroll'])
+  // 标签栏外壳不提供左右滑动切页，分页滑动固定关闭（与 iOS 一致）
+  const scrollEnabled = false
   // const isScrollingRef = useRef(false)
   // const scrollPositionRef = useRef(-1)
 
@@ -252,23 +251,10 @@ const Main = () => {
       activeIndexRef.current = index
       pagerViewRef.current?.setPageWithoutAnimation(index)
     }
-    const handleConfigUpdate = (keys: Array<keyof LX.AppSetting>, setting: Partial<LX.AppSetting>) => {
-      if (Platform.OS == 'ios') return
-      if (!keys.includes('common.homePageScroll')) return
-      setScrollEnabled(setting['common.homePageScroll']!)
-    }
-    const handleHomePageScrollEnabled = (enabled: boolean) => {
-      if (Platform.OS == 'ios') return
-      setScrollEnabled(enabled ? settingState.setting['common.homePageScroll'] : false)
-    }
     // window.requestAnimationFrame(() => pagerViewRef.current && pagerViewRef.current.setPage(activeIndexRef.current))
     global.state_event.on('navActiveIdUpdated', handleUpdate)
-    global.state_event.on('configUpdated', handleConfigUpdate)
-    global.app_event.on('changeHomePageScrollEnabled', handleHomePageScrollEnabled)
     return () => {
       global.state_event.off('navActiveIdUpdated', handleUpdate)
-      global.state_event.off('configUpdated', handleConfigUpdate)
-      global.app_event.off('changeHomePageScrollEnabled', handleHomePageScrollEnabled)
     }
   }, [])
 
@@ -314,7 +300,8 @@ const Main = () => {
         <Setting />
       </View> */}
     </PagerView>
-  ), [onPageScrollStateChanged, onPageSelected, scrollEnabled])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [onPageScrollStateChanged, onPageSelected])
 
   return component
 }

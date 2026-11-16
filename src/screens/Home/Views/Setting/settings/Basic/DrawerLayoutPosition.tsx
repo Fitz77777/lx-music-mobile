@@ -1,60 +1,28 @@
 import { memo, useMemo } from 'react'
 
-import { StyleSheet, View } from 'react-native'
-
-import SubTitle from '../../components/SubTitle'
-import CheckBox from '@/components/common/CheckBox'
 import { useSettingValue } from '@/store/setting/hook'
 import { useI18n } from '@/lang'
 import { updateSetting } from '@/core/common'
+import SelectRow, { type SelectRowOption } from '../../components/SelectRow'
 
-const LIST = [
-  {
-    position: 'left',
-    name: 'setting_basic_drawer_layout_position_left',
-  },
-  {
-    position: 'right',
-    name: 'setting_basic_drawer_layout_position_right',
-  },
-] as const
+type Position = LX.AppSetting['common.drawerLayoutPosition']
 
-const useActive = (id: LX.AppSetting['common.drawerLayoutPosition']) => {
-  const drawerLayoutPosition = useSettingValue('common.drawerLayoutPosition')
-  const isActive = useMemo(() => drawerLayoutPosition == id, [drawerLayoutPosition, id])
-  return isActive
-}
-
-const Item = ({ position, label }: {
-  position: LX.AppSetting['common.drawerLayoutPosition']
-  label: string
-}) => {
-  const isActive = useActive(position)
-  // const [toggleCheckBox, setToggleCheckBox] = useState(false)
-  return <CheckBox marginRight={8} check={isActive} label={label} onChange={() => { updateSetting({ 'common.drawerLayoutPosition': position }) }} need />
-}
-
+/** iOS 弹出方向选择：行内显示当前值，点击下拉切换。 */
 export default memo(() => {
   const t = useI18n()
+  const value = useSettingValue('common.drawerLayoutPosition')
 
-  const list = useMemo(() => {
-    return LIST.map((item) => ({ position: item.position, name: t(item.name) }))
-  }, [t])
+  const options = useMemo<SelectRowOption[]>(() => [
+    { value: 'left', label: t('setting_basic_drawer_layout_position_left') },
+    { value: 'right', label: t('setting_basic_drawer_layout_position_right') },
+  ], [t])
 
   return (
-    <SubTitle title={t('setting_basic_drawer_layout_position')}>
-      <View style={styles.list}>
-        {
-          list.map(({ position, name }) => <Item key={position} position={position} label={name} />)
-        }
-      </View>
-    </SubTitle>
+    <SelectRow
+      label={t('setting_basic_drawer_layout_position')}
+      value={value}
+      options={options}
+      onSelect={next => { updateSetting({ 'common.drawerLayoutPosition': next as Position }) }}
+    />
   )
-})
-
-const styles = StyleSheet.create({
-  list: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
 })

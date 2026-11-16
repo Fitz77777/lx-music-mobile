@@ -1,24 +1,28 @@
 import { memo, useState, useEffect, useRef } from 'react'
 
-import { StyleSheet, View, Keyboard } from 'react-native'
+import { Keyboard, StyleSheet, View } from 'react-native'
 import type { InputType, InputProps } from '@/components/common/Input'
 import Input from '@/components/common/Input'
-import { useTheme } from '@/store/theme/hook'
-import Text from '@/components/common/Text'
-
+import IOSText from '@/components/ios/Text'
+import { iosTypography } from '@/theme/ios/tokens'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 
 export interface InputItemProps extends InputProps {
   value: string
   label: string
-  onChanged: (text: string, callback: (vlaue: string) => void) => void
+  onChanged: (text: string, callback: (value: string) => void) => void
 }
 
+/**
+ * iOS 输入行：标题在左，输入框在右，失焦或键盘收起时保存。
+ */
 export default memo(({ value, label, onChanged, ...props }: InputItemProps) => {
+  const { colors, spacing } = useIOSTheme()
   const [text, setText] = useState(value)
   const textRef = useRef(value)
   const isMountRef = useRef(false)
   const inputRef = useRef<InputType>(null)
-  const theme = useTheme()
+
   const saveValue = () => {
     onChanged?.(text, (value: string) => {
       if (!isMountRef.current) return
@@ -27,12 +31,14 @@ export default memo(({ value, label, onChanged, ...props }: InputItemProps) => {
       textRef.current = newValue
     })
   }
+
   useEffect(() => {
     isMountRef.current = true
     return () => {
       isMountRef.current = false
     }
   }, [])
+
   useEffect(() => {
     const handleKeyboardDidHide = () => {
       if (!inputRef.current?.isFocused()) return
@@ -49,6 +55,7 @@ export default memo(({ value, label, onChanged, ...props }: InputItemProps) => {
       keyboardDidHide.remove()
     }
   }, [onChanged])
+
   useEffect(() => {
     if (value != text) {
       const newValue = String(value)
@@ -57,40 +64,42 @@ export default memo(({ value, label, onChanged, ...props }: InputItemProps) => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
+
   const handleSetSelectMode = (text: string) => {
     setText(text)
     textRef.current = text
   }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.label} size={14}>{label}</Text>
+    <View style={{
+      minHeight: 48,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: 7,
+      flexDirection: 'row',
+      alignItems: 'center',
+    }}>
+      <IOSText variant="body" numberOfLines={1} style={{ marginRight: spacing.md }}>{label}</IOSText>
       <Input
         value={text}
         ref={inputRef}
         onChangeText={handleSetSelectMode}
-        style={{ ...styles.input, backgroundColor: theme['c-primary-input-background'] }}
+        placeholderTextColor={colors.placeholderText}
+        style={[styles.input, { color: colors.label }]}
         {...props}
         onBlur={saveValue}
-       />
+      />
     </View>
   )
 })
 
 const styles = StyleSheet.create({
-  container: {
-    paddingLeft: 25,
-    marginBottom: 15,
-  },
-  label: {
-    marginBottom: 2,
-  },
   input: {
-    backgroundColor: 'rgba(0,0,0,0.2)',
     flexGrow: 1,
     flexShrink: 1,
-    borderRadius: 4,
-    // paddingTop: 3,
-    // paddingBottom: 3,
-    maxWidth: 300,
+    height: 34,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    fontSize: iosTypography.body.fontSize,
+    textAlign: 'right',
   },
 })

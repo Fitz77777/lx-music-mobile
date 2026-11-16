@@ -1,18 +1,15 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react'
-import { TouchableOpacity } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 
-import { Icon } from '@/components/common/Icon'
-import { BorderWidths } from '@/theme'
-import { useTheme } from '@/store/theme/hook'
-import { useActiveListId, useListFetching } from '@/store/list/hook'
-import listState from '@/store/list/state'
-import { createStyle } from '@/utils/tools'
+import IOSIcon from '@/components/ios/Icon'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { useActiveListId, useListFetching, useMyList } from '@/store/list/hook'
 import { getListPrevSelectId } from '@/utils/data'
 import { setActiveList } from '@/core/list'
-import Text from '@/components/common/Text'
 import { LIST_IDS } from '@/config/constant'
+import { useI18n } from '@/lang'
 import Loading from '@/components/common/Loading'
-import { useSettingValue } from '@/store/setting/hook'
 
 export interface ActiveListProps {
   onShowSearchBar: () => void
@@ -22,25 +19,41 @@ export interface ActiveListType {
   setVisibleBar: (visible: boolean) => void
 }
 
-export default forwardRef<ActiveListType, ActiveListProps>(({ onShowSearchBar, onScrollToTop }, ref) => {
-  const theme = useTheme()
+/**
+ * iOS 我的列表头部：内置列表 chips（试听 / 收藏 / 临时），
+ * 当前列表是自建歌单时追加一个 chip；右侧按钮打开全部列表抽屉。
+ * 长按当前 chip 回到列表顶部。
+ */
+export default forwardRef<ActiveListType, ActiveListProps>(({ onScrollToTop }, ref) => {
+  const { colors, accent, spacing, radius, shadow } = useIOSTheme()
   const currentListId = useActiveListId()
   const fetching = useListFetching(currentListId)
-  const langId = useSettingValue('common.langId')
+  const allList = useMyList()
+  const t = useI18n()
+  const [visibleBar, setVisibleBar] = useState(true)
+
   const currentListName = useMemo(() => {
     switch (currentListId) {
       case LIST_IDS.TEMP:
-        return global.i18n.t('list_name_temp')
+        return t('list_name_temp')
       case LIST_IDS.DEFAULT:
-        return global.i18n.t('list_name_default')
+        return t('list_name_default')
       case LIST_IDS.LOVE:
-        return global.i18n.t('list_name_love')
+        return t('list_name_love')
       default:
-        return listState.allList.find(l => l.id === currentListId)?.name ?? ''
+        return allList.find(l => l.id === currentListId)?.name ?? ''
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentListId, langId])
-  const [visibleBar, setVisibleBar] = useState(true)
+  }, [currentListId, t, allList])
+
+  const chips = useMemo(() => {
+    // 横向歌单与「全部歌单」列表保持同一批、同一顺序；
+    // 临时列表不在 allList 里，只有它是当前列表时才补一个
+    const list = allList.map(item => ({ id: item.id, name: item.name }))
+    if (!list.some(item => item.id == currentListId) && currentListName) {
+      list.push({ id: currentListId, name: currentListName })
+    }
+    return list
+  }, [allList, currentListId, currentListName])
 
   useImperativeHandle(ref, () => ({
     setVisibleBar(visible) {
@@ -52,6 +65,7 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onShowSearchBar, o
     global.app_event.changeLoveListVisible(true)
   }
 
+
   useEffect(() => {
     void getListPrevSelectId().then((id) => {
       setActiveList(id)
@@ -59,49 +73,71 @@ export default forwardRef<ActiveListType, ActiveListProps>(({ onShowSearchBar, o
   }, [])
 
   return (
-    <TouchableOpacity onPress={showList} onLongPress={onScrollToTop} style={{ ...styles.currentList, opacity: visibleBar ? 1 : 0, borderBottomColor: theme['c-border-background'] }}>
-      <Icon style={styles.currentListIcon} color={theme['c-button-font']} name="chevron-right" size={12} />
-      { fetching ? <Loading color={theme['c-button-font']} style={styles.loading} /> : null }
-      <Text style={styles.currentListText} numberOfLines={1} color={theme['c-button-font']}>{currentListName}</Text>
-      <TouchableOpacity style={styles.currentListBtns} onPress={onShowSearchBar}>
-        <Icon color={theme['c-button-font']} name="search-2" />
-      </TouchableOpacity>
-    </TouchableOpacity>
+    <View style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.xl,
+      paddingBottom: 12,
+      backgroundColor: colors.canvas,
+      opacity: visibleBar ? 1 : 0,
+    }}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ flexGrow: 0, flexShrink: 1 }}
+        contentContainerStyle={{ alignItems: 'center' }}
+        keyboardShouldPersistTaps="always"
+      >
+        {
+          chips.map(item => {
+            const active = currentListId == item.id
+            return (
+              <Pressable
+                key={item.id}
+                onPress={() => { setActiveList(item.id) }}
+                onLongPress={active ? onScrollToTop : undefined}
+                style={({ pressed }) => ({
+                  paddingHorizontal: 14,
+                  paddingVertical: 6,
+                  marginRight: spacing.sm,
+                  borderRadius: radius.pill,
+                  backgroundColor: active ? accent : colors.secondaryGroupedBackground,
+                  ...(active ? null : shadow.chip),
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <IOSText
+                  variant="subheadline"
+                  weight={active ? '600' : '400'}
+                  color={active ? colors.onAccent : colors.label}
+                  numberOfLines={1}
+                  style={{ maxWidth: 150 }}
+                >{item.name}</IOSText>
+              </Pressable>
+            )
+          })
+        }
+        {fetching ? <Loading color={colors.secondaryLabel} style={{ marginRight: spacing.sm }} /> : null}
+      </ScrollView>
+      <View style={{ flex: 1 }} />
+      {/* 单一入口：打开全部列表面板（面板内可切换歌单手动排序） */}
+      <Pressable
+        onPress={showList}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={t('nav_love')}
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: radius.pill,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.secondaryGroupedBackground,
+          ...shadow.chip,
+        }}
+      >
+        <IOSIcon name="list-order" size={18} color={accent} />
+      </Pressable>
+    </View>
   )
-})
-
-
-const styles = createStyle({
-  currentList: {
-    flexDirection: 'row',
-    paddingRight: 2,
-    height: 36,
-    alignItems: 'center',
-    borderBottomWidth: BorderWidths.normal,
-    // backgroundColor: 'rgba(0,0,0,0.2)',
-  },
-  currentListIcon: {
-    paddingLeft: 15,
-    paddingRight: 10,
-    // paddingTop: 10,
-    // paddingBottom: 0,
-  },
-  currentListText: {
-    flex: 1,
-    // minWidth: 70,
-    // paddingLeft: 10,
-    paddingRight: 10,
-    // paddingTop: 10,
-    // paddingBottom: 10,
-  },
-  loading: {
-    marginRight: 5,
-  },
-  currentListBtns: {
-    width: 46,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
-    // backgroundColor: 'rgba(0,0,0,0.2)',
-  },
 })

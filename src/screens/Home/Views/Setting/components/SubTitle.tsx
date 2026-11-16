@@ -1,30 +1,28 @@
 import { memo } from 'react'
-
 import { View } from 'react-native'
-import { createStyle } from '@/utils/tools'
-import Text from '@/components/common/Text'
 
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import IOSText from '@/components/ios/Text'
+
+/** iOS 设置分组内的小标题，用于给一组选项分组 */
 export default memo(({ title, children }: {
   title: string
   children: React.ReactNode | React.ReactNode[]
 }) => {
+  const { colors, spacing } = useIOSTheme()
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
-      {children}
+    <View style={{ paddingTop: spacing.md, paddingBottom: spacing.sm }}>
+      <IOSText
+        variant="footnote"
+        color={colors.secondaryLabel}
+        style={{
+          marginHorizontal: spacing.lg,
+          marginBottom: spacing.sm - 2,
+          textTransform: 'uppercase',
+        }}
+      >{title}</IOSText>
+      <View style={{ paddingHorizontal: spacing.lg }}>{children}</View>
     </View>
   )
-})
-
-
-const styles = createStyle({
-  container: {
-    paddingLeft: 25,
-    marginBottom: 18,
-  },
-  title: {
-    marginLeft: -10,
-    marginBottom: 10,
-    // lineHeight: 16,
-  },
 })

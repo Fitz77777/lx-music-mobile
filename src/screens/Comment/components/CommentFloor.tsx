@@ -1,28 +1,27 @@
-import { memo, useState, useMemo, useCallback } from 'react'
-import { StyleSheet, View } from 'react-native'
-import { BorderWidths } from '@/theme'
-import { Icon } from '@/components/common/Icon'
-import { createStyle } from '@/utils/tools'
-import { useTheme } from '@/store/theme/hook'
-import { type Comment } from '../utils'
-import Text from '@/components/common/Text'
-import { scaleSizeW } from '@/utils/pixelRatio'
-import { useLayout } from '@/utils/hooks'
-import { useI18n } from '@/lang'
+import { memo, useCallback, useMemo, useState } from 'react'
+import { View } from 'react-native'
+
 import Image from '@/components/common/Image'
+import IOSIcon from '@/components/ios/Icon'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { useI18n } from '@/lang'
+import { useLayout } from '@/utils/hooks'
+import { type Comment } from '../utils'
 import CommentImage from './CommentImage'
 import CommentText from './CommentText'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const defaultUser = require('@/resources/images/defaultUser.jpg')
 
 const GAP = 12
-const avatarWidth = scaleSizeW(36)
+const AVATAR_SIZE = 36
 
+/** iOS 评论楼层：头像 + 昵称/时间/点赞 + 正文/图片 + 回复 */
 const CommentFloor = memo(({ comment, isLast }: {
   comment: Comment
   isLast?: boolean
 }) => {
-  const theme = useTheme()
+  const { colors, spacing, hairline } = useIOSTheme()
   const [isAvatarError, setIsAvatarError] = useState(false)
   const { onLayout, width } = useLayout()
   const t = useI18n()
@@ -35,7 +34,13 @@ const CommentFloor = memo(({ comment, isLast }: {
     if (!comment.reply?.length) return null
     const endIndex = comment.reply.length - 1
     return (
-      <View style={{ ...styles.replyFloor, borderTopColor: theme['c-list-header-border-bottom'] }}>
+      <View style={{
+        marginTop: GAP,
+        marginLeft: spacing.xl,
+        paddingLeft: spacing.md,
+        borderLeftWidth: 2,
+        borderLeftColor: colors.quaternaryFill,
+      }}>
         {
           comment.reply.map((c, index) => (
             <CommentFloor comment={c} isLast={index === endIndex} key={`${comment.id}_${c.id}`} />
@@ -47,44 +52,48 @@ const CommentFloor = memo(({ comment, isLast }: {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const likedCount = useMemo(() => {
-    if (comment.likedCount == null) return null
-    return (
-      <View style={styles.like}>
-        <Icon name="thumbs-up" style={{ color: theme['c-450'] }} size={12} />
-        <Text style={styles.likedCount} size={12} color={ theme['c-450'] }>{comment.likedCount}</Text>
-      </View>
-    )
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   return (
-    <View style={{ ...styles.container, borderBottomColor: theme['c-list-header-border-bottom'], borderBottomWidth: isLast ? 0 : BorderWidths.normal, paddingBottom: isLast ? 0 : GAP }}>
-      <View style={styles.comment}>
-        <View>
-          <Image
-            url={comment.avatar && !isAvatarError ? comment.avatar : defaultUser}
-            onError={handleAvatarError}
-            style={stylesRaw.avatar} />
-        </View>
-        <View style={styles.right}>
-          <View style={styles.info}>
-            <View>
-              <Text selectable numberOfLines={1} size={14}>
-                {comment.userName}
-              </Text>
-              <View style={styles.metaInfo}>
-                <Text numberOfLines={1} size={12} color={theme['c-450']}>{comment.timeStr}</Text>
-                { comment.location ? <Text numberOfLines={1} style={styles.location} size={12} color={theme['c-450']}>{t('location', { location: comment.location })}</Text> : null }
+    <View style={{
+      marginTop: GAP,
+      paddingBottom: GAP,
+      borderBottomWidth: isLast ? 0 : hairline,
+      borderBottomColor: colors.separator,
+    }}>
+      <View style={{ flexDirection: 'row' }}>
+        <Image
+          url={comment.avatar && !isAvatarError ? comment.avatar : defaultUser}
+          onError={handleAvatarError}
+          style={{ width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2 }}
+        />
+        <View style={{ flex: 1, marginLeft: spacing.md }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flex: 1 }}>
+              <IOSText variant="subheadline" weight="600" numberOfLines={1}>{comment.userName}</IOSText>
+              <View style={{ flexDirection: 'row', marginTop: 2 }}>
+                <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1}>{comment.timeStr}</IOSText>
+                {comment.location
+                  ? (
+                      <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1} style={{ marginLeft: spacing.sm }}>
+                        {t('location', { location: comment.location })}
+                      </IOSText>
+                    )
+                  : null}
               </View>
             </View>
-            {likedCount}
+            {comment.likedCount != null
+              ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: spacing.sm }}>
+                    <IOSIcon name="thumbs-up" size={12} color={colors.tertiaryLabel} />
+                    <IOSText variant="caption1" color={colors.tertiaryLabel} style={{ marginLeft: 2 }}>{comment.likedCount}</IOSText>
+                  </View>
+                )
+              : null}
           </View>
           <CommentText text={comment.text} />
           {
             comment.images?.length
               ? (
-                  <View style={styles.images} onLayout={onLayout}>
+                  <View style={{ flexDirection: 'row', paddingTop: spacing.xs, width: '100%' }} onLayout={onLayout}>
                     {
                       comment.images.map((url, index) => <CommentImage key={String(index)} url={url} maxWidth={width} />)
                     }
@@ -97,67 +106,6 @@ const CommentFloor = memo(({ comment, isLast }: {
       {replyComments}
     </View>
   )
-})
-
-const styles = createStyle({
-  container: {
-    flex: 1,
-    // backgroundColor: 'rgba(0,0,0,0.1)',
-    marginTop: GAP,
-    paddingBottom: GAP,
-    borderBottomWidth: BorderWidths.normal,
-    borderStyle: 'dashed',
-  },
-  comment: {
-    flex: 1,
-    // backgroundColor: 'rgba(0,0,0,0.1)',
-    flexDirection: 'row',
-  },
-  right: {
-    flex: 1,
-    paddingLeft: 10,
-  },
-  info: {
-    flex: 1,
-    flexDirection: 'row',
-    // backgroundColor: 'rgba(0,0,0,0.1)',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  metaInfo: {
-    marginTop: 2,
-    flexDirection: 'row',
-  },
-  location: {
-    marginLeft: 10,
-  },
-  like: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  likedCount: {
-    marginLeft: 2,
-  },
-  images: {
-    paddingTop: 5,
-    width: '100%',
-    flexDirection: 'row',
-  },
-  replyFloor: {
-    marginTop: GAP,
-    marginLeft: 20,
-    borderTopWidth: BorderWidths.normal,
-    // backgroundColor: 'rgba(0,0,0,0.1)',
-    borderStyle: 'dashed',
-  },
-})
-
-const stylesRaw = StyleSheet.create({
-  avatar: {
-    height: avatarWidth,
-    width: avatarWidth,
-    borderRadius: 4,
-  },
 })
 
 export default CommentFloor

@@ -1,11 +1,8 @@
 import { useRef, useState, useCallback, useMemo, forwardRef, useImperativeHandle, type Ref } from 'react'
-import { StyleSheet, View, Animated, Platform } from 'react-native'
-// import PropTypes from 'prop-types'
-// import { AppColors } from '@/theme'
-import { useTheme } from '@/store/theme/hook'
-import { BorderRadius, BorderWidths } from '@/theme'
+import { Animated, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native'
+
 import List, { type ItemT, type ListProps, type ListType } from './List'
-// import InsetShadow from 'react-native-inset-shadow'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 
 export interface SearchTipListProps<T> extends ListProps<T> {
   onPressBg?: () => void
@@ -17,17 +14,28 @@ export interface SearchTipListType<T> {
   hide: () => void
 }
 
+/** 单行高度（与 TipList 的行样式保持一致） */
+export const TIP_ITEM_HEIGHT = 44
+/** 面板最多展示的行数 */
+const MAX_ROWS = 8
+/** 小圆角/阴影来自设计令牌 */
+
 const noop = () => {}
 
+/**
+ * iOS 搜索联想面板（原型无此页，按系统搜索建议设计）：
+ * 搜索框下方的浮层卡片，最多展示 8 行，超出内部滚动；
+ * 面板高度随内容区高度自适应，但不会像原来那样铺满整屏。
+ */
 const Component = <T extends ItemT<T>>({ onPressBg = noop, hideWhenEmpty = true, ...props }: SearchTipListProps<T>, ref: Ref<SearchTipListType<T>>) => {
-  const theme = useTheme()
+  const { colors } = useIOSTheme()
   const translateY = useRef(new Animated.Value(0)).current
   const scaleY = useRef(new Animated.Value(0)).current
   const [visible, setVisible] = useState(false)
   const [animatePlayed, setAnimatPlayed] = useState(true)
   const listRef = useRef<ListType<T>>(null)
   const prevListRef = useRef<T[]>([])
-  const heightRef = useRef(0)
+  const [panelMaxHeight, setPanelMaxHeight] = useState(TIP_ITEM_HEIGHT * MAX_ROWS)
 
   useImperativeHandle(ref, () => ({
     setList(list) {
@@ -40,7 +48,8 @@ const Component = <T extends ItemT<T>>({ onPressBg = noop, hideWhenEmpty = true,
       })
     },
     setHeight(height) {
-      heightRef.current = height
+      // 内容区高度的 60%，且不超过 8 行，避免平板/横屏下铺满整屏
+      setPanelMaxHeight(Math.max(TIP_ITEM_HEIGHT * 3, Math.min(Math.round(height * 0.6), TIP_ITEM_HEIGHT * MAX_ROWS)))
     },
     hide() {
       prevListRef.current = []
@@ -51,88 +60,77 @@ const Component = <T extends ItemT<T>>({ onPressBg = noop, hideWhenEmpty = true,
     },
   }))
 
-
   const handleShow = useCallback(() => {
-    // console.log('handleShow', height, visible)
-    if (!heightRef.current) return
+    if (!panelMaxHeight) return
     setVisible(true)
     setAnimatPlayed(false)
     requestAnimationFrame(() => {
-      translateY.setValue(-heightRef.current / 2)
+      translateY.setValue(-panelMaxHeight / 2)
       scaleY.setValue(0)
 
       Animated.parallel([
-      // Animated.timing(fade, {
-      //   toValue: 1,
-      //   duration: 300,
-      //   useNativeDriver: true,
-      // }),
         Animated.timing(translateY, {
           toValue: 0,
-          duration: 300,
+          duration: 260,
           useNativeDriver: true,
         }),
         Animated.timing(scaleY, {
           toValue: 1,
-          duration: 300,
+          duration: 260,
           useNativeDriver: true,
         }),
       ]).start(() => {
         setAnimatPlayed(true)
       })
     })
-  }, [translateY, scaleY])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [translateY, scaleY, panelMaxHeight])
 
   const handleHide = useCallback(() => {
     setAnimatPlayed(false)
     Animated.parallel([
-      // Animated.timing(fade, {
-      //   toValue: 0,
-      //   duration: 200,
-      //   useNativeDriver: true,
-      // }),
       Animated.timing(translateY, {
-        toValue: -heightRef.current / 2,
-        duration: 300,
+        toValue: -panelMaxHeight / 2,
+        duration: 220,
         useNativeDriver: true,
       }),
       Animated.timing(scaleY, {
         toValue: 0,
-        duration: 300,
+        duration: 220,
         useNativeDriver: true,
       }),
     ]).start((finished) => {
-      // console.log(finished)
       if (!finished) return
       setVisible(false)
       setAnimatPlayed(true)
     })
-  }, [translateY, scaleY])
+  }, [translateY, scaleY, panelMaxHeight])
 
+  const component = useMemo(() => {
+    const panelStyle: StyleProp<ViewStyle> = {
+      backgroundColor: colors.groupedBackground,
+      overflow: 'hidden',
+    }
 
-  const component = useMemo(() => (
-    <Animated.View
-      style={{
-        ...styles.anima,
-        transform: [
-          { translateY },
-          { scaleY },
-        ],
-      }}>
-      <View
-        style={styles.mask}
-        onTouchStart={onPressBg}></View>
-      <View style={styles.content}>
-        <View style={{
-          ...styles.container,
-          backgroundColor: theme['c-content-background'],
-          borderColor: theme['c-border-background'],
+    return (
+      <Animated.View
+        style={{
+          ...styles.anima,
+          transform: [
+            { translateY },
+            { scaleY },
+          ],
         }}>
-          <List ref={listRef} {...props} />
+        <Pressable style={styles.mask} onPress={onPressBg} />
+        <View style={styles.content} pointerEvents="box-none">
+          <View style={panelStyle}>
+            {/* 高度限制加在 FlatList 上，保证超出 8 行时面板内部可滚动 */}
+            <List ref={listRef} {...props} style={{ maxHeight: panelMaxHeight }} />
+          </View>
         </View>
-      </View>
-    </Animated.View>
-  ), [onPressBg, props, scaleY, theme, translateY])
+      </Animated.View>
+    )
+  }, [colors, onPressBg, panelMaxHeight, props, scaleY, translateY])
 
   return !visible && animatePlayed ? null : component
 }
@@ -149,35 +147,13 @@ const styles = StyleSheet.create({
     width: '100%',
     zIndex: 10,
   },
+  mask: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.06)',
+  },
   content: {
     zIndex: 1,
     paddingTop: 6,
-    paddingLeft: 8,
-    paddingRight: 8,
-  },
-  mask: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-  },
-  container: {
-    flex: 0,
-    borderWidth: BorderWidths.normal2,
-    borderRadius: BorderRadius.normal * 2,
-    overflow: 'hidden',
-    maxHeight: '80%',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 6,
-        },
-        shadowOpacity: 0.16,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
+    paddingHorizontal: 0,
   },
 })

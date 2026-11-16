@@ -1,3 +1,4 @@
+import { Platform, StatusBar } from 'react-native'
 import { Navigation } from 'react-native-navigation'
 
 /**
@@ -9,8 +10,11 @@ import { Navigation } from 'react-native-navigation'
  */
 export const getIOSStatusBarHeight = (): number => {
   try {
-    return Navigation.constantsSync().statusBarHeight || 0
+    const height = Navigation.constantsSync().statusBarHeight || 0
+    if (height) return height
   } catch {
-    return 0
+    // ignore
   }
+  // Android 兜底：RNN 常量拿不到时用 RN 的状态栏高度
+  return Platform.OS == 'android' ? StatusBar.currentHeight ?? 0 : 0
 }

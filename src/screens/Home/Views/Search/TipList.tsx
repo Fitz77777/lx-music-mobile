@@ -1,20 +1,14 @@
 import { useRef, useImperativeHandle, forwardRef, useState, useEffect } from 'react'
-import { Platform, Pressable } from 'react-native'
+import { Pressable } from 'react-native'
 import SearchTipList, { type SearchTipListProps as _SearchTipListProps, type SearchTipListType as _SearchTipListType } from '@/components/SearchTipList'
 import IOSText from '@/components/ios/Text'
-import Button from '@/components/common/Button'
-import { createStyle } from '@/utils/tools'
-import Text from '@/components/common/Text'
-import { scaleSizeH } from '@/utils/pixelRatio'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import musicSdk from '@/utils/musicSdk'
-import { useTheme } from '@/store/theme/hook'
-import { BorderWidths } from '@/theme'
 import searchState, { type InitState as SearchState } from '@/store/search/state'
 import { setSearchText, setTipList, setTipListInfo } from '@/core/search/search'
 import { debounce } from '@/utils'
 
-export const ITEM_HEIGHT = Platform.OS == 'ios' ? 44 : scaleSizeH(36)
+export const ITEM_HEIGHT = 44
 
 export const debounceTipSearch = debounce((keyword: string, source: SearchState['temp_source'], callback: (list: string[]) => void) => {
   // console.log(reslutList)
@@ -39,8 +33,7 @@ export default forwardRef<TipListType, TipListProps>(({ onSearch }, ref) => {
   const [visible, setVisible] = useState(false)
   const visibleListRef = useRef(false)
   const isUnmountedRef = useRef(false)
-  const theme = useTheme()
-  const { colors: iosColors, spacing: iosSpacing, hairline } = useIOSTheme()
+  const { colors, spacing, hairline } = useIOSTheme()
 
   useEffect(() => {
     isUnmountedRef.current = false
@@ -103,38 +96,22 @@ export default forwardRef<TipListType, TipListProps>(({ onSearch }, ref) => {
     },
   }), [visible])
 
-  const renderItem: SearchTipListProps['renderItem'] = ({ item, index }) => {
-    if (Platform.OS == 'ios') {
-      return (
-        <Pressable
-          key={index}
-          onPress={() => { onSearch(item) }}
-          style={({ pressed }) => ({
-            height: ITEM_HEIGHT,
-            justifyContent: 'center',
-            paddingHorizontal: iosSpacing.lg,
-            backgroundColor: pressed ? iosColors.cardPressed : 'transparent',
-            borderTopWidth: index ? hairline : 0,
-            borderTopColor: iosColors.rowSeparator,
-          })}
-        >
-          <IOSText variant="body" numberOfLines={1}>{item}</IOSText>
-        </Pressable>
-      )
-    }
-    return (
-      <Button
-        style={{
-          ...styles.item,
-          borderTopColor: theme['c-border-background'],
-          borderTopWidth: index ? BorderWidths.normal2 : 0,
-        }}
-        onPress={() => { onSearch(item) }}
-        key={index}>
-        <Text numberOfLines={1}>{item}</Text>
-      </Button>
-    )
-  }
+  const renderItem: SearchTipListProps['renderItem'] = ({ item, index }) => (
+    <Pressable
+      key={index}
+      onPress={() => { onSearch(item) }}
+      style={({ pressed }) => ({
+        height: ITEM_HEIGHT,
+        justifyContent: 'center',
+        paddingHorizontal: spacing.lg,
+        backgroundColor: pressed ? colors.cardPressed : 'transparent',
+        borderTopWidth: index ? hairline : 0,
+        borderTopColor: colors.rowSeparator,
+      })}
+    >
+      <IOSText variant="body" numberOfLines={1}>{item}</IOSText>
+    </Pressable>
+  )
   const getkey: SearchTipListProps['keyExtractor'] = (item, index) => String(index)
   const getItemLayout: SearchTipListProps['getItemLayout'] = (data, index) => {
     return { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
@@ -153,14 +130,4 @@ export default forwardRef<TipListType, TipListProps>(({ onSearch }, ref) => {
   )
 })
 
-
-const styles = createStyle({
-  item: {
-    height: ITEM_HEIGHT,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingLeft: 15,
-    paddingRight: 15,
-  },
-})
 

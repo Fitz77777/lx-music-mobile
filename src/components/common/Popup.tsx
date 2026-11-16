@@ -1,51 +1,6 @@
-import { forwardRef, useImperativeHandle, useMemo, useRef } from 'react'
-import { View, TouchableOpacity } from 'react-native'
+import { forwardRef, useImperativeHandle, useState } from 'react'
 
-import Modal, { type ModalType } from './Modal'
-import { Icon } from '@/components/common/Icon'
-import { useKeyboard } from '@/utils/hooks'
-import { createStyle } from '@/utils/tools'
-import { useTheme } from '@/store/theme/hook'
-import Text from './Text'
-import { useStatusbarHeight } from '@/store/common/hook'
-
-const styles = createStyle({
-  centeredView: {
-    flex: 1,
-    // justifyContent: 'flex-end',
-    // alignItems: 'center',
-  },
-  modalView: {
-    elevation: 6,
-    flexGrow: 0,
-    flexShrink: 1,
-  },
-  header: {
-    flex: 0,
-    flexDirection: 'row',
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-  },
-  title: {
-    paddingLeft: 10,
-    paddingRight: 25,
-    paddingTop: 10,
-    paddingBottom: 10,
-    // lineHeight: 20,
-  },
-  closeBtn: {
-    position: 'absolute',
-    right: 0,
-    // borderTopRightRadius: 8,
-    flexGrow: 0,
-    flexShrink: 0,
-    height: 30,
-    width: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    // backgroundColor: '#eee',
-  },
-})
+import IOSBottomSheet from '@/components/ios/BottomSheet'
 
 export interface PopupProps {
   onHide?: () => void
@@ -61,124 +16,36 @@ export interface PopupType {
   setVisible: (visible: boolean) => void
 }
 
+/**
+ * iOS 弹层：统一用底部面板（与原型 .sheet 一致）。
+ * 播放页设置、音效、同步历史这些原本是 Android 居中弹窗的，现在都是底部面板。
+ */
 export default forwardRef<PopupType, PopupProps>(({
   onHide = () => {},
-  keyHide = true,
   bgHide = true,
-  closeBtn = true,
-  position = 'bottom',
   title = '',
   children,
 }: PopupProps, ref) => {
-  const theme = useTheme()
-  const { keyboardShown, keyboardHeight } = useKeyboard()
-  const statusBarHeight = useStatusbarHeight()
-
-  const modalRef = useRef<ModalType>(null)
+  const [visible, setVisible] = useState(false)
 
   useImperativeHandle(ref, () => ({
-    setVisible(visible: boolean) {
-      modalRef.current?.setVisible(visible)
+    setVisible(v: boolean) {
+      setVisible(v)
+      if (!v) onHide()
     },
-  }))
-
-  const closeBtnComponent = useMemo(() => closeBtn
-    ? <TouchableOpacity style={styles.closeBtn} onPress={() => modalRef.current?.setVisible(false)}>
-        <Icon name="close" style={{ color: theme['c-font-label'] }} size={12} />
-      </TouchableOpacity>
-    : null, [closeBtn, theme])
-
-  const [centeredViewStyle, modalViewStyle] = useMemo(() => {
-    switch (position) {
-      case 'top':
-        return [
-          {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            top: 0,
-            justifyContent: 'flex-start',
-          },
-          {
-            width: '100%',
-            maxHeight: '78%',
-            minHeight: '20%',
-            // backgroundColor: 'white',
-          },
-        ] as const
-      case 'left':
-        return [
-          {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            top: 0,
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-          },
-          {
-            minWidth: '45%',
-            maxWidth: '78%',
-            height: '100%',
-            paddingTop: statusBarHeight,
-            // backgroundColor: 'white',
-          },
-        ] as const
-      case 'right':
-        return [
-          {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            top: 0,
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-          },
-          {
-            minWidth: '45%',
-            maxWidth: '78%',
-            height: '100%',
-            paddingTop: statusBarHeight,
-            // backgroundColor: 'white',
-          },
-        ] as const
-      case 'bottom':
-      default:
-        return [
-          {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            top: 0,
-            justifyContent: 'flex-end',
-          },
-          {
-            width: '100%',
-            maxHeight: '78%',
-            minHeight: '20%',
-            // backgroundColor: 'white',
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
-          },
-        ] as const
-    }
-  }, [position, statusBarHeight])
+  }), [onHide])
 
   return (
-    <Modal onHide={onHide} keyHide={keyHide} bgHide={bgHide} bgColor="rgba(50,50,50,.2)" ref={modalRef}>
-      <View style={{ ...styles.centeredView, ...centeredViewStyle, paddingBottom: keyboardShown ? keyboardHeight : 0 }}>
-        <View style={{ ...styles.modalView, ...modalViewStyle, backgroundColor: theme['c-content-background'] }} onStartShouldSetResponder={() => true}>
-          <View style={styles.header}>
-            <Text size={13} style={styles.title} numberOfLines={1}>{title}</Text>
-            {closeBtnComponent}
-          </View>
-          {children}
-        </View>
-      </View>
-    </Modal>
+    <IOSBottomSheet
+      visible={visible}
+      onClose={() => {
+        setVisible(false)
+        onHide()
+      }}
+      title={title || undefined}
+      dismissOnBackdrop={bgHide}
+    >
+      {children}
+    </IOSBottomSheet>
   )
 })

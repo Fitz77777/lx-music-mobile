@@ -1,26 +1,18 @@
 import { memo } from 'react'
 import { View } from 'react-native'
-import Button from '@/components/common/Button'
 
-import { createStyle } from '@/utils/tools'
-import { pop } from '@/navigation'
-import { useTheme } from '@/store/theme/hook'
-import commonState from '@/store/common/state'
-import Text from '@/components/common/Text'
+import IOSButton from '@/components/ios/Button'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { useI18n } from '@/lang'
 import { handleCollect, handlePlay } from './listAction'
 import songlistState from '@/store/songlist/state'
-import { useI18n } from '@/lang'
 import { useListInfo } from './state'
-// import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 
+/** iOS 歌单详情操作区：收藏 + 播放全部 */
 export default memo(() => {
-  const theme = useTheme()
   const t = useI18n()
   const info = useListInfo()
-
-  const back = () => {
-    void pop(commonState.componentIds.songlistDetail!)
-  }
+  const { spacing } = useIOSTheme()
 
   const handlePlayAll = () => {
     if (!songlistState.listDetailInfo.info.name) return
@@ -33,39 +25,14 @@ export default memo(() => {
   }
 
   return (
-    <View style={styles.container}>
-      <Button onPress={handleCollection} style={styles.controlBtn}>
-        <Text style={{ ...styles.controlBtnText, color: theme['c-button-font'] }}>{t('collect_songlist')}</Text>
-      </Button>
-      <Button onPress={handlePlayAll} style={styles.controlBtn}>
-        <Text style={{ ...styles.controlBtnText, color: theme['c-button-font'] }}>{t('play_all')}</Text>
-      </Button>
-      <Button onPress={back} style={styles.controlBtn}>
-        <Text style={{ ...styles.controlBtnText, color: theme['c-button-font'] }}>{t('back')}</Text>
-      </Button>
+    <View style={{
+      flexDirection: 'row',
+      paddingHorizontal: spacing.lg,
+      marginTop: spacing.lg,
+      gap: spacing.md,
+    }}>
+      <IOSButton title={t('collect_songlist')} variant="tinted" onPress={handleCollection} style={{ flex: 1 }} />
+      <IOSButton title={t('play_all')} variant="filled" onPress={handlePlayAll} style={{ flex: 1 }} />
     </View>
   )
 })
-
-const styles = createStyle({
-  container: {
-    flexDirection: 'row',
-    width: '100%',
-    flexGrow: 0,
-    flexShrink: 0,
-  },
-  controlBtn: {
-    flexGrow: 1,
-    flexShrink: 1,
-    width: '33%',
-    paddingTop: 12,
-    paddingBottom: 12,
-    paddingLeft: 10,
-    paddingRight: 10,
-  },
-  controlBtnText: {
-    fontSize: 13,
-    textAlign: 'center',
-  },
-})
-

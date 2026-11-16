@@ -1,10 +1,10 @@
-import Text from '@/components/common/Text'
-import { useI18n } from '@/lang'
-import { useSettingValue } from '@/store/setting/hook'
-import { useTheme } from '@/store/theme/hook'
-import { createStyle } from '@/utils/tools'
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { ScrollView, View } from 'react-native'
+import { useSettingValue } from '@/store/setting/hook'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
+import { useI18n } from '@/lang'
+import IOSText from '@/components/ios/Text'
 import HistorySearch, { type HistorySearchType } from './HistorySearch'
 import HotSearch, { type HotSearchType } from './HotSearch'
 
@@ -17,15 +17,16 @@ export interface BlankViewType {
   show: (source: Source) => void
 }
 
+/** iOS 搜索空状态：热门搜索与历史搜索 */
 export default forwardRef<BlankViewType, BlankViewProps>(({ onSearch }, ref) => {
-  // const [listType, setListType] = useState<SearchState['searchType']>('music')
   const [visible, setVisible] = useState(false)
   const hotSearchRef = useRef<HotSearchType>(null)
   const historySearchRef = useRef<HistorySearchType>(null)
   const isShowHotSearch = useSettingValue('search.isShowHotSearch')
   const isShowHistorySearch = useSettingValue('search.isShowHistorySearch')
+  const { colors, spacing } = useIOSTheme()
+  const bottomInset = useIOSHomeBottomInset()
   const t = useI18n()
-  const theme = useTheme()
 
   const handleShow = (source: Source) => {
     hotSearchRef.current?.show(source)
@@ -44,38 +45,26 @@ export default forwardRef<BlankViewType, BlankViewProps>(({ onSearch }, ref) => 
     },
   }), [visible])
 
+  if (!visible) return null
+
+  if (!isShowHotSearch && !isShowHistorySearch) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <IOSText variant="title2" color={colors.secondaryLabel}>{t('search__welcome')}</IOSText>
+      </View>
+    )
+  }
+
   return (
-    visible
-      ? isShowHotSearch || isShowHistorySearch
-        ? (
-            <ScrollView>
-              <View style={styles.content}>
-                { isShowHotSearch ? <HotSearch ref={hotSearchRef} onSearch={onSearch} /> : null }
-                { isShowHistorySearch ? <HistorySearch ref={historySearchRef} onSearch={onSearch} /> : null }
-              </View>
-            </ScrollView>
-          )
-        : (
-            <View style={styles.welcome}>
-              <Text size={22} color={theme['c-font-label']}>{t('search__welcome')}</Text>
-            </View>
-          )
-      : null
-
+    <ScrollView
+      keyboardShouldPersistTaps="always"
+      contentContainerStyle={{
+        paddingHorizontal: spacing.lg,
+        paddingBottom: spacing.xxxl + bottomInset,
+      }}
+    >
+      {isShowHotSearch ? <HotSearch ref={hotSearchRef} onSearch={onSearch} /> : null}
+      {isShowHistorySearch ? <HistorySearch ref={historySearchRef} onSearch={onSearch} /> : null}
+    </ScrollView>
   )
-})
-
-
-const styles = createStyle({
-  content: {
-    // paddingTop: 15,
-    paddingBottom: 15,
-    paddingLeft: 15,
-    paddingRight: 15,
-  },
-  welcome: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 })

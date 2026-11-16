@@ -1,12 +1,10 @@
 import { memo, useCallback, useEffect, useRef } from 'react'
-import { View, TouchableOpacity } from 'react-native'
+import { View } from 'react-native'
 
 import OnlineList, { type OnlineListType } from '@/components/OnlineList'
 import AlbumList from './AlbumList'
-import Text from '@/components/common/Text'
-import { useTheme } from '@/store/theme/hook'
-import { createStyle } from '@/utils/tools'
-import { BorderWidths } from '@/theme'
+import IOSSegmentedControl from '@/components/ios/SegmentedControl'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import PagerView, { type PagerViewOnPageSelectedEvent } from 'react-native-pager-view'
 
 interface SongListProps {
@@ -22,14 +20,18 @@ interface SongListProps {
   onPlayList: (index: number) => void
 }
 
+const TABS = ['所有歌曲', '所有专辑'] as const
+const SORTS = ['热门', '时间'] as const
+
+/** iOS 歌手详情列表：分段控件切换歌曲/专辑 */
 export default memo(({
   componentId, songs, albums, activeTab, onTabChange,
   onLoadMoreSongs, onLoadMoreAlbums,
   onSortChange, onRefresh, onPlayList,
 }: SongListProps) => {
-  const theme = useTheme()
   const songListRef = useRef<OnlineListType>(null)
   const pagerViewRef = useRef<PagerView>(null)
+  const { spacing } = useIOSTheme()
 
   useEffect(() => {
     if (activeTab === 'songs') {
@@ -57,48 +59,42 @@ export default memo(({
     }
   }, [activeTab, onTabChange])
 
+  const handleTabChange = useCallback((index: number) => {
+    onTabChange(index === 0 ? 'songs' : 'albums')
+  }, [onTabChange])
+
+  const handleSortChange = useCallback((index: number) => {
+    onSortChange(index === 0 ? 'hot' : 'time')
+  }, [onSortChange])
+
   return (
     <View style={{ flex: 1 }}>
-      <View style={styles.listHeader}>
-        <View style={styles.tabs}>
-          <TouchableOpacity style={styles.tab} onPress={() => { onTabChange('songs') }}>
-            <Text
-              style={[styles.tabText, { borderBottomColor: activeTab === 'songs' ? theme['c-primary-font-active'] : 'transparent' }]}
-              color={activeTab === 'songs' ? theme['c-primary-font'] : theme['c-font']}
-            >
-              所有歌曲
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tab} onPress={() => { onTabChange('albums') }}>
-            <Text
-              style={[styles.tabText, { borderBottomColor: activeTab === 'albums' ? theme['c-primary-font-active'] : 'transparent' }]}
-              color={activeTab === 'albums' ? theme['c-primary-font'] : theme['c-font']}
-            >
-              所有专辑
-            </Text>
-          </TouchableOpacity>
-        </View>
-        {activeTab === 'songs' && (
-          <View style={styles.sorts}>
-            <TouchableOpacity onPress={() => { onSortChange('hot') }} style={styles.sortBtn}>
-              <Text
-                style={[styles.tabText, { borderBottomColor: songs.sort === 'hot' ? theme['c-primary-font-active'] : 'transparent' }]}
-                color={songs.sort === 'hot' ? theme['c-primary-font'] : theme['c-font']}
-              >
-                热门
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => { onSortChange('time') }} style={styles.sortBtn}>
-              <Text
-                style={[styles.tabText, { borderBottomColor: songs.sort === 'time' ? theme['c-primary-font-active'] : 'transparent' }]}
-                color={songs.sort === 'time' ? theme['c-primary-font'] : theme['c-font']}
-              >
-                时间
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+      <View style={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.sm }}>
+        <IOSSegmentedControl
+          values={TABS}
+          selectedIndex={activeTab === 'songs' ? 0 : 1}
+          onChange={handleTabChange}
+        />
       </View>
+      {activeTab === 'songs'
+        ? (
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+              paddingHorizontal: spacing.lg,
+              paddingBottom: spacing.sm,
+            }}>
+              <View style={{ width: 140 }}>
+                <IOSSegmentedControl
+                  values={SORTS}
+                  selectedIndex={songs.sort === 'hot' ? 0 : 1}
+                  onChange={handleSortChange}
+                  small
+                />
+              </View>
+            </View>
+          )
+        : null}
       <PagerView
         ref={pagerViewRef}
         style={{ flex: 1 }}
@@ -127,32 +123,4 @@ export default memo(({
       </PagerView>
     </View>
   )
-})
-
-const styles = createStyle({
-  listHeader: {
-    paddingHorizontal: 15,
-    paddingTop: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  tabs: {
-    flexDirection: 'row',
-  },
-  tab: {
-    paddingVertical: 8,
-    paddingRight: 15,
-  },
-  sorts: {
-    flexDirection: 'row',
-  },
-  sortBtn: {
-    paddingVertical: 8,
-    paddingLeft: 15,
-  },
-  tabText: {
-    paddingBottom: 3,
-    borderBottomWidth: BorderWidths.normal3,
-  },
 })

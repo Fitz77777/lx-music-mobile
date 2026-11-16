@@ -1,13 +1,11 @@
 import { useMemo, useRef, useState, forwardRef, useImperativeHandle } from 'react'
 import { FlatList, type FlatListProps, RefreshControl, View } from 'react-native'
 
-// import { useMusicList } from '@/store/list/hook'
 import CommentFloor from './CommentFloor'
-import { createStyle } from '@/utils/tools'
-import { useTheme } from '@/store/theme/hook'
-import { type Comment } from '../utils'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { useI18n } from '@/lang'
-import Text from '@/components/common/Text'
+import { type Comment } from '../utils'
 
 type FlatListType = FlatListProps<Comment>
 
@@ -22,17 +20,15 @@ export interface ListType {
 }
 export type Status = 'loading' | 'refreshing' | 'end' | 'error' | 'idle'
 
+/** iOS 评论列表 */
 const List = forwardRef<ListType, ListProps>(({
   onRefresh,
   onLoadMore,
 }, ref) => {
-  // const t = useI18n()
-  const theme = useTheme()
+  const { accent, spacing } = useIOSTheme()
   const flatListRef = useRef<FlatList>(null)
   const [currentList, setList] = useState<Comment[]>([])
   const [status, setStatus] = useState<Status>('idle')
-  // const currentListIdRef = useRef('')
-  // console.log('render comment list')
 
   useImperativeHandle(ref, () => ({
     setList(list) {
@@ -57,11 +53,11 @@ const List = forwardRef<ListType, ListProps>(({
 
   const refreshControl = useMemo(() => (
     <RefreshControl
-      colors={[theme['c-primary']]}
-      // progressBackgroundColor={theme.primary}
+      colors={[accent]}
+      tintColor={accent}
       refreshing={status == 'refreshing'}
       onRefresh={onRefresh} />
-  ), [status, onRefresh, theme])
+  ), [status, onRefresh, accent])
   const footerComponent = useMemo(() => {
     let label: FooterLabel
     switch (status) {
@@ -85,18 +81,13 @@ const List = forwardRef<ListType, ListProps>(({
   return (
     <FlatList
       ref={flatListRef}
-      style={styles.list}
+      style={{ flexGrow: 1, flexShrink: 1 }}
+      contentContainerStyle={{ paddingHorizontal: spacing.lg }}
       data={currentList}
       onEndReachedThreshold={0.5}
-      // maxToRenderPerBatch={4}
-      // updateCellsBatchingPeriod={80}
-      // windowSize={8}
       removeClippedSubviews={false}
-      // initialNumToRender={12}
       renderItem={renderItem}
       keyExtractor={getkey}
-      // onRefresh={onRefresh}
-      // refreshing={refreshing}
       onEndReached={handleLoadMore}
       refreshControl={refreshControl}
       ListFooterComponent={footerComponent}
@@ -109,7 +100,7 @@ const Footer = ({ label, onLoadMore }: {
   label: FooterLabel
   onLoadMore: () => void
 }) => {
-  const theme = useTheme()
+  const { colors, spacing } = useIOSTheme()
   const t = useI18n()
   const handlePress = () => {
     if (label != 'list_error') return
@@ -118,28 +109,12 @@ const Footer = ({ label, onLoadMore }: {
   return (
     label
       ? (
-          <View>
-            <Text onPress={handlePress} style={styles.footer} color={theme['c-font-label']}>{t(label)}</Text>
+          <View style={{ paddingVertical: spacing.md }}>
+            <IOSText variant="footnote" color={colors.secondaryLabel} align="center" onPress={handlePress}>{t(label)}</IOSText>
           </View>
         )
       : null
   )
 }
-
-const styles = createStyle({
-  container: {
-    flex: 1,
-  },
-  list: {
-    flexGrow: 1,
-    flexShrink: 1,
-    paddingLeft: 15,
-    paddingRight: 15,
-  },
-  footer: {
-    textAlign: 'center',
-    padding: 10,
-  },
-})
 
 export default List

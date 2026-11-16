@@ -1,24 +1,25 @@
 import { memo, useMemo, useState } from 'react'
-import { TouchableOpacity, View } from 'react-native'
-import { createStyle } from '@/utils/tools'
-import Text from '@/components/common/Text'
-import { useTheme } from '@/store/theme/hook'
+import { View } from 'react-native'
+
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { useI18n } from '@/lang'
 
 const TEXT_LIMIT = 160
 const SUB_TEXT_LIMIT = TEXT_LIMIT * 1.2
-// const CHAR_RXP = /\n/g
 
+/** iOS 评论正文：超长时折叠，展开按钮使用强调色 */
 export default memo(({ text }: { text: string }) => {
   const [show, setShow] = useState(false)
-  const theme = useTheme()
+  const { accent, spacing } = useIOSTheme()
+  const t = useI18n()
 
   const length = useMemo(() => {
-    // text.length + (text.match(CHAR_RXP)?.length ?? 0) * 40
     let count = 0
     let bCount = 0
     let subLength = 0
     for (let i = 0; i < text.length; i++) {
-      let char = text.charAt(i)
+      const char = text.charAt(i)
       if (char == '\n') {
         count += bCount * 24 + 20
         bCount++
@@ -33,28 +34,20 @@ export default memo(({ text }: { text: string }) => {
   }, [text])
 
   return (
-    length ? (
-      <View>
-        {
-          show ? <Text selectable style={styles.text}>{text}</Text>
-            : <Text selectable style={styles.text}>{text.substring(0, length)} <Text color={theme['c-font-label']}>……</Text></Text>
-        }
-        <TouchableOpacity style={styles.toggle} onPress={() => { setShow(!show) }}>
-          <Text color={theme['c-primary-font']}>{show ? global.i18n.t('comment_hide_text') : global.i18n.t('comment_show_text')}</Text>
-        </TouchableOpacity>
-
-      </View>
-    ) : <Text selectable style={styles.text}>{text}</Text>
+    length
+      ? (
+          <View>
+            <IOSText variant="subheadline" selectable style={{ marginTop: spacing.xs }}>
+              {show ? text : `${text.substring(0, length)}……`}
+            </IOSText>
+            <IOSText
+              variant="subheadline"
+              color={accent}
+              onPress={() => { setShow(!show) }}
+              style={{ marginTop: spacing.sm, alignSelf: 'flex-end' }}
+            >{show ? t('comment_hide_text') : t('comment_show_text')}</IOSText>
+          </View>
+        )
+      : <IOSText variant="subheadline" selectable style={{ marginTop: spacing.xs }}>{text}</IOSText>
   )
-})
-
-const styles = createStyle({
-  text: {
-    marginTop: 5,
-    lineHeight: 19,
-  },
-  toggle: {
-    marginTop: 15,
-    alignSelf: 'flex-end',
-  },
 })

@@ -1,3 +1,5 @@
+import { Platform } from 'react-native'
+
 import type { Message } from '@/lang'
 import type { SettingScreenIds } from './Main'
 
@@ -55,6 +57,23 @@ export const IOS_SETTING_GROUPS: IOSSettingGroup[] = [
     ],
   },
 ]
+
+/** Android 独有设置项（网络代理、桌面歌词没有 iOS 实现） */
+export const ANDROID_EXTRA_SECTIONS: Record<string, IOSSettingSection> = {
+  lyric_desktop: { id: 'lyric_desktop', titleKey: 'setting_lyric_desktop', icon: 'lyric-on' },
+  network: { id: 'network', titleKey: 'setting_network', icon: 'slider' },
+}
+
+/** 当前平台可见的设置分组 */
+export const getIOSSettingGroups = (): IOSSettingGroup[] => {
+  if (Platform.OS != 'android') return IOS_SETTING_GROUPS
+  return IOS_SETTING_GROUPS.map((group) => {
+    const items = [...group.items]
+    if (group.titleKey == 'setting_group_playback') items.push(ANDROID_EXTRA_SECTIONS.lyric_desktop)
+    if (group.titleKey == 'setting_group_data') items.unshift(ANDROID_EXTRA_SECTIONS.network)
+    return { titleKey: group.titleKey, items }
+  })
+}
 
 export const findIOSSettingSection = (id: SettingScreenIds): IOSSettingSection | undefined => {
   for (const group of IOS_SETTING_GROUPS) {

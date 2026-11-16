@@ -1,11 +1,9 @@
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react'
-import { ScrollView, TouchableOpacity } from 'react-native'
+import { Pressable, ScrollView } from 'react-native'
 import songlistState, { type SortInfo, type Source } from '@/store/songlist/state'
 import { useI18n } from '@/lang'
-import { useTheme } from '@/store/theme/hook'
-import Text from '@/components/common/Text'
-import { createStyle } from '@/utils/tools'
-import { BorderWidths } from '@/theme'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import IOSText from '@/components/ios/Text'
 
 export interface SortTabProps {
   onSortChange: (id: string) => void
@@ -15,12 +13,12 @@ export interface SortTabType {
   setSource: (source: Source, activeTab: SortInfo['id']) => void
 }
 
-
+/** iOS 歌单排序：胶囊 chips（选中强调色实底，未选中浅灰底） */
 export default forwardRef<SortTabType, SortTabProps>(({ onSortChange }, ref) => {
   const [sortList, setSortList] = useState<SortInfo[]>([])
   const [activeId, setActiveId] = useState<SortInfo['id']>('')
   const t = useI18n()
-  const theme = useTheme()
+  const { colors, accent, spacing, radius } = useIOSTheme()
   const scrollViewRef = useRef<ScrollView>(null)
 
   useImperativeHandle(ref, () => ({
@@ -41,41 +39,40 @@ export default forwardRef<SortTabType, SortTabProps>(({ onSortChange }, ref) => 
   }
 
   return (
-    <ScrollView ref={scrollViewRef} style={styles.container} keyboardShouldPersistTaps={'always'} horizontal>
+    <ScrollView
+      ref={scrollViewRef}
+      style={{ flexGrow: 1, flexShrink: 1 }}
+      contentContainerStyle={{ alignItems: 'center', paddingRight: spacing.md }}
+      keyboardShouldPersistTaps="always"
+      horizontal
+      showsHorizontalScrollIndicator={false}
+    >
       {
-        sorts.map(s => (
-          <TouchableOpacity style={styles.button} onPress={() => { handleSortChange(s.id) }} key={s.id}>
-            <Text style={{ ...styles.buttonText, borderBottomColor: activeId == s.id ? theme['c-primary-background-active'] : 'transparent' }} color={activeId == s.id ? theme['c-primary-font-active'] : theme['c-font']}>{s.label}</Text>
-          </TouchableOpacity>
-        ))
+        sorts.map(s => {
+          const active = activeId == s.id
+          return (
+            <Pressable
+              key={s.id}
+              onPress={() => { handleSortChange(s.id) }}
+              style={({ pressed }) => ({
+                paddingHorizontal: 14,
+                paddingVertical: 7,
+                marginRight: spacing.sm,
+                borderRadius: radius.pill,
+                backgroundColor: active ? accent : colors.tertiaryFill,
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <IOSText
+                variant="subheadline"
+                weight={active ? '600' : '400'}
+                color={active ? colors.onAccent : colors.label}
+                numberOfLines={1}
+              >{s.label}</IOSText>
+            </Pressable>
+          )
+        })
       }
     </ScrollView>
   )
-})
-
-
-const styles = createStyle({
-  container: {
-    flexGrow: 1,
-    flexShrink: 1,
-    // paddingLeft: 5,
-    // paddingRight: 5,
-  },
-  button: {
-    // height: 38,
-    // lineHeight: 38,
-    justifyContent: 'center',
-    paddingLeft: 14,
-    paddingRight: 14,
-    // width: 80,
-    // backgroundColor: 'rgba(0,0,0,0.1)',
-  },
-  buttonText: {
-    // height: 38,
-    // lineHeight: 38,
-    textAlign: 'center',
-    paddingHorizontal: 2,
-    paddingVertical: 3,
-    borderBottomWidth: BorderWidths.normal3,
-  },
 })

@@ -1,13 +1,12 @@
 import { memo } from 'react'
-import { View, TouchableOpacity } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 import Image from '@/components/common/Image'
-import Text from '@/components/common/Text'
-import { createStyle } from '@/utils/tools'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { getIOSStatusBarHeight } from '@/theme/ios/insets'
 import { dateFormat } from '@/utils/common'
-import { useStatusbarHeight } from '@/store/common/hook'
-import { Icon } from '@/components/common/Icon'
-import { pop, navigations } from '@/navigation'
+import { navigations } from '@/navigation'
 
 interface Props {
   albumInfo: {
@@ -24,16 +23,13 @@ interface Props {
   componentId: string
 }
 
+/** iOS 专辑详情头部：封面 + 专辑信息（返回靠右滑手势） */
 export default memo(({ albumInfo, componentId }: Props) => {
-  const statusBarHeight = useStatusbarHeight()
+  const { colors, accent, spacing } = useIOSTheme()
   const albumPic = albumInfo.picUrl ?? albumInfo.img
   const artists: Array<{ id: string, name: string }> = albumInfo.artists?.length
     ? albumInfo.artists
     : (albumInfo.author ? [{ id: '', name: albumInfo.author }] : [])
-
-  const back = () => {
-    void pop(componentId)
-  }
 
   const handleArtistPress = (artist: { id: string, name: string }) => {
     if (!artist.id) return
@@ -46,69 +42,37 @@ export default memo(({ albumInfo, componentId }: Props) => {
   }
 
   return (
-    <View style={{ paddingTop: statusBarHeight, backgroundColor: 'rgba(0,0,0,0.2)' }}>
-      <View style={styles.headerContainer}>
-        <TouchableOpacity style={styles.backBtn} onPress={back}>
-          <Icon name="chevron-left" color="#fff" size={18} />
-        </TouchableOpacity>
-        <Image url={albumPic} style={styles.albumArt} />
-        <View style={styles.infoContainer}>
-          <Text style={styles.albumName} size={18} color="#FFF" numberOfLines={2}>{albumInfo.name}</Text>
-          <View style={styles.artistContainer}>
-            {artists.map((artist, index) => (
-              <TouchableOpacity key={artist.id || `${artist.name}_${index}`} onPress={() => { handleArtistPress(artist) }}>
-                <Text style={styles.artistName} size={14} color="rgba(255,255,255,0.9)">
-                  {artist.name}{index < artists.length - 1 ? ' / ' : ''}
-                </Text>
-              </TouchableOpacity>
-            ))}
+    // 二级页里 RN SafeAreaView 拿不到安全区，用原生状态栏高度显式下移
+    <View style={{ paddingTop: getIOSStatusBarHeight() + spacing.sm, paddingBottom: spacing.sm }}>
+        <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
+          <Image
+            url={albumPic}
+            style={{
+              width: 96,
+              height: 96,
+              borderRadius: 8,
+              backgroundColor: colors.tertiaryFill,
+            }}
+          />
+          <View style={{ flex: 1, marginLeft: spacing.lg, justifyContent: 'center' }}>
+          <IOSText variant="headline" numberOfLines={2}>{albumInfo.name}</IOSText>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.xs }}>
+            {
+              artists.map((artist, index) => (
+                <Pressable key={artist.id || `${artist.name}_${index}`} onPress={() => { handleArtistPress(artist) }} hitSlop={4}>
+                  <IOSText variant="subheadline" color={accent}>
+                    {artist.name}{index < artists.length - 1 ? ' / ' : ''}
+                  </IOSText>
+                </Pressable>
+              ))
+            }
           </View>
-          <Text style={styles.metaInfo} size={12} color="rgba(255,255,255,0.8)">
+          <IOSText variant="footnote" color={colors.secondaryLabel} style={{ marginTop: spacing.xs }}>
             {albumInfo.publishTime ? dateFormat(albumInfo.publishTime, 'Y.M.D') : ''}
-            {albumInfo.size ? ` • ${albumInfo.size} tracks` : ''}
-          </Text>
+            {albumInfo.size ? ` • ${global.i18n.t('album_song_count', { num: albumInfo.size })}` : ''}
+          </IOSText>
+          </View>
         </View>
-      </View>
     </View>
   )
-})
-
-const styles = createStyle({
-  backBtn: {
-    position: 'absolute',
-    top: 12,
-    left: 10,
-    zIndex: 10,
-    padding: 5,
-  },
-  headerContainer: {
-    padding: 20,
-    paddingTop: 36,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  albumArt: {
-    width: 96,
-    height: 96,
-    borderRadius: 8,
-  },
-  infoContainer: {
-    flex: 1,
-    marginLeft: 20,
-    justifyContent: 'center',
-  },
-  albumName: {
-    fontWeight: 'bold',
-  },
-  artistContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 8,
-  },
-  artistName: {
-    textDecorationLine: 'underline',
-  },
-  metaInfo: {
-    marginTop: 8,
-  },
 })

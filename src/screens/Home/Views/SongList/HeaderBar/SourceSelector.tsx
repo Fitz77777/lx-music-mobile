@@ -1,19 +1,14 @@
-import { forwardRef, useImperativeHandle, useRef } from 'react'
-import { StyleSheet, View, type ViewStyle } from 'react-native'
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { View, type ViewStyle, type View as ViewType } from 'react-native'
 
-import { createStyle } from '@/utils/tools'
-import SourceSelector, {
-  type SourceSelectorType as _SourceSelectorType,
-  type SourceSelectorProps as _SourceSelectorProps,
-} from '@/components/SourceSelector'
-import songlistState, { type Source, type InitState } from '@/store/songlist/state'
-
-type Sources = Readonly<InitState['sources']>
-type SourceSelectorCommonProps = _SourceSelectorProps<Sources>
-type SourceSelectorCommonType = _SourceSelectorType<Sources>
+import IOSPopover from '@/components/ios/Popover'
+import IOSSourcePill from '@/components/ios/SourcePill'
+import { getSourceColor } from '@/components/ios/sourceColor'
+import { useSourceListI18n } from '@/components/SourceSelector'
+import songlistState, { type Source } from '@/store/songlist/state'
 
 export interface SourceSelectorProps {
-  onSourceChange: SourceSelectorCommonProps['onSourceChange']
+  onSourceChange: (source: Source) => void
   style?: ViewStyle
 }
 
@@ -21,25 +16,51 @@ export interface SourceSelectorType {
   setSource: (source: Source) => void
 }
 
+/** iOS 歌单音源：点击弹出下拉菜单（原型 .src-pop） */
 export default forwardRef<SourceSelectorType, SourceSelectorProps>(({ style, onSourceChange }, ref) => {
-  const sourceSelectorRef = useRef<SourceSelectorCommonType>(null)
+  const [source, setSource] = useState<Source>('kw')
+  const [visible, setVisible] = useState(false)
+  const anchorRef = useRef<ViewType>(null)
+
+  const sourceList = useSourceListI18n(songlistState.sources)
+  const label = useMemo(() => {
+    return sourceList.find(item => item.action == source)?.label ?? ''
+  }, [sourceList, source])
 
   useImperativeHandle(ref, () => ({
     setSource(source) {
-      sourceSelectorRef.current?.setSourceList(songlistState.sources, source)
+      setSource(source)
     },
   }), [])
 
+  const items = useMemo(() => {
+    return sourceList.map(item => ({
+      key: item.action,
+      label: item.label,
+      color: getSourceColor(item.action),
+      selected: item.action == source,
+    }))
+  }, [sourceList, source])
 
   return (
-    <View style={StyleSheet.compose(styles.selector, style)}>
-      <SourceSelector ref={sourceSelectorRef} onSourceChange={onSourceChange} center />
+    <View style={style}>
+      <IOSSourcePill
+        source={source}
+        label={label}
+        anchorRef={anchorRef}
+        onPress={() => { if (sourceList.length) setVisible(true) }}
+        disabled={!sourceList.length}
+      />
+      <IOSPopover
+        visible={visible}
+        anchorRef={anchorRef}
+        items={items}
+        onClose={() => { setVisible(false) }}
+        onSelect={key => {
+          setVisible(false)
+          onSourceChange(key as Source)
+        }}
+      />
     </View>
   )
-})
-
-const styles = createStyle({
-  selector: {
-    // width: 86,
-  },
 })

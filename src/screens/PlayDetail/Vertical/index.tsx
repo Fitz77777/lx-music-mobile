@@ -34,10 +34,6 @@ export default memo(({ componentId }: { componentId: string }) => {
   const showLyricRef = useRef(false)
   const pagerViewRef = useRef<PagerView>(null)
 
-  const handleToggleLyric = () => {
-    pagerViewRef.current?.setPage(showLyricRef.current ? 0 : 1)
-  }
-
   const onPageSelected = ({ nativeEvent }: PagerViewOnPageSelectedEvent) => {
     setPageIndex(nativeEvent.position)
     showLyricRef.current = nativeEvent.position == 1
@@ -96,7 +92,7 @@ export default memo(({ componentId }: { componentId: string }) => {
           <View style={{ ...styles.pageIndicatorItem, backgroundColor: pageIndex == 0 ? theme['c-primary-light-100-alpha-700'] : theme['c-primary-alpha-900'] }}></View>
           <View style={{ ...styles.pageIndicatorItem, backgroundColor: pageIndex == 1 ? theme['c-primary-light-100-alpha-700'] : theme['c-primary-alpha-900'] }}></View>
         </View> */}
-        <Player onToggleLyric={handleToggleLyric} showingLyric={pageIndex == 1} />
+        <Player />
       </View>
     </>
   )

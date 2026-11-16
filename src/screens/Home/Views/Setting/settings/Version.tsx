@@ -1,26 +1,30 @@
 import { memo, useState, useEffect } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
 
 import Section from '../components/Section'
-import SubTitle from '../components/SubTitle'
 import Button from '../components/Button'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { sizeFormate } from '@/utils'
 
 import { useI18n } from '@/lang'
 import { useVersionDownloadProgressUpdated, useVersionInfo } from '@/store/version/hook'
-import Text from '@/components/common/Text'
 import { showModal } from '@/core/version'
 
 const currentVer = process.versions.app
+
+/**
+ * iOS 版本页：状态、当前/最新版本放在一张卡片里，下面一个整行按钮。
+ */
 export default memo(() => {
   const t = useI18n()
+  const { colors, spacing } = useIOSTheme()
   const versionInfo = useVersionInfo()
-  // const versionStatus = useVrsionUpdateStatus()
   const [title, setTitle] = useState('')
   const [tip, setTip] = useState('')
   const progress = useVersionDownloadProgressUpdated()
+
   const handleOpenVersionModal = () => {
-    // setVersionInfo({ showModal: true })
     showModal()
   }
 
@@ -53,8 +57,6 @@ export default memo(() => {
           setTitle(t('version_title_failed'))
           setTip(t('version_tip_failed'))
           break
-        // case 'idle':
-        //   break
         default:
           setTitle(t('version_title_new'))
           setTip('')
@@ -65,27 +67,27 @@ export default memo(() => {
 
   return (
     <Section title={t('setting_version')}>
-      <SubTitle title={title}>
-        <View style={styles.desc}>
-          <Text size={14}>{t('version_label_latest_ver')}{versionInfo.newVersion?.version}</Text>
-          <Text size={14}>{t('version_label_current_ver')}{currentVer}</Text>
-          {
-            tip ? <Text size={14}>{tip}</Text> : null
-          }
+      <View style={{ padding: spacing.lg }}>
+        <IOSText variant="subheadline" weight="600">{title}</IOSText>
+        <IOSText variant="footnote" color={colors.secondaryLabel} style={{ marginTop: 6 }}>
+          {t('version_label_latest_ver')}{versionInfo.newVersion?.version ?? '-'}
+        </IOSText>
+        <IOSText variant="footnote" color={colors.secondaryLabel}>
+          {t('version_label_current_ver')}{currentVer}
+        </IOSText>
+        {tip
+          ? (
+              <IOSText variant="footnote" color={colors.secondaryLabel} style={{ marginTop: 4 }}>
+                {tip}
+              </IOSText>
+            )
+          : null}
+        <View style={{ marginTop: spacing.md }}>
+          <Button style={{ alignSelf: 'stretch' }} onPress={handleOpenVersionModal}>
+            {t('setting_version_show_ver_modal')}
+          </Button>
         </View>
-        <View style={styles.btn}>
-          <Button onPress={handleOpenVersionModal}>{t('setting_version_show_ver_modal')}</Button>
-        </View>
-      </SubTitle>
+      </View>
     </Section>
   )
-})
-
-const styles = StyleSheet.create({
-  desc: {
-    marginBottom: 8,
-  },
-  btn: {
-    flexDirection: 'row',
-  },
 })

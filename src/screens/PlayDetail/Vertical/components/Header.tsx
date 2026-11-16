@@ -1,91 +1,149 @@
-import { memo, useRef } from 'react'
+import { memo, useMemo, useRef, useState } from 'react'
+import { Platform, Pressable, View, type View as ViewType } from 'react-native'
 
-import { View, StyleSheet } from 'react-native'
-
-import { pop } from '@/navigation'
 import StatusBar from '@/components/common/StatusBar'
-import { useTheme } from '@/store/theme/hook'
+import TimeoutExitEditModal, { type TimeoutExitEditModalType, useTimeInfo } from '@/components/TimeoutExitEditModal'
+import IOSIcon from '@/components/ios/Icon'
+import IOSPopover from '@/components/ios/Popover'
+import IOSText from '@/components/ios/Text'
+import { useI18n } from '@/lang'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { getIOSStatusBarHeight } from '@/theme/ios/insets'
 import { usePlayerMusicInfo } from '@/store/player/hook'
-import Text from '@/components/common/Text'
-import { scaleSizeH } from '@/utils/pixelRatio'
-import { HEADER_HEIGHT as _HEADER_HEIGHT, NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
+import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
 import commonState from '@/store/common/state'
+import { pop } from '@/navigation'
+import { useIOSDismissPan } from '@/navigation/iosGestures'
 import SettingPopup, { type SettingPopupType } from '../../components/SettingPopup'
 import SoundEffectPopup, { type SoundEffectPopupType } from '../../components/SoundEffectPopup'
-import { useStatusbarHeight } from '@/store/common/hook'
 import { useSetting } from '@/store/setting/hook'
 import { isSoundEffectActive } from '@/plugins/player/soundEffect'
-import Btn from './Btn'
-import TimeoutExitBtn from './TimeoutExitBtn'
 
-export const HEADER_HEIGHT = scaleSizeH(_HEADER_HEIGHT)
+/** 头部高度（pt），Pic 用它计算封面尺寸 */
+export const HEADER_HEIGHT = 44
 
+const BUTTON_SIZE = 32
 
-const Title = () => {
-  const theme = useTheme()
-  const musicInfo = usePlayerMusicInfo()
-
-
-  return (
-    <View style={styles.titleContent}>
-      <Text numberOfLines={1} style={styles.title}>{musicInfo.name}</Text>
-      <Text numberOfLines={1} style={styles.title} size={12} color={theme['c-font-label']}>{musicInfo.singer}</Text>
-    </View>
-  )
-}
-
+/**
+ * iOS 播放页头部（原型 .player .bar）：
+ * 左侧收起按钮、中间歌曲名/歌手、右侧「更多」下拉（定时退出 / 音效 / 播放器设置）。
+ * 同时保留在头部或封面上向下滑动、右滑返回的收起方式。
+ */
 export default memo(() => {
-  const popupRef = useRef<SettingPopupType>(null)
-  const soundEffectPopupRef = useRef<SoundEffectPopupType>(null)
-  const statusBarHeight = useStatusbarHeight()
-  const theme = useTheme()
-  const setting = useSetting()
-
-  const back = () => {
+  const t = useI18n()
+  const panDismiss = useIOSDismissPan(commonState.componentIds.playDetail)
+  const handleClose = () => {
     void pop(commonState.componentIds.playDetail!)
   }
-  const showSetting = () => {
-    popupRef.current?.show()
-  }
-  const showSoundEffect = () => {
-    soundEffectPopupRef.current?.show()
+  const topInset = Platform.OS == 'android' ? getIOSStatusBarHeight() : 0
+  const popupRef = useRef<SettingPopupType>(null)
+  const soundEffectPopupRef = useRef<SoundEffectPopupType>(null)
+  const timeoutModalRef = useRef<TimeoutExitEditModalType>(null)
+  const [menuVisible, setMenuVisible] = useState(false)
+  const moreAnchorRef = useRef<ViewType>(null)
+  const { colors, accent, spacing } = useIOSTheme()
+  const musicInfo = usePlayerMusicInfo()
+  const setting = useSetting()
+  const timeInfo = useTimeInfo()
+
+  const items = useMemo(() => [
+    {
+      key: 'timeout',
+      label: timeInfo.active ? t('timeout_exit_btn_update') : t('timeout_exit_tip_off'),
+      selected: timeInfo.active,
+    },
+    {
+      key: 'soundEffect',
+      label: t('setting_play_sound_effect'),
+      selected: isSoundEffectActive(setting),
+    },
+    { key: 'setting', label: t('play_detail_setting_title') },
+  ], [setting, t, timeInfo.active])
+
+  const handleSelect = (key: string) => {
+    setMenuVisible(false)
+    // 等下拉菜单收起后再打开二级弹层，避免两个 Modal 叠加
+    setTimeout(() => {
+      switch (key) {
+        case 'timeout':
+          timeoutModalRef.current?.show()
+          break
+        case 'soundEffect':
+          soundEffectPopupRef.current?.show()
+          break
+        case 'setting':
+          popupRef.current?.show()
+          break
+      }
+    }, 140)
   }
 
   return (
-    <View style={{ height: HEADER_HEIGHT + statusBarHeight, paddingTop: statusBarHeight }} nativeID={NAV_SHEAR_NATIVE_IDS.playDetail_header}>
+    <View
+      nativeID={NAV_SHEAR_NATIVE_IDS.playDetail_header}
+      style={{ paddingTop: topInset }}
+      {...panDismiss.panHandlers}
+    >
       <StatusBar />
-      <View style={styles.container}>
-        <Btn icon="chevron-left" onPress={back} />
-        <Title />
-        <TimeoutExitBtn />
-        <Btn icon="slider" color={isSoundEffectActive(setting) ? theme['c-primary-font-active'] : undefined} onPress={showSoundEffect} />
-        <Btn icon="setting" size={16} onPress={showSetting} />
+      <View style={{
+        height: HEADER_HEIGHT,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: spacing.xl,
+      }}>
+        {/* 收起按钮（同时保留下拉 / 右滑手势） */}
+        <Pressable
+          onPress={handleClose}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t('close')}
+          style={({ pressed }) => ({
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <IOSIcon
+            name="chevron-right"
+            size={20}
+            color={accent}
+            style={{ transform: [{ rotate: '90deg' }] }}
+          />
+        </Pressable>
+        <View style={{ flex: 1, paddingHorizontal: spacing.sm, alignItems: 'center' }}>
+          <IOSText variant="headline" numberOfLines={1} align="center">{musicInfo.name}</IOSText>
+          <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1} align="center" style={{ marginTop: 1 }}>
+            {musicInfo.singer}
+          </IOSText>
+        </View>
+        <Pressable
+          ref={moreAnchorRef}
+          onPress={() => { setMenuVisible(true) }}
+          hitSlop={8}
+          accessibilityRole="button"
+          style={({ pressed }) => ({
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <IOSIcon name="dots-vertical" size={22} color={accent} />
+        </Pressable>
       </View>
+      <IOSPopover
+        visible={menuVisible}
+        anchorRef={moreAnchorRef}
+        items={items}
+        onClose={() => { setMenuVisible(false) }}
+        onSelect={handleSelect}
+      />
       <SoundEffectPopup ref={soundEffectPopupRef} layoutMode="stacked" />
       <SettingPopup ref={popupRef} direction="vertical" />
+      <TimeoutExitEditModal ref={timeoutModalRef} timeInfo={timeInfo} />
     </View>
   )
-})
-
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    // justifyContent: 'center',
-    height: '100%',
-  },
-  titleContent: {
-    flex: 1,
-    paddingHorizontal: 5,
-    // alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    // flex: 1,
-    // textAlign: 'center',
-  },
-  icon: {
-    paddingLeft: 4,
-    paddingRight: 4,
-  },
 })

@@ -1,22 +1,22 @@
-import { useTheme } from '@/store/theme/hook'
-import { scaleSizeW } from '@/utils/pixelRatio'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 
 export type DrawerKind = 'mylist' | 'leaderboard' | 'songlist'
 
+/**
+ * 侧栏宽度按 HIG 的常用比例，直接以 pt 计。
+ * 榜单名较长，所以比 Android 版宽一些。
+ */
 const CONFIG = {
-  mylist: { widthPercentage: 0.82, maxWidth: scaleSizeW(400) },
-  leaderboard: { widthPercentage: 0.82, maxWidth: scaleSizeW(200) },
-  songlist: { widthPercentage: 0.8, maxWidth: scaleSizeW(560) },
+  mylist: { widthPercentage: 0.82, maxWidth: 340 },
+  leaderboard: { widthPercentage: 0.78, maxWidth: 300 },
+  songlist: { widthPercentage: 0.8, maxWidth: 420 },
 } as const
 
-/**
- * Android 抽屉外观：沿用 LX 主题背景与按屏幕缩放后的宽度上限。
- * iOS 版本见 useDrawerAppearance.ios.ts。
- */
+/** iOS 抽屉外观：系统分组背景 + pt 宽度上限 */
 export const useDrawerAppearance = (kind: DrawerKind) => {
-  const theme = useTheme()
+  const { colors } = useIOSTheme()
   return {
     ...CONFIG[kind],
-    backgroundColor: theme['c-content-background'],
+    backgroundColor: colors.groupedBackground,
   }
 }

@@ -1,13 +1,10 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { type Source, type InitState } from '@/store/hotSearch/state'
-import Button from '@/components/common/Button'
 import { getList } from '@/core/hotSearch'
-import Text from '@/components/common/Text'
-import { createStyle } from '@/utils/tools'
-import { useTheme } from '@/store/theme/hook'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { useI18n } from '@/lang'
-
 
 interface ListProps {
   onSearch: (keyword: string) => void
@@ -16,27 +13,49 @@ export interface HotSearchType {
   show: (source: Source) => void
 }
 
-
 export type List = NonNullable<InitState['sourceList'][keyof InitState['sourceList']]>
 
-const ListItem = ({ keyword, onSearch }: {
+const ListItem = ({ keyword, index, onSearch }: {
   keyword: string
+  index: number
   onSearch: (keyword: string) => void
 }) => {
-  const theme = useTheme()
+  const { colors, accent, isDark, withAlpha, radius, hairline } = useIOSTheme()
+  const top = index < 3
   return (
-    <Button style={{ ...styles.button, backgroundColor: theme['c-button-background'] }} onPress={() => { onSearch(keyword) }}>
-      <Text color={theme['c-button-font']} size={13}>{keyword}</Text>
-    </Button>
+    <Pressable
+      onPress={() => { onSearch(keyword) }}
+      style={({ pressed }) => ({
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderRadius: radius.pill,
+        borderWidth: top || isDark ? 0 : hairline,
+        borderColor: colors.rowSeparator,
+        backgroundColor: top ? withAlpha(accent, 0.1) : pressed ? colors.tertiaryFill : 'transparent',
+        opacity: pressed ? 0.6 : 1,
+      })}
+    >
+      <IOSText
+        variant="caption2"
+        weight="700"
+        color={top ? accent : colors.secondaryLabel}
+        style={{ opacity: top ? 0.8 : 1 }}
+      >{index + 1}</IOSText>
+      <IOSText variant="subheadline" weight={top ? '600' : '400'} color={top ? accent : colors.label} numberOfLines={1}>
+        {keyword}
+      </IOSText>
+    </Pressable>
   )
 }
 
+/** iOS 热门搜索：带排名的胶囊标签，前三名强调色（原型 .hot-tag） */
 export default forwardRef<HotSearchType, ListProps>((props, ref) => {
-  // const [listType, setListType] = useState<SearchState['searchType']>('music')
-  // const listRef = useRef<MusicListType>(null)
   const [list, setList] = useState<List>([])
+  const { colors, spacing } = useIOSTheme()
   const t = useI18n()
-  // const theme = useTheme()
 
   const isUnmountedRef = useRef(false)
   useEffect(() => {
@@ -55,44 +74,29 @@ export default forwardRef<HotSearchType, ListProps>((props, ref) => {
     },
   }), [])
 
+  if (!list.length) return null
+
   return (
-    list.length
-      ? (
-          <ScrollView>
-            <Text style={styles.title} size={16}>{t('search_hot_search')}</Text>
-            <View style={styles.list}>
-              {
-                list.map(keyword => <ListItem keyword={keyword} key={keyword} onSearch={props.onSearch} />)
-              }
-            </View>
-          </ScrollView>
-        )
-      : null
+    <View>
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        justifyContent: 'space-between',
+        marginTop: spacing.xl,
+        marginBottom: spacing.md,
+      }}>
+        <IOSText variant="title3" weight="700" color={colors.label} style={{ letterSpacing: 0.2 }}>
+          {t('search_hot_search')}
+        </IOSText>
+        <IOSText variant="footnote" color={colors.secondaryLabel}>{t('search_hot_search_sub')}</IOSText>
+      </View>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+        {
+          list.map((keyword, index) => (
+            <ListItem keyword={keyword} index={index} key={keyword} onSearch={props.onSearch} />
+          ))
+        }
+      </View>
+    </View>
   )
-})
-
-
-const styles = createStyle({
-  title: {
-    // paddingLeft: 15,
-    paddingTop: 15,
-    // paddingBottom: 10,
-  },
-  list: {
-    // paddingLeft: 15,
-    // paddingRight: 15,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    // paddingBottom: 15,
-  },
-  button: {
-    textAlign: 'center',
-    paddingLeft: 10,
-    paddingRight: 10,
-    paddingTop: 5,
-    paddingBottom: 5,
-    borderRadius: 4,
-    marginRight: 10,
-    marginTop: 8,
-  },
 })

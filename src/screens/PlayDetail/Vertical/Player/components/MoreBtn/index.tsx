@@ -1,40 +1,90 @@
-import { createStyle } from '@/utils/tools'
+import { memo, useEffect, useRef, useState } from 'react'
 import { View } from 'react-native'
+
+import PlayQueueModal, { type PlayQueueModalType } from '@/components/player/PlayQueueModal'
+import { IOSHeart } from '@/components/ios'
+import { LIST_IDS } from '@/config/constant'
+import { getListMusics } from '@/core/list'
+import { collectMusic, uncollectMusic } from '@/core/player/player'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { usePlayerMusicInfo } from '@/store/player/hook'
+import Btn, { BTN_ICON_SIZE } from './Btn'
 import PlayModeBtn from './PlayModeBtn'
-import MusicAddBtn from './MusicAddBtn'
-import DesktopLyricBtn from './DesktopLyricBtn'
 import CommentBtn from './CommentBtn'
 
+/** 当前歌曲是否已在我的收藏里 */
+const useIsLove = (musicId: string | null) => {
+  const [isLove, setIsLove] = useState(false)
+
+  useEffect(() => {
+    if (!musicId) {
+      setIsLove(false)
+      return
+    }
+    let cancelled = false
+    const check = () => {
+      void getListMusics(LIST_IDS.LOVE).then(list => {
+        if (cancelled) return
+        setIsLove(list.some(item => item.id == musicId))
+      })
+    }
+    const handleUpdate = (ids: string[]) => {
+      if (ids.includes(LIST_IDS.LOVE)) check()
+    }
+    check()
+    global.app_event.on('myListMusicUpdate', handleUpdate)
+    return () => {
+      cancelled = true
+      global.app_event.off('myListMusicUpdate', handleUpdate)
+    }
+  }, [musicId])
+
+  return isLove
+}
+
 export interface MoreBtnProps {
-  /** iOS：切换封面 / 歌词页，Android 忽略 */
+  /** 切换封面 / 歌词页（iOS 已移除歌词按钮，仅保留给共用类型） */
   onToggleLyric?: () => void
-  /** iOS：当前是否显示歌词页，Android 忽略 */
+  /** 当前是否显示歌词页 */
   showingLyric?: boolean
 }
 
-export default ({ onToggleLyric, showingLyric }: MoreBtnProps) => {
-  // 这两个参数仅 iOS 使用，Android 侧忽略
-  void onToggleLyric
-  void showingLyric
+/**
+ * iOS 播放页底部操作行（原型 .secondary）：
+ * 收藏 / 播放模式 / 评论 / 播放队列。
+ * 歌词页通过左右滑动封面切换，不再提供独立的歌词按钮。
+ */
+export default memo(() => {
+  const { colors, accent } = useIOSTheme()
+  const musicInfo = usePlayerMusicInfo()
+  const isLove = useIsLove(musicInfo.id)
+  const queueRef = useRef<PlayQueueModalType>(null)
+
+  const handleToggleLove = () => {
+    if (isLove) uncollectMusic()
+    else collectMusic()
+  }
+
   return (
-    <View style={styles.container}>
-      <DesktopLyricBtn />
-      <MusicAddBtn />
+    <View style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 34,
+      paddingTop: 22,
+      paddingBottom: 6,
+    }}>
+      <Btn
+        icon="love"
+        color={isLove ? accent : colors.label}
+        onPress={handleToggleLove}
+      >
+        {isLove ? <IOSHeart size={BTN_ICON_SIZE} color={accent} /> : undefined}
+      </Btn>
       <PlayModeBtn />
       <CommentBtn />
+      <Btn icon="list-order" onPress={() => { queueRef.current?.show() }} />
+      <PlayQueueModal ref={queueRef} />
     </View>
   )
-}
-
-
-const styles = createStyle({
-  container: {
-    // flexShrink: 0,
-    // flexGrow: 0,
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    // backgroundColor: 'rgba(0,0,0,0.1)',
-  },
 })

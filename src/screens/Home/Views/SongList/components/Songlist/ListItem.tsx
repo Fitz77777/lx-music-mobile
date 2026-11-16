@@ -1,14 +1,14 @@
 import { memo } from 'react'
-import { View, Platform, TouchableOpacity } from 'react-native'
-import { createStyle } from '@/utils/tools'
+import { View, TouchableOpacity } from 'react-native'
+
 import { type ListInfoItem } from '@/store/songlist/state'
-import Text from '@/components/common/Text'
-import { scaleSizeW } from '@/utils/pixelRatio'
+import IOSIcon from '@/components/ios/Icon'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { NAV_SHEAR_NATIVE_IDS } from '@/config/constant'
-import { useTheme } from '@/store/theme/hook'
 import Image from '@/components/common/Image'
 
-const gap = scaleSizeW(15)
+/** iOS 歌单卡片：14pt 圆角封面 + 播放量角标 + 两行标题（原型 .grid2） */
 export default memo(({ item, index, width, showSource, onPress }: {
   item: ListInfoItem
   index: number
@@ -16,60 +16,72 @@ export default memo(({ item, index, width, showSource, onPress }: {
   width: number
   onPress: (item: ListInfoItem, index: number) => void
 }) => {
-  const theme = useTheme()
-  const itemWidth = width - gap
+  const { colors, spacing, radius } = useIOSTheme()
+
+  if (!item.source) return <View style={{ width, marginBottom: spacing.xl }} />
+
   const handlePress = () => {
     onPress(item, index)
   }
-  return (
-    item.source
-      ? (
-          <View style={{ ...styles.listItem, width: itemWidth }}>
-            <View style={{ ...styles.listItemImg, backgroundColor: theme['c-content-background'] }}>
-              <TouchableOpacity activeOpacity={0.5} onPress={handlePress}>
-                <Image url={item.img} nativeID={`${NAV_SHEAR_NATIVE_IDS.songlistDetail_pic}_from_${item.id}`} style={{ width: itemWidth, height: itemWidth, borderRadius: 4 }} />
-                { showSource ? <Text style={styles.sourceLabel} size={9} color="#fff" >{item.source}</Text> : null }
-              </TouchableOpacity>
-            </View>
-            <TouchableOpacity activeOpacity={0.5} onPress={handlePress}>
-              <Text style={styles.listItemTitle} numberOfLines={ 2 }>{item.name}</Text>
-            </TouchableOpacity>
-            {/* <Text>{JSON.stringify(item)}</Text> */}
-          </View>
-        )
-      : <View style={{ ...styles.listItem, width: itemWidth }} />
-  )
-})
 
-const styles = createStyle({
-  listItem: {
-    // width: 90,
-    margin: 10,
-  },
-  listItemImg: {
-    // backgroundColor: '#eee',
-    borderRadius: 4,
-    marginBottom: 5,
-    overflow: 'hidden',
-    ...Platform.select({
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  sourceLabel: {
-    paddingLeft: 4,
-    paddingBottom: 2,
-    paddingRight: 4,
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    borderBottomLeftRadius: 3,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  listItemTitle: {
-    fontSize: 12,
-    // overflow: 'hidden',
-    marginBottom: 5,
-  },
+  return (
+    <View style={{ width, marginBottom: spacing.xl }}>
+      <TouchableOpacity activeOpacity={0.6} onPress={handlePress}>
+        <View style={{
+          width,
+          height: width,
+          borderRadius: radius.card,
+          overflow: 'hidden',
+          backgroundColor: colors.tertiaryFill,
+        }}>
+          <Image
+            url={item.img}
+            nativeID={`${NAV_SHEAR_NATIVE_IDS.songlistDetail_pic}_from_${item.id}`}
+            style={{ width, height: width }}
+          />
+          {showSource
+            ? (
+                <View style={{
+                  position: 'absolute',
+                  top: 6,
+                  left: 6,
+                  paddingHorizontal: 6,
+                  paddingVertical: 1,
+                  borderRadius: radius.cover,
+                  backgroundColor: colors.imageOverlay,
+                }}>
+                  <IOSText variant="caption2" color={colors.onAccent}>{item.source}</IOSText>
+                </View>
+              )
+            : null}
+          {item.play_count
+            ? (
+                <View style={{
+                  position: 'absolute',
+                  right: 8,
+                  bottom: 8,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingHorizontal: 7,
+                  paddingVertical: 2,
+                  borderRadius: 8,
+                  backgroundColor: colors.imageOverlay,
+                }}>
+                  <IOSIcon name="play" size={9} color={colors.onAccent} style={{ marginRight: 3 }} />
+                  <IOSText variant="caption2" weight="500" color={colors.onAccent} numberOfLines={1}>{item.play_count}</IOSText>
+                </View>
+              )
+            : null}
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity activeOpacity={0.6} onPress={handlePress}>
+        <IOSText
+          variant="subheadline"
+          weight="500"
+          numberOfLines={2}
+          style={{ marginTop: spacing.sm }}
+        >{item.name}</IOSText>
+      </TouchableOpacity>
+    </View>
+  )
 })

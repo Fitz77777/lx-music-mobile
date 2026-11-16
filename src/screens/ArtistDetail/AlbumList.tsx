@@ -2,9 +2,8 @@ import { memo, useMemo } from 'react'
 import { FlatList, View, RefreshControl, TouchableOpacity } from 'react-native'
 
 import Image from '@/components/common/Image'
-import Text from '@/components/common/Text'
-import { useTheme } from '@/store/theme/hook'
-import { createStyle } from '@/utils/tools'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { dateFormat } from '@/utils/common'
 import { navigations } from '@/navigation'
 
@@ -29,8 +28,9 @@ interface Props {
   onLoadMore: () => void
 }
 
+/** iOS 歌手专辑列表：两列封面卡片 */
 export default memo(({ componentId, albums, loading, error, hasMore, onRefresh, onLoadMore }: Props) => {
-  const theme = useTheme()
+  const { colors, accent, spacing } = useIOSTheme()
 
   const list = useMemo(() => [...albums], [albums])
 
@@ -49,13 +49,26 @@ export default memo(({ componentId, albums, loading, error, hasMore, onRefresh, 
   }
 
   const renderItem = ({ item }: { item: AlbumItem }) => (
-    <TouchableOpacity style={styles.item} onPress={() => { handlePress(item) }}>
-      <Image url={item.picUrl} style={styles.cover} />
-      <Text numberOfLines={1} size={13}>{item.name}</Text>
-      <Text numberOfLines={1} size={11} color={theme['c-font-label']}>{item.artistName}</Text>
-      <Text size={10} color={theme['c-font-label']}>
+    <TouchableOpacity
+      style={{ flex: 1, padding: spacing.sm }}
+      activeOpacity={0.6}
+      onPress={() => { handlePress(item) }}
+    >
+      <Image
+        url={item.picUrl}
+        style={{
+          width: '100%',
+          aspectRatio: 1,
+          borderRadius: 8,
+          marginBottom: spacing.sm,
+          backgroundColor: colors.tertiaryFill,
+        }}
+      />
+      <IOSText variant="subheadline" numberOfLines={2}>{item.name}</IOSText>
+      <IOSText variant="footnote" color={colors.secondaryLabel} numberOfLines={1} style={{ marginTop: 2 }}>{item.artistName}</IOSText>
+      <IOSText variant="caption1" color={colors.tertiaryLabel} style={{ marginTop: 2 }}>
         {item.publishTime ? dateFormat(item.publishTime, 'Y.M.D') : ''}
-      </Text>
+      </IOSText>
     </TouchableOpacity>
   )
 
@@ -65,8 +78,8 @@ export default memo(({ componentId, albums, loading, error, hasMore, onRefresh, 
     else if (error && albums.length === 0) text = '加载失败，下拉可重试'
     else if (!hasMore) text = '加载完毕'
     return (
-      <View style={styles.footer}>
-        <Text color={theme['c-font-label']}>{text}</Text>
+      <View style={{ width: '100%', paddingVertical: spacing.md, alignItems: 'center' }}>
+        <IOSText variant="footnote" color={colors.secondaryLabel}>{text}</IOSText>
       </View>
     )
   }
@@ -79,33 +92,16 @@ export default memo(({ componentId, albums, loading, error, hasMore, onRefresh, 
       keyExtractor={item => String(item.id)}
       onEndReached={onLoadMore}
       onEndReachedThreshold={0.5}
+      contentContainerStyle={{ paddingHorizontal: spacing.sm, paddingBottom: spacing.xxxl }}
       ListFooterComponent={footer}
       refreshControl={
         <RefreshControl
-          colors={[theme['c-primary']]}
+          colors={[accent]}
+          tintColor={accent}
           refreshing={loading && albums.length === 0}
           onRefresh={onRefresh}
         />
       }
     />
   )
-})
-
-const styles = createStyle({
-  item: {
-    flex: 1,
-    padding: 8,
-  },
-  cover: {
-    width: '100%',
-    aspectRatio: 1,
-    borderRadius: 6,
-    marginBottom: 6,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-  },
-  footer: {
-    width: '100%',
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
 })

@@ -1,21 +1,18 @@
-// import { useLrcPlay } from '@/plugins/lyric'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import IOSText from '@/components/ios/Text'
 import { useStatusText } from '@/store/player/hook'
-import { createStyle } from '@/utils/tools'
-import Text from '@/components/common/Text'
 
-
+/** iOS 播放状态文字 */
 export default () => {
-  // const { text } = useLrcPlay()
   const statusText = useStatusText()
-  // console.log('render status')
+  const { colors } = useIOSTheme()
 
-  // const status = playerStatus.isPlay ? text : playerStatus.statusText
-
-  return <Text style={styles.text} numberOfLines={1} size={13}>{statusText}</Text>
+  return (
+    <IOSText
+      variant="caption1"
+      color={colors.secondaryLabel}
+      numberOfLines={1}
+      align="center"
+    >{statusText}</IOSText>
+  )
 }
-
-const styles = createStyle({
-  text: {
-    textAlign: 'center',
-  },
-})

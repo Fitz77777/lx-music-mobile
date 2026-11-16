@@ -1,55 +1,10 @@
 import { forwardRef, useImperativeHandle, useRef } from 'react'
-import { View, ScrollView } from 'react-native'
-import Dialog, { type DialogType } from './Dialog'
-import Button from './Button'
-import { createStyle } from '@/utils/tools'
-import { useI18n } from '@/lang/index'
-import { useTheme } from '@/store/theme/hook'
-import Text from './Text'
+import { Pressable, ScrollView, View } from 'react-native'
 
-const styles = createStyle({
-  main: {
-    // flexGrow: 0,
-    flexShrink: 1,
-    marginTop: 15,
-    marginLeft: 5,
-    marginRight: 5,
-    marginBottom: 25,
-  },
-  content: {
-    flexGrow: 0,
-    paddingLeft: 10,
-    paddingRight: 10,
-  },
-  btns: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingBottom: 15,
-    // paddingRight: 15,
-  },
-  btnsDirection: {
-    paddingLeft: 15,
-  },
-  btnsReversedDirection: {
-    paddingLeft: 15,
-    flexDirection: 'row-reverse',
-  },
-  btn: {
-    flex: 1,
-    paddingTop: 9,
-    paddingBottom: 9,
-    paddingLeft: 10,
-    paddingRight: 10,
-    alignItems: 'center',
-    borderRadius: 4,
-  },
-  btnDirection: {
-    marginRight: 15,
-  },
-  btnReversedDirection: {
-    marginLeft: 15,
-  },
-})
+import Modal, { type ModalType } from './Modal'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { useKeyboard } from '@/utils/hooks'
 
 export interface ConfirmAlertProps {
   onCancel?: () => void
@@ -72,13 +27,18 @@ export interface ConfirmAlertType {
   setVisible: (visible: boolean) => void
 }
 
+const BUTTON_HEIGHT = 44
+
+/**
+ * iOS 确认框：系统 UIAlertController 风格（居中圆角卡片 + 分隔线 + 强调色文字按钮）。
+ * 需要输入框等自定义内容的场景（连接码、规则编辑）仍然复用同一套外壳。
+ */
 export default forwardRef<ConfirmAlertType, ConfirmAlertProps>(({
   onHide,
   onCancel,
   onConfirm = () => {},
   keyHide,
   bgHide,
-  closeBtn,
   title = '',
   text = '',
   cancelText = '',
@@ -87,40 +47,111 @@ export default forwardRef<ConfirmAlertType, ConfirmAlertProps>(({
   disabledConfirm = false,
   children,
   reverseBtn = false,
-}: ConfirmAlertProps, ref) => {
-  const theme = useTheme()
-  const t = useI18n()
-
-  const dialogRef = useRef<DialogType>(null)
+}, ref) => {
+  const { colors, accent, hairline, radius } = useIOSTheme()
+  const { keyboardShown, keyboardHeight } = useKeyboard()
+  const modalRef = useRef<ModalType>(null)
 
   useImperativeHandle(ref, () => ({
     setVisible(visible: boolean) {
-      dialogRef.current?.setVisible(visible)
+      modalRef.current?.setVisible(visible)
     },
   }))
 
   const handleCancel = () => {
     onCancel?.()
-    dialogRef.current?.setVisible(false)
+    modalRef.current?.setVisible(false)
   }
 
+  const renderButton = (label: string, bold: boolean, onPress: () => void, disabled = false) => (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        flex: 1,
+        height: BUTTON_HEIGHT,
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: disabled ? 0.4 : pressed ? 0.5 : 1,
+      })}
+    >
+      <IOSText weight={bold ? '600' : '400'} color={accent} numberOfLines={1}>{label}</IOSText>
+    </Pressable>
+  )
+
+  const cancelButton = renderButton(cancelText || global.i18n.t('cancel'), false, handleCancel)
+  const confirmButton = showConfirm
+    ? renderButton(confirmText || global.i18n.t('confirm'), true, onConfirm, disabledConfirm)
+    : null
+
   return (
-    <Dialog onHide={onHide} keyHide={keyHide} bgHide={bgHide} closeBtn={closeBtn} title={title} ref={dialogRef}>
-      <View style={styles.main}>
-        <ScrollView style={styles.content} keyboardShouldPersistTaps={'always'}>
-          {children ?? <Text>{text}</Text>}
-        </ScrollView>
+    <Modal
+      onHide={onHide}
+      keyHide={keyHide}
+      bgHide={bgHide}
+      bgColor={colors.overlay}
+      ref={modalRef}
+    >
+      <View style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 30,
+        paddingBottom: keyboardShown ? keyboardHeight : 0,
+      }}>
+        <View style={{
+          width: '100%',
+          maxWidth: 290,
+          borderRadius: radius.card,
+          overflow: 'hidden',
+          backgroundColor: colors.secondaryGroupedBackground,
+        }}>
+          {title
+            ? (
+                <IOSText
+                  weight="600"
+                  align="center"
+                  style={{ marginHorizontal: 16, marginTop: 19 }}
+                >{title}</IOSText>
+              )
+            : null}
+          <ScrollView
+            style={{ flexGrow: 0, maxHeight: 320 }}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingTop: title ? 4 : 19,
+              paddingBottom: 19,
+            }}
+            keyboardShouldPersistTaps="handled"
+          >
+            {children ?? (
+              <IOSText variant="footnote" align="center" color={colors.secondaryLabel}>{text}</IOSText>
+            )}
+          </ScrollView>
+          <View style={{ flexDirection: 'row', borderTopWidth: hairline, borderTopColor: colors.rowSeparator }}>
+            {reverseBtn
+              ? (
+                  <>
+                    {confirmButton}
+                    {confirmButton
+                      ? <View style={{ width: hairline, backgroundColor: colors.rowSeparator }} />
+                      : null}
+                    {cancelButton}
+                  </>
+                )
+              : (
+                  <>
+                    {cancelButton}
+                    {confirmButton
+                      ? <View style={{ width: hairline, backgroundColor: colors.rowSeparator }} />
+                      : null}
+                    {confirmButton}
+                  </>
+                )}
+          </View>
+        </View>
       </View>
-      <View style={{ ...styles.btns, ...(reverseBtn ? styles.btnsReversedDirection : styles.btnsDirection) }}>
-        <Button style={{ ...styles.btn, ...(reverseBtn ? styles.btnReversedDirection : styles.btnDirection), backgroundColor: theme['c-button-background'] }} onPress={handleCancel}>
-          <Text color={theme['c-button-font']}>{cancelText || t('cancel')}</Text>
-        </Button>
-        {showConfirm
-          ? <Button style={{ ...styles.btn, ...(reverseBtn ? styles.btnReversedDirection : styles.btnDirection), backgroundColor: theme['c-button-background'] }} onPress={onConfirm} disabled={disabledConfirm}>
-              <Text color={theme['c-button-font']}>{confirmText || t('confirm')}</Text>
-            </Button>
-          : null}
-      </View>
-    </Dialog>
+    </Modal>
   )
 })

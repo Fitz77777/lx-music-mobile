@@ -1,39 +1,25 @@
 import { useMemo, useRef, useState } from 'react'
-import { Pressable, Platform, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 
 import { useI18n } from '@/lang'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import IOSIcon from '@/components/ios/Icon'
 import IOSText from '@/components/ios/Text'
 import Main, { type MainType } from './Main'
-import { IOS_SETTING_GROUPS, type IOSSettingGroup, type IOSSettingSection } from './iosSections'
+import { getIOSSettingGroups, type IOSSettingSection } from './iosSections'
 
 /**
  * 平板设置（原型 .set-split）：左侧入口列表常驻，右侧就地展开，无二级页与返回。
  * 分组结构沿用 iOS 设置首页的 iosSections；Android 平板额外补上
  * 桌面歌词与网络设置（仅 Android 实现的设置项）。
  */
-const ANDROID_EXTRA_SECTIONS: Record<string, IOSSettingSection> = {
-  lyric_desktop: { id: 'lyric_desktop', titleKey: 'setting_lyric_desktop', icon: 'lyric-on' },
-  network: { id: 'network', titleKey: 'setting_network', icon: 'slider' },
-}
-
-const buildGroups = (): IOSSettingGroup[] => {
-  if (Platform.OS != 'android') return IOS_SETTING_GROUPS
-  return IOS_SETTING_GROUPS.map((group) => {
-    const items = [...group.items]
-    if (group.titleKey == 'setting_group_playback') items.push(ANDROID_EXTRA_SECTIONS.lyric_desktop)
-    if (group.titleKey == 'setting_group_data') items.unshift(ANDROID_EXTRA_SECTIONS.network)
-    return { titleKey: group.titleKey, items }
-  })
-}
 
 
 export default () => {
   const t = useI18n()
   const { colors, accent, spacing, radius, hairline } = useIOSTheme()
   const mainRef = useRef<MainType>(null)
-  const groups = useMemo(buildGroups, [])
+  const groups = useMemo(getIOSSettingGroups, [])
   const [activeId, setActiveId] = useState(() => global.lx.settingActiveId || groups[0].items[0].id)
 
   const handlePress = (item: IOSSettingSection) => {

@@ -1,20 +1,12 @@
 import { memo, useState } from 'react'
 
-import Section from '../../components/Section'
 import IsEnable from './IsEnable'
-import History from './History'
-import { useI18n } from '@/lang'
-// import SyncHost from './SyncHost'
 
+/**
+ * iOS 数据同步页：一张分组卡片，历史地址按钮并入「地址」行。
+ */
 export default memo(() => {
-  const t = useI18n()
-
   const [host, setHost] = useState('')
 
-  return (
-    <Section title={t('setting_sync')}>
-      <IsEnable host={host} setHost={setHost} />
-      <History setHost={setHost} />
-    </Section>
-  )
+  return <IsEnable host={host} setHost={setHost} />
 })

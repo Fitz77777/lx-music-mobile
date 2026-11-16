@@ -1,16 +1,11 @@
 import { useCallback, useRef } from 'react'
-import Text from '@/components/common/Text'
-import { useTheme } from '@/store/theme/hook'
-import Button, { type BtnType } from '@/components/common/Button'
-import { createStyle } from '@/utils/tools'
-import { type BoardItem } from '@/store/leaderboard/state'
-import { Icon } from '@/components/common/Icon'
+import { Pressable, type View } from 'react-native'
 
-// index={index}
-// longPressIndex={longPressIndex}
-// activeId={activeId}
-// showMenu={showMenu}
-// onBoundChange={handleBoundChange}
+import IOSText from '@/components/ios/Text'
+import CheckMark from '@/components/ios/CheckMark'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { type BoardItem } from '@/store/leaderboard/state'
+
 export interface ListItemProps {
   item: BoardItem
   index: number
@@ -20,57 +15,40 @@ export interface ListItemProps {
   onBoundChange: (item: BoardItem) => void
 }
 
+/** iOS 排行榜列表行：当前榜单显示对勾，长按弹出操作菜单 */
 export default ({ item, activeId, index, longPressIndex, onBoundChange, onShowMenu }: ListItemProps) => {
-  const theme = useTheme()
-  const buttonRef = useRef<BtnType>(null)
+  const { colors, accent, spacing } = useIOSTheme()
+  const rowRef = useRef<View>(null)
 
   const setPosition = useCallback(() => {
-    if (buttonRef.current?.measure) {
-      buttonRef.current.measure((fx, fy, width, height, px, py) => {
-        // console.log(fx, fy, width, height, px, py)
-        onShowMenu(item.id, item.name, index, { x: Math.ceil(px), y: Math.ceil(py), w: Math.ceil(width), h: Math.ceil(height) })
-      })
-    }
+    rowRef.current?.measure((fx, fy, width, height, px, py) => {
+      onShowMenu(item.id, item.name, index, { x: Math.ceil(px), y: Math.ceil(py), w: Math.ceil(width), h: Math.ceil(height) })
+    })
   }, [index, item, onShowMenu])
 
   const active = activeId == item.id
 
   return (
-    <Button
-      ref={buttonRef}
-      style={{ ...styles.button, backgroundColor: index == longPressIndex ? theme['c-button-background-active'] : undefined }}
-      key={item.id} onLongPress={setPosition}
+    <Pressable
+      ref={rowRef}
       onPress={() => { onBoundChange(item) }}
+      onLongPress={setPosition}
+      style={({ pressed }) => ({
+        minHeight: 48,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingLeft: spacing.lg,
+        paddingRight: spacing.md,
+        backgroundColor: pressed || index == longPressIndex ? colors.secondaryFill : 'transparent',
+      })}
     >
-      {
-        active
-          ? <Icon style={styles.listActiveIcon} name="chevron-right" size={12} color={theme['c-primary-font']} />
-          : null
-      }
-      <Text style={styles.listName} size={14} textBreakStrategy="simple" color={active ? theme['c-primary-font-active'] : theme['c-font']} numberOfLines={1}>{item.name}</Text>
-    </Button>
+      <IOSText
+        variant="body"
+        color={active ? accent : colors.label}
+        numberOfLines={1}
+        style={{ flex: 1, paddingRight: spacing.sm }}
+      >{item.name}</IOSText>
+      {active ? <CheckMark size={13} color={accent} thickness={2} /> : null}
+    </Pressable>
   )
 }
-
-const styles = createStyle({
-  button: {
-    paddingLeft: 5,
-    paddingRight: 10,
-    paddingTop: 10,
-    paddingBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  listActiveIcon: {
-    // width: 18,
-    marginLeft: 3,
-    // paddingRight: 5,
-    textAlign: 'center',
-  },
-  listName: {
-    height: '100%',
-    justifyContent: 'center',
-    paddingLeft: 6,
-    // backgroundColor: 'rgba(0,0,0,0.1)',
-  },
-})

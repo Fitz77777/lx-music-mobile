@@ -1,233 +1,161 @@
-import { memo, useCallback, useMemo, useRef, useState, forwardRef, useImperativeHandle } from 'react'
-import { Animated, FlatList, Modal, Platform, Pressable, View, TouchableOpacity, type ModalProps } from 'react-native'
-import { createStyle } from '@/utils/tools'
-import { useTheme } from '@/store/theme/hook'
-import { scaleSizeH, scaleSizeW } from '@/utils/pixelRatio'
-import Text from '@/components/common/Text'
-import { Icon } from '@/components/common/Icon'
-import Badge from '@/components/common/Badge'
+import { forwardRef, memo, useCallback, useImperativeHandle, useMemo, useState } from 'react'
+import { FlatList, Pressable, View } from 'react-native'
+
+import Image from '@/components/common/Image'
+import IOSBottomSheet from '@/components/ios/BottomSheet'
+import IOSText from '@/components/ios/Text'
+import { useI18n } from '@/lang'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { usePlayInfo } from '@/store/player/hook'
 import { playList } from '@/core/player/player'
 import { getList } from '@/core/player/playInfo'
-import { useStatusbarHeight } from '@/store/common/hook'
-import useWindowSize from '@/utils/hooks/useWindowSize'
 
-const ITEM_HEIGHT = scaleSizeH(48)
-const DRAWER_WIDTH_PERCENTAGE = 0.75
-const DRAWER_MAX_WIDTH = scaleSizeW(360)
+const ITEM_HEIGHT = 56
 
-const ListItem = memo(({ item, index, activeIndex, onPress }: {
+const ListItem = memo(({ item, index, active, onPress }: {
   item: LX.Music.MusicInfo
   index: number
-  activeIndex: number
+  active: boolean
   onPress: (index: number) => void
 }) => {
-  const theme = useTheme()
-  const active = activeIndex === index
+  const t = useI18n()
+  const { colors, accent, withAlpha } = useIOSTheme()
 
   return (
-    <TouchableOpacity
-      style={{ ...styles.listItem, height: ITEM_HEIGHT, backgroundColor: active ? theme['c-primary-background-hover'] : 'rgba(0,0,0,0)' }}
-      activeOpacity={0.5}
+    <Pressable
       onPress={() => { onPress(index) }}
+      style={({ pressed }) => ({
+        height: ITEM_HEIGHT,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        gap: 11,
+        backgroundColor: active
+          ? withAlpha(accent, 0.1)
+          : pressed
+            ? colors.tertiaryFill
+            : 'transparent',
+      })}
     >
-      {
-        active
-          ? <Icon style={styles.sn} name="play-outline" size={13} color={theme['c-primary-font']} />
-          : <Text style={styles.sn} size={13} color={theme['c-300']}>{index + 1}</Text>
-      }
-      <View style={styles.itemInfo}>
-        <Text color={active ? theme['c-primary-font'] : theme['c-font']} numberOfLines={1} size={14}>{item.name}</Text>
-        <View style={styles.listItemSingle}>
-          <Badge>{item.source.toUpperCase()}</Badge>
-          <Text style={styles.listItemSingleText} size={11} color={active ? theme['c-primary-alpha-200'] : theme['c-500']} numberOfLines={1}>
-            {item.singer}
-          </Text>
-        </View>
+      <IOSText variant="caption1" color={colors.tertiaryLabel} style={{ width: 15, textAlign: 'center' }}>
+        {index + 1}
+      </IOSText>
+      <Image
+        url={item.meta.picUrl}
+        style={{
+          width: 38,
+          height: 38,
+          borderRadius: 8,
+          backgroundColor: colors.tertiaryFill,
+        }}
+      />
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <IOSText
+          variant="subheadline"
+          weight="500"
+          color={colors.label}
+          numberOfLines={1}
+        >{item.name}</IOSText>
+        <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1} style={{ marginTop: 2 }}>
+          {item.singer}
+        </IOSText>
       </View>
-      {
-        item.interval ? (
-          <Text size={12} color={active ? theme['c-primary-alpha-400'] : theme['c-250']} numberOfLines={1}>{item.interval}</Text>
-        ) : null
-      }
-    </TouchableOpacity>
+      {active
+        ? <IOSText variant="caption1" color={accent}>{t('playing')}</IOSText>
+        : null}
+    </Pressable>
   )
-}, (prevProps, nextProps) => {
-  return prevProps.item === nextProps.item &&
-    prevProps.index === nextProps.index &&
-    prevProps.activeIndex === nextProps.activeIndex
+}, (prev, next) => {
+  return prev.item === next.item && prev.index === next.index && prev.active === next.active
 })
+
+const Separator = () => {
+  const { colors, hairline } = useIOSTheme()
+  return <View style={{ height: hairline, backgroundColor: colors.rowSeparator }} />
+}
 
 export interface PlayQueueModalType {
   show: () => void
 }
 
+/** iOS 播放队列：底部面板（原型 #queueSheet），点击歌曲直接切歌 */
 export default forwardRef<PlayQueueModalType, {}>((props, ref) => {
+  const t = useI18n()
+  const { colors, accent, spacing } = useIOSTheme()
   const [visible, setVisible] = useState(false)
   const playInfo = usePlayInfo()
-  const theme = useTheme()
-  const statusBarHeight = useStatusbarHeight()
-  const windowSize = useWindowSize()
-  const animation = useRef(new Animated.Value(0)).current
 
   const listId = playInfo.playerListId
   const activeIndex = playInfo.playerPlayIndex
 
-  const drawerWidth = useMemo(() => {
-    return Math.min(Math.floor(windowSize.width * DRAWER_WIDTH_PERCENTAGE), DRAWER_MAX_WIDTH)
-  }, [windowSize.width])
-
   const list = useMemo(() => {
     if (!listId) return []
     return getList(listId) as LX.Music.MusicInfo[]
-  // 引入 visible 触发在抽屉打开时刷新选中列表（依赖集合如有误后续再收敛）
+  // 打开面板时刷新一次列表
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listId, visible])
 
-  const openDrawer = useCallback(() => {
-    setVisible(true)
-    Animated.timing(animation, {
-      toValue: 1,
-      duration: 220,
-      useNativeDriver: true,
-    }).start()
-  }, [animation])
-
-  const closeDrawer = useCallback(() => {
-    Animated.timing(animation, {
-      toValue: 0,
-      duration: 180,
-      useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (finished) setVisible(false)
-    })
-  }, [animation])
-
   useImperativeHandle(ref, () => ({
     show() {
-      openDrawer()
+      setVisible(true)
     },
-  }), [openDrawer])
+  }))
 
   const handlePress = useCallback((index: number) => {
     if (!listId || index === activeIndex) return
     void playList(listId, index)
-  }, [listId, activeIndex])
+  }, [activeIndex, listId])
 
-  const renderItem = useCallback(({ item, index }: { item: LX.Music.MusicInfo, index: number }) => {
-    return <ListItem item={item} index={index} activeIndex={activeIndex} onPress={handlePress} />
-  }, [activeIndex, handlePress])
+  const renderItem = useCallback(({ item, index }: { item: LX.Music.MusicInfo, index: number }) => (
+    <ListItem item={item} index={index} active={index === activeIndex} onPress={handlePress} />
+  ), [activeIndex, handlePress])
 
-  const getItemLayout = useCallback((data: unknown, index: number) => {
-    return { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
-  }, [])
+  const getItemLayout = useCallback((data: unknown, index: number) => ({
+    length: ITEM_HEIGHT,
+    offset: ITEM_HEIGHT * index,
+    index,
+  }), [])
 
   const keyExtractor = useCallback((item: LX.Music.MusicInfo) => item.id, [])
 
-  const drawerTranslate = animation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [drawerWidth, 0],
-  })
-  const overlayOpacity = animation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 0.32],
-  })
-
-  const supportedOrientations = useMemo<ModalProps['supportedOrientations']>(() => Platform.OS === 'ios'
-    ? ['portrait', 'portrait-upside-down', 'landscape', 'landscape-left', 'landscape-right']
-    : undefined, [])
-
-  if (!visible) return null
-
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      hardwareAccelerated={true}
-      statusBarTranslucent={true}
+    <IOSBottomSheet
       visible={visible}
-      onRequestClose={closeDrawer}
-      supportedOrientations={supportedOrientations}
+      onClose={() => { setVisible(false) }}
+      title={t('play_queue_title')}
+      description={t('play_queue_count', { num: list.length })}
     >
-      <View style={{ flex: 1, paddingTop: statusBarHeight }}>
-        <Animated.View
-          pointerEvents="auto"
-          style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, opacity: overlayOpacity }}
-        >
-          <Pressable onPress={closeDrawer} style={{ flex: 1, backgroundColor: '#000' }} />
-        </Animated.View>
-        <Animated.View
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            width: drawerWidth,
-            backgroundColor: theme['c-content-background'],
-            transform: [{ translateX: drawerTranslate }],
-          }}
-        >
-          <View style={styles.header}>
-            <Text style={styles.title} size={14} color={theme['c-primary-font']}>
-              播放队列 ({list.length})
-            </Text>
-          </View>
-          <FlatList
-            style={styles.list}
-            data={list}
-            renderItem={renderItem}
-            keyExtractor={keyExtractor}
-            getItemLayout={getItemLayout}
-            initialScrollIndex={Math.max(0, activeIndex - 2)}
-            maxToRenderPerBatch={10}
-            windowSize={5}
-            removeClippedSubviews={true}
-          />
-        </Animated.View>
-      </View>
-    </Modal>
+      <FlatList
+        style={{ maxHeight: 322, flexGrow: 0, marginBottom: spacing.lg }}
+        contentContainerStyle={{
+          borderRadius: 12,
+          overflow: 'hidden',
+          backgroundColor: colors.secondaryGroupedBackground,
+        }}
+        data={list}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        getItemLayout={getItemLayout}
+        ItemSeparatorComponent={Separator}
+        initialScrollIndex={Math.max(0, activeIndex - 2)}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews
+        showsVerticalScrollIndicator={false}
+      />
+      <Pressable
+        onPress={() => { setVisible(false) }}
+        accessibilityRole="button"
+        style={({ pressed }) => ({
+          height: 44,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: spacing.xs,
+          opacity: pressed ? 0.6 : 1,
+        })}
+      >
+        <IOSText color={accent}>{t('close')}</IOSText>
+      </Pressable>
+    </IOSBottomSheet>
   )
-})
-
-const styles = createStyle({
-  header: {
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
-  },
-  title: {
-    fontWeight: 'bold',
-  },
-  list: {
-    flex: 1,
-  },
-  listItem: {
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    alignItems: 'center',
-    paddingLeft: 10,
-    paddingRight: 10,
-  },
-  sn: {
-    width: 38,
-    textAlign: 'center',
-    paddingLeft: 3,
-    paddingRight: 3,
-  },
-  itemInfo: {
-    flexGrow: 1,
-    flexShrink: 1,
-    paddingRight: 2,
-  },
-  listItemSingle: {
-    paddingTop: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  listItemSingleText: {
-    flexGrow: 0,
-    flexShrink: 1,
-    fontWeight: '300',
-  },
 })

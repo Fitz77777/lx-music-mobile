@@ -1,5 +1,5 @@
 import { useRef, useState, useMemo, forwardRef, useImperativeHandle } from 'react'
-import { FlatList, Platform, View, RefreshControl, type FlatListProps } from 'react-native'
+import { FlatList, View, RefreshControl, type FlatListProps } from 'react-native'
 
 import ListItem from './ListItem'
 // import { navigations } from '@/navigation'
@@ -7,7 +7,6 @@ import { type ListInfoItem } from '@/store/songlist/state'
 import { useLayout } from '@/utils/hooks'
 import { useTheme } from '@/store/theme/hook'
 import { useI18n } from '@/lang'
-import { scaleSizeW } from '@/utils/pixelRatio'
 import { createStyle } from '@/utils/tools'
 import Text from '@/components/common/Text'
 import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
@@ -15,9 +14,6 @@ import useIsPad from '@/utils/hooks/useIsPad'
 
 type FlatListType = FlatListProps<ListInfoItem>
 
-// const MAX_WIDTH = scaleSizeW(110)
-const MIN_WIDTH = scaleSizeW(110)
-const GAP = scaleSizeW(20)
 
 /** iOS 歌单宫格：2 列、页边距 16、列间距 14、行间距 20（原型 .grid2） */
 const IOS_COLUMNS = 2
@@ -127,31 +123,18 @@ export default forwardRef<ListType, ListProps>(({ onRefresh, onLoadMore, onOpenD
 
   const rowInfo = useMemo(() => {
     if (isPad) {
-      // iOS 网格左右各留 IOS_PADDING，列间 IOS_GAP；Android 网格用 space-evenly，无左右留白
-      const padPadding = Platform.OS == 'ios' ? IOS_PADDING : 0
-      const padGap = Platform.OS == 'ios' ? IOS_GAP : 20
-      let n = width / (PAD_MIN_WIDTH + padGap)
+      // 平板：按可用宽度自适应列数，左右各留 IOS_PADDING，列间 IOS_GAP
+      let n = width / (PAD_MIN_WIDTH + IOS_GAP)
       if (n > PAD_MAX_COLUMNS) n = PAD_MAX_COLUMNS
       const num = Math.max(Math.floor(n), 2)
       return {
         num,
-        width: (width - padPadding * 2 - padGap * (num - 1)) / num,
+        width: (width - IOS_PADDING * 2 - IOS_GAP * (num - 1)) / num,
       }
     }
-    if (Platform.OS == 'ios') {
-      return {
-        num: IOS_COLUMNS,
-        width: (width - IOS_PADDING * 2 - IOS_GAP) / IOS_COLUMNS,
-      }
-    }
-    let w = width - GAP
-    let n = width / (MIN_WIDTH + GAP)
-    if (n > 10) n = 10
-    let computedItemWidth = Math.floor(w / n)
-    const num = Math.max(Math.floor(width / computedItemWidth), 2)
     return {
-      num,
-      width: (width - GAP) / num,
+      num: IOS_COLUMNS,
+      width: (width - IOS_PADDING * 2 - IOS_GAP) / IOS_COLUMNS,
     }
   }, [width, isPad])
   const list = useMemo(() => {
@@ -183,11 +166,9 @@ export default forwardRef<ListType, ListProps>(({ onRefresh, onLoadMore, onOpenD
               <FlatList
                 key={String(rowInfo.num)}
                 ref={flatListRef}
-                style={Platform.OS == 'ios' ? styles.iosList : styles.list}
-                columnWrapperStyle={Platform.OS == 'ios'
-                  ? { justifyContent: 'space-between', paddingHorizontal: IOS_PADDING }
-                  : { justifyContent: 'space-evenly' }}
-                contentContainerStyle={Platform.OS == 'ios' ? { paddingTop: 2, paddingBottom: bottomInset } : undefined}
+                style={styles.iosList}
+                columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: IOS_PADDING }}
+                contentContainerStyle={{ paddingTop: 2, paddingBottom: bottomInset }}
                 numColumns={rowInfo.num}
                 data={list}
                 maxToRenderPerBatch={4}
@@ -238,11 +219,6 @@ const styles = createStyle({
   container: {
     flex: 1,
     overflow: 'hidden',
-  },
-  list: {
-    flex: 1,
-    paddingLeft: 10,
-    paddingRight: 10,
   },
   iosList: {
     flex: 1,

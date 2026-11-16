@@ -1,11 +1,12 @@
 import { memo, useRef } from 'react'
+
 import TimeoutExitEditModal, { type TimeoutExitEditModalType, useTimeInfo } from '@/components/TimeoutExitEditModal'
-import { useTheme } from '@/store/theme/hook'
-import Btn from './Btn'
+import IOSIconButton from '@/components/ios/IconButton'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 
-
+/** iOS 定时退出按钮：激活时使用强调色 */
 export default memo(() => {
-  const theme = useTheme()
+  const { accent, colors } = useIOSTheme()
   const modalRef = useRef<TimeoutExitEditModalType>(null)
 
   const timeInfo = useTimeInfo()
@@ -16,7 +17,12 @@ export default memo(() => {
 
   return (
     <>
-      <Btn icon="music_time" color={timeInfo.active ? theme['c-primary-font-active'] : theme['c-font']} onPress={handleShow} />
+      <IOSIconButton
+        name="music_time"
+        size={20}
+        color={timeInfo.active ? accent : colors.label}
+        onPress={handleShow}
+      />
       <TimeoutExitEditModal ref={modalRef} timeInfo={timeInfo} />
     </>
   )

@@ -1,13 +1,11 @@
 import { forwardRef, useImperativeHandle, useRef, useState, useCallback, memo } from 'react'
 import { FlatList, RefreshControl, TouchableOpacity, View } from 'react-native'
 import musicSdk from '@/utils/musicSdk'
-import { useTheme } from '@/store/theme/hook'
-import { createStyle } from '@/utils/tools'
-import Text from '@/components/common/Text'
+import IOSText from '@/components/ios/Text'
 import Image from '@/components/common/Image'
 import Badge from '@/components/common/Badge'
-import { BorderRadius } from '@/theme'
-import { scaleSizeW } from '@/utils/pixelRatio'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
 import { navigations } from '@/navigation'
 import commonState from '@/store/common/state'
 import { useI18n } from '@/lang'
@@ -53,7 +51,7 @@ interface SearchResultListProps {
   searchType: SearchType
 }
 
-const imgSize = scaleSizeW(60)
+const IMG_SIZE = 52
 
 const ARTIST_ALBUM_SOURCES: LX.OnlineSource[] = ['kw', 'wy', 'tx', 'kg', 'mg']
 
@@ -78,7 +76,7 @@ const handleItemPress = (searchType: SearchType, item: ListItem) => {
 }
 
 const ArtistItemComp = memo(({ item, showSource }: { item: ArtistItem, showSource: boolean }) => {
-  const theme = useTheme()
+  const { colors, spacing } = useIOSTheme()
   const t = useI18n()
   const alias = item.alias?.length ? item.alias.join('/') : ''
   const countInfo = (item.albumSize != null || item.musicSize != null)
@@ -86,16 +84,30 @@ const ArtistItemComp = memo(({ item, showSource }: { item: ArtistItem, showSourc
     : ''
 
   return (
-    <TouchableOpacity style={styles.item} onPress={() => { handleItemPress('artist', item) }} activeOpacity={0.6}>
+    <TouchableOpacity
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.sm,
+      }}
+      activeOpacity={0.6}
+      onPress={() => { handleItemPress('artist', item) }}
+    >
       <Image
         url={item.picUrl}
-        style={{ ...styles.avatar, borderColor: theme['c-border-background'] }}
+        style={{
+          width: IMG_SIZE,
+          height: IMG_SIZE,
+          borderRadius: IMG_SIZE / 2,
+          backgroundColor: colors.tertiaryFill,
+        }}
         resizeMode="cover"
       />
-      <View style={styles.itemContent}>
-        <Text numberOfLines={1} color={theme['c-font']}>{item.name}</Text>
-        {alias ? <Text numberOfLines={1} size={12} color={theme['c-font-label']}>{alias}</Text> : null}
-        {countInfo ? <Text numberOfLines={1} size={11} color={theme['c-font-label']}>{countInfo}</Text> : null}
+      <View style={{ flex: 1, marginLeft: spacing.md }}>
+        <IOSText variant="body" numberOfLines={1}>{item.name}</IOSText>
+        {alias ? <IOSText variant="footnote" color={colors.secondaryLabel} numberOfLines={1}>{alias}</IOSText> : null}
+        {countInfo ? <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1}>{countInfo}</IOSText> : null}
       </View>
       {showSource ? <Badge type="tertiary">{item.source}</Badge> : null}
     </TouchableOpacity>
@@ -103,20 +115,34 @@ const ArtistItemComp = memo(({ item, showSource }: { item: ArtistItem, showSourc
 })
 
 const AlbumItemComp = memo(({ item, showSource }: { item: AlbumItem, showSource: boolean }) => {
-  const theme = useTheme()
+  const { colors, spacing } = useIOSTheme()
 
   return (
-    <TouchableOpacity style={styles.item} onPress={() => { handleItemPress('album', item) }} activeOpacity={0.6}>
+    <TouchableOpacity
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.sm,
+      }}
+      activeOpacity={0.6}
+      onPress={() => { handleItemPress('album', item) }}
+    >
       <Image
         url={item.picUrl}
-        style={{ ...styles.cover, borderColor: theme['c-border-background'] }}
+        style={{
+          width: IMG_SIZE,
+          height: IMG_SIZE,
+          borderRadius: 8,
+          backgroundColor: colors.tertiaryFill,
+        }}
         resizeMode="cover"
       />
-      <View style={styles.itemContent}>
-        <Text numberOfLines={1} color={theme['c-font']}>{item.name}</Text>
-        {item.artistName ? <Text numberOfLines={1} size={12} color={theme['c-font-label']}>{item.artistName}</Text> : null}
+      <View style={{ flex: 1, marginLeft: spacing.md }}>
+        <IOSText variant="body" numberOfLines={1}>{item.name}</IOSText>
+        {item.artistName ? <IOSText variant="footnote" color={colors.secondaryLabel} numberOfLines={1}>{item.artistName}</IOSText> : null}
         {item.publishTime ? (
-          <Text size={11} color={theme['c-font-label']}>{item.publishTime}</Text>
+          <IOSText variant="caption1" color={colors.secondaryLabel}>{item.publishTime}</IOSText>
         ) : null}
       </View>
       {showSource ? <Badge type="tertiary">{item.source}</Badge> : null}
@@ -134,7 +160,8 @@ export default forwardRef<SearchResultListType, SearchResultListProps>(({ search
   const loadingRef = useRef(false)
   // 请求序号，用于丢弃过期响应
   const genRef = useRef(0)
-  const theme = useTheme()
+  const { colors, accent, spacing } = useIOSTheme()
+  const bottomInset = useIOSHomeBottomInset()
 
   const doSearch = useCallback(async(text: string, page: number, source: string): Promise<SearchResult> => {
     if (source === 'all') {
@@ -227,56 +254,23 @@ export default forwardRef<SearchResultListType, SearchResultListProps>(({ search
       keyExtractor={keyExtractor}
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.5}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ paddingBottom: spacing.xxxl + bottomInset }}
       refreshControl={
         <RefreshControl
-          colors={[theme['c-primary']]}
+          colors={[accent]}
+          tintColor={accent}
           refreshing={refreshing}
           onRefresh={handleRefresh}
         />
       }
       ListEmptyComponent={
         !loading ? (
-          <View style={styles.empty}>
-            <Text color={theme['c-font-label']}>No results</Text>
+          <View style={{ alignItems: 'center', paddingTop: 60 }}>
+            <IOSText variant="body" color={colors.secondaryLabel}>No results</IOSText>
           </View>
         ) : null
       }
     />
   )
-})
-
-const styles = createStyle({
-  item: {
-    flexDirection: 'row',
-    paddingLeft: 12,
-    paddingRight: 12,
-    paddingTop: 8,
-    paddingBottom: 8,
-    alignItems: 'center',
-  },
-  avatar: {
-    width: imgSize,
-    height: imgSize,
-    borderRadius: imgSize / 2,
-    borderWidth: BorderRadius.normal,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-  },
-  cover: {
-    width: imgSize,
-    height: imgSize,
-    borderRadius: BorderRadius.normal,
-    borderWidth: BorderRadius.normal,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-  },
-  itemContent: {
-    flex: 1,
-    paddingLeft: 12,
-    gap: 2,
-  },
-  empty: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 60,
-  },
 })

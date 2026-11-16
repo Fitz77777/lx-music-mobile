@@ -1,92 +1,98 @@
-import { TouchableOpacity, View } from 'react-native'
-import { Icon } from '@/components/common/Icon'
-import { useTheme } from '@/store/theme/hook'
-// import { useIsPlay } from '@/store/player/hook'
+import { Pressable, View } from 'react-native'
+
+import IOSIcon from '@/components/ios/Icon'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { playNext, playPrev, togglePlay } from '@/core/player/player'
 import { useIsPlay } from '@/store/player/hook'
-import { createStyle } from '@/utils/tools'
-import { useWindowSize } from '@/utils/hooks'
-import { BTN_WIDTH } from './MoreBtn/Btn'
-import { useMemo } from 'react'
 import { markTimeoutExitInteraction } from '@/core/player/timeoutExit'
 
-const PrevBtn = ({ size }: { size: number }) => {
-  const theme = useTheme()
+const PREV_NEXT_ICON_SIZE = 32
+const PLAY_ICON_SIZE = 54
+const SIDE_BTN_SIZE = 48
+const PLAY_BTN_SIZE = 64
+
+const PrevBtn = () => {
+  const { colors } = useIOSTheme()
   const handlePlayPrev = () => {
     markTimeoutExitInteraction()
     void playPrev()
   }
   return (
-    <TouchableOpacity style={{ ...styles.cotrolBtn, width: size, height: size }} activeOpacity={0.5} onPress={handlePlayPrev}>
-      <Icon name='prevMusic' color={theme['c-button-font']} rawSize={size * 0.7} />
-    </TouchableOpacity>
+    <Pressable
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        width: SIDE_BTN_SIZE,
+        height: SIDE_BTN_SIZE,
+        justifyContent: 'center',
+        alignItems: 'center',
+        opacity: pressed ? 0.6 : 1,
+      })}
+      onPress={handlePlayPrev}
+    >
+      <IOSIcon name="prevMusic" size={PREV_NEXT_ICON_SIZE} color={colors.label} />
+    </Pressable>
   )
 }
-const NextBtn = ({ size }: { size: number }) => {
-  const theme = useTheme()
+
+const NextBtn = () => {
+  const { colors } = useIOSTheme()
   const handlePlayNext = () => {
     markTimeoutExitInteraction()
     void playNext()
   }
   return (
-    <TouchableOpacity style={{ ...styles.cotrolBtn, width: size, height: size }} activeOpacity={0.5} onPress={handlePlayNext}>
-      <Icon name='nextMusic' color={theme['c-button-font']} rawSize={size * 0.7} />
-    </TouchableOpacity>
+    <Pressable
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        width: SIDE_BTN_SIZE,
+        height: SIDE_BTN_SIZE,
+        justifyContent: 'center',
+        alignItems: 'center',
+        opacity: pressed ? 0.6 : 1,
+      })}
+      onPress={handlePlayNext}
+    >
+      <IOSIcon name="nextMusic" size={PREV_NEXT_ICON_SIZE} color={colors.label} />
+    </Pressable>
   )
 }
 
-const TogglePlayBtn = ({ size }: { size: number }) => {
-  const theme = useTheme()
+const TogglePlayBtn = () => {
+  const { colors } = useIOSTheme()
   const isPlay = useIsPlay()
   return (
-    <TouchableOpacity style={{ ...styles.cotrolBtn, width: size, height: size }} activeOpacity={0.5} onPress={() => {
-      markTimeoutExitInteraction()
-      togglePlay()
-    }}>
-      <Icon name={isPlay ? 'pause' : 'play'} color={theme['c-button-font']} rawSize={size * 0.7} />
-    </TouchableOpacity>
+    <Pressable
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        width: PLAY_BTN_SIZE,
+        height: PLAY_BTN_SIZE,
+        justifyContent: 'center',
+        alignItems: 'center',
+        opacity: pressed ? 0.6 : 1,
+      })}
+      onPress={() => {
+        markTimeoutExitInteraction()
+        togglePlay()
+      }}
+    >
+      <IOSIcon name={isPlay ? 'pause' : 'play'} size={PLAY_ICON_SIZE} color={colors.label} />
+    </Pressable>
   )
 }
 
-const MAX_SIZE = BTN_WIDTH * 1.6
-const MIN_SIZE = BTN_WIDTH * 1.2
-
+/** iOS 播放控制（原型 .controls）：上一首 / 播放暂停 / 下一首 */
 export default () => {
-  const winSize = useWindowSize()
-  const maxHeight = Math.max(winSize.height * 0.11, MIN_SIZE)
-  const containerStyle = useMemo(() => {
-    return {
-      ...styles.conatiner,
-      maxHeight,
-    }
-  }, [maxHeight])
-  const size = Math.min(Math.max(winSize.width * 0.33 * global.lx.fontSize * 0.4, MIN_SIZE), MAX_SIZE, maxHeight)
-
   return (
-    <View style={containerStyle}>
-      <PrevBtn size={size} />
-      <TogglePlayBtn size={size}/>
-      <NextBtn size={size} />
+    <View style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 24,
+      paddingTop: 20,
+    }}>
+      <PrevBtn />
+      <TogglePlayBtn />
+      <NextBtn />
     </View>
   )
 }
-
-
-const styles = createStyle({
-  conatiner: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    flexGrow: 1,
-    flexShrink: 1,
-    paddingHorizontal: '4%',
-    paddingVertical: 22,
-    // backgroundColor: 'rgba(0, 0, 0, .1)',
-  },
-  cotrolBtn: {
-    justifyContent: 'center',
-    alignItems: 'center',
-
-    // backgroundColor: '#ccc',
-  },
-})

@@ -1,143 +1,153 @@
-import { useRef, useImperativeHandle, forwardRef, useState } from 'react'
-import ConfirmAlert, { type ConfirmAlertType } from '@/components/common/ConfirmAlert'
-import Text from '@/components/common/Text'
-import { View } from 'react-native'
-import Input, { type InputType } from '@/components/common/Input'
-import { createStyle } from '@/utils/tools'
-import { useTheme } from '@/store/theme/hook'
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
+import { Pressable, TextInput, View } from 'react-native'
+import Clipboard from '@react-native-clipboard/clipboard'
+
+import IOSBottomSheet from '@/components/ios/BottomSheet'
+import IOSText from '@/components/ios/Text'
 import { useI18n } from '@/lang'
-// import SourceSelector, { type SourceSelectorProps, type SourceSelectorType } from '../SourceSelector'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { type Source } from '@/store/songlist/state'
-
-interface IdInputType {
-  setText: (text: string) => void
-  getText: () => string
-  focus: () => void
-}
-const IdInput = forwardRef<IdInputType, {}>((props, ref) => {
-  const theme = useTheme()
-  const t = useI18n()
-  const [text, setText] = useState('')
-  const inputRef = useRef<InputType>(null)
-
-  useImperativeHandle(ref, () => ({
-    getText() {
-      return text.trim()
-    },
-    setText(text) {
-      setText(text)
-    },
-    focus() {
-      inputRef.current?.focus()
-    },
-  }))
-
-  return (
-    <Input
-      ref={inputRef}
-      placeholder={t('songlist_open_input_placeholder')}
-      value={text}
-      onChangeText={setText}
-      style={{ ...styles.input, backgroundColor: theme['c-primary-input-background'] }}
-    />
-  )
-})
-
 
 export interface ModalProps {
   onOpenId: (id: string) => void
-  // onSourceChange: SourceSelectorProps['onSourceChange']
 }
+
 export interface ModalType {
   show: (source: Source) => void
 }
 
+/**
+ * iOS「打开歌单」面板：贴合原型 .sheet（标题 / 输入框 + 粘贴 / 提示 / 主按钮 / 取消）。
+ * 功能与 Android 版一致，仍然只提交歌单 ID 或链接。
+ */
 export default forwardRef<ModalType, ModalProps>(({ onOpenId }, ref) => {
-  const alertRef = useRef<ConfirmAlertType>(null)
-  // const sourceSelectorRef = useRef<SourceSelectorType>(null)
-  const inputRef = useRef<IdInputType>(null)
-  const [visible, setVisible] = useState(false)
-  const theme = useTheme()
   const t = useI18n()
+  const { colors, accent, spacing, radius, typography } = useIOSTheme()
+  const inputRef = useRef<TextInput>(null)
+  const [visible, setVisible] = useState(false)
+  const [text, setText] = useState('')
 
-  const handleShow = (source: Source) => {
-    alertRef.current?.setVisible(true)
-    requestAnimationFrame(() => {
-      inputRef.current?.setText('')
-      // sourceSelectorRef.current?.setSource(source)
-      setTimeout(() => {
-        inputRef.current?.focus()
-      }, 300)
-    })
-  }
   useImperativeHandle(ref, () => ({
-    show(source) {
-      if (visible) handleShow(source)
-      else {
-        setVisible(true)
-        requestAnimationFrame(() => {
-          handleShow(source)
-        })
-      }
+    show() {
+      setText('')
+      setVisible(true)
     },
   }))
 
+  // 面板展示的同时聚焦输入框，让面板上滑与键盘弹出是同一段动画，
+  // 避免「先出面板、再出键盘」的两段式。
+  const handleShow = () => {
+    inputRef.current?.focus()
+  }
+
+  const handleClose = () => {
+    inputRef.current?.blur()
+    setVisible(false)
+  }
+
+  const handlePaste = async() => {
+    try {
+      const value = await Clipboard.getString()
+      if (value) setText(value)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   const handleConfirm = () => {
-    let id = inputRef.current?.getText() ?? ''
+    let id = text.trim()
     if (!id.length) return
     if (id.length > 500) id = id.substring(0, 500)
-    alertRef.current?.setVisible(false)
+    setVisible(false)
     onOpenId(id)
   }
 
+  const canSubmit = text.trim().length > 0
+
   return (
-    visible
-      ? <ConfirmAlert
-          ref={alertRef}
-          onConfirm={handleConfirm}
+    <IOSBottomSheet
+      visible={visible}
+      onClose={handleClose}
+      onShow={handleShow}
+      title={t('songlist_open')}
+    >
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 46,
+        borderRadius: radius.card,
+        backgroundColor: colors.fill,
+        paddingLeft: 14,
+        paddingRight: 4,
+      }}>
+        <TextInput
+          ref={inputRef}
+          value={text}
+          onChangeText={setText}
+          placeholder={t('songlist_open_input_placeholder')}
+          placeholderTextColor={colors.placeholderText}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="go"
+          onSubmitEditing={handleConfirm}
+          style={{
+            flex: 1,
+            minWidth: 0,
+            padding: 0,
+            fontSize: typography.subheadline.fontSize,
+            color: colors.label,
+          }}
+        />
+        <Pressable
+          onPress={() => { void handlePaste() }}
+          hitSlop={6}
+          accessibilityRole="button"
+          accessibilityLabel={t('paste')}
+          style={({ pressed }) => ({
+            paddingHorizontal: 12,
+            paddingVertical: 7,
+            borderRadius: radius.control,
+            backgroundColor: colors.secondaryGroupedBackground,
+            marginLeft: spacing.sm,
+            opacity: pressed ? 0.6 : 1,
+          })}
         >
-          <View style={styles.content}>
-            <View style={styles.col}>
-              {/* <SourceSelector style={{ ...styles.selector, backgroundColor: theme['c-primary-input-background'] }} ref={sourceSelectorRef} onSourceChange={onSourceChange} /> */}
-              <IdInput ref={inputRef} />
-            </View>
-            <Text style={styles.inputTipText} size={13} color={theme['c-600']}>{t('songlist_open_input_tip')}</Text>
-          </View>
-        </ConfirmAlert>
-      : null
+          <IOSText variant="footnote" weight="600" color={accent}>{t('paste')}</IOSText>
+        </Pressable>
+      </View>
+      <IOSText
+        variant="caption1"
+        color={colors.secondaryLabel}
+        style={{ marginTop: 9, marginBottom: 18 }}
+      >{t('songlist_open_input_tip')}</IOSText>
+      <Pressable
+        onPress={handleConfirm}
+        disabled={!canSubmit}
+        accessibilityRole="button"
+        style={({ pressed }) => ({
+          height: 50,
+          borderRadius: radius.control,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: accent,
+          opacity: !canSubmit ? 0.4 : pressed ? 0.85 : 1,
+        })}
+      >
+        <IOSText variant="headline" color={colors.onAccent}>{t('songlist_open')}</IOSText>
+      </Pressable>
+      <Pressable
+        onPress={handleClose}
+        accessibilityRole="button"
+        style={({ pressed }) => ({
+          height: 44,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: spacing.xs,
+          opacity: pressed ? 0.6 : 1,
+        })}
+      >
+        <IOSText color={accent}>{t('cancel')}</IOSText>
+      </Pressable>
+    </IOSBottomSheet>
   )
 })
-
-
-const styles = createStyle({
-  content: {
-    flexGrow: 1,
-    flexShrink: 1,
-    flexDirection: 'column',
-  },
-  col: {
-    flexDirection: 'row',
-    height: 38,
-  },
-  // selector: {
-  //   borderTopLeftRadius: 4,
-  //   borderBottomLeftRadius: 4,
-  // },
-  input: {
-    flexGrow: 1,
-    flexShrink: 1,
-    minWidth: 290,
-    // borderRadius: 4,
-    // borderTopRightRadius: 4,
-    // borderBottomRightRadius: 4,
-    // paddingTop: 2,
-    // paddingBottom: 2,
-    height: '100%',
-  },
-  inputTipText: {
-    marginTop: 15,
-    // lineHeight: 18,
-  },
-})
-
-

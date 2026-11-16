@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
-import { TouchableOpacity, View } from 'react-native'
+import { Pressable, View } from 'react-native'
+
 import Image, { getSize } from '@/components/common/Image'
-import { createStyle } from '@/utils/tools'
-import Text from '@/components/common/Text'
-import { scaleSizeH } from '@/utils/pixelRatio'
-import { BorderWidths } from '@/theme'
-import { useTheme } from '@/store/theme/hook'
+import IOSText from '@/components/ios/Text'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import { useI18n } from '@/lang'
 
-const MAX_IMAGE_HEIGHT = scaleSizeH(260)
+const MAX_IMAGE_HEIGHT = 260
 
-
+/** iOS 评论图片：默认显示占位，点击后加载原图 */
 export default ({ url, maxWidth }: { url: string, maxWidth: number }) => {
   const [show, setShow] = useState(false)
   const [wh, setWH] = useState({ width: 0, height: 0 })
-  const theme = useTheme()
+  const { colors, accent } = useIOSTheme()
+  const t = useI18n()
 
   useEffect(() => {
     getSize(url, (realWidth, realHeight) => {
@@ -42,31 +42,29 @@ export default ({ url, maxWidth }: { url: string, maxWidth: number }) => {
     })
   }, [maxWidth, url])
 
+  if (!wh.width) return null
+
   return (
-    wh.width ? (
-      <View style={{ height: wh.height, width: wh.width }}>
-        {
-          show ? (<Image
-            url={url}
-            style={{ height: wh.height, width: wh.width, borderWidth: BorderWidths.normal, borderColor: theme['c-border-background'] }}
-          />) : (
-            <TouchableOpacity style={{ ...styles.defaultPic, borderColor: theme['c-border-background'], backgroundColor: theme['c-primary-light-200-alpha-900'] }} onPress={() => { setShow(true) }}>
-              <Text size={13} color={theme['c-primary-font-hover']}>{global.i18n.t('comment_show_image')}</Text>
-            </TouchableOpacity>
-          )
-        }
-      </View>
-    ) : null
+    <View style={{ height: wh.height, width: wh.width }}>
+      {
+        show
+          ? <Image url={url} style={{ height: wh.height, width: wh.width, borderRadius: 8 }} />
+          : (
+              <Pressable
+                onPress={() => { setShow(true) }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 8,
+                  backgroundColor: colors.tertiaryFill,
+                }}
+              >
+                <IOSText variant="subheadline" color={accent}>{t('comment_show_image')}</IOSText>
+              </Pressable>
+            )
+      }
+    </View>
   )
 }
-
-const styles = createStyle({
-  defaultPic: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: BorderWidths.normal,
-    borderStyle: 'dashed',
-  },
-})

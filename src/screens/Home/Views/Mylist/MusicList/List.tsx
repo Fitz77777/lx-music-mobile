@@ -1,6 +1,6 @@
 import { playList } from '@/core/player/player'
 import { useMemo, useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { FlatList, Platform, type NativeScrollEvent, type NativeSyntheticEvent, type FlatListProps } from 'react-native'
+import { FlatList, type NativeScrollEvent, type NativeSyntheticEvent, type FlatListProps } from 'react-native'
 
 import listState from '@/store/list/state'
 import playerState from '@/store/player/state'
@@ -276,7 +276,7 @@ const List = forwardRef<ListType, ListProps>(({ onShowMenu, onMuiltSelectMode, o
     return { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
   }
 
-  const listCardStyle = Platform.OS == 'ios' && currentList.length
+  const listCardStyle = currentList.length
     ? {
         marginHorizontal: 16,
         marginTop: 8,
@@ -303,7 +303,7 @@ const List = forwardRef<ListType, ListProps>(({ onShowMenu, onMuiltSelectMode, o
       keyExtractor={getkey}
       extraData={activeIndex}
       getItemLayout={getItemLayout}
-      contentContainerStyle={Platform.OS == 'ios' ? { paddingBottom: bottomInset } : undefined}
+      contentContainerStyle={{ paddingBottom: bottomInset }}
     />
   )
 })

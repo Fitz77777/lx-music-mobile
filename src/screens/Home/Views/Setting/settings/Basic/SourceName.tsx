@@ -1,64 +1,28 @@
 import { memo, useMemo } from 'react'
 
-import { StyleSheet, View } from 'react-native'
-
-import SubTitle from '../../components/SubTitle'
-import CheckBox from '@/components/common/CheckBox'
 import { useSettingValue } from '@/store/setting/hook'
 import { useI18n } from '@/lang'
 import { updateSetting } from '@/core/common'
+import SelectRow, { type SelectRowOption } from '../../components/SelectRow'
 
 type SourceNameType = LX.AppSetting['common.sourceNameType']
 
-const setSourceNameType = (type: SourceNameType) => {
-  updateSetting({ 'common.sourceNameType': type })
-}
-
-
-const useActive = (type: SourceNameType) => {
-  const sourceNameType = useSettingValue('common.sourceNameType')
-  const isActive = useMemo(() => sourceNameType == type, [sourceNameType, type])
-  return isActive
-}
-
-const Item = ({ id, name }: {
-  id: SourceNameType
-  name: string
-}) => {
-  const isActive = useActive(id)
-  // const [toggleCheckBox, setToggleCheckBox] = useState(false)
-  return <CheckBox marginBottom={3} check={isActive} label={name} onChange={() => { setSourceNameType(id) }} need />
-}
-
+/** iOS 歌曲来源名称选择：行内显示当前值，点击下拉切换。 */
 export default memo(() => {
   const t = useI18n()
-  const list = useMemo(() => {
-    return [
-      {
-        id: 'real',
-        name: t('setting_basic_sourcename_real'),
-      },
-      {
-        id: 'alias',
-        name: t('setting_basic_sourcename_alias'),
-      },
-    ] as const
-  }, [t])
+  const value = useSettingValue('common.sourceNameType')
+
+  const options = useMemo<SelectRowOption[]>(() => [
+    { value: 'real', label: t('setting_basic_sourcename_real') },
+    { value: 'alias', label: t('setting_basic_sourcename_alias') },
+  ], [t])
 
   return (
-    <SubTitle title={t('setting_basic_sourcename')}>
-      <View style={styles.list}>
-        {
-          list.map(({ id, name }) => <Item name={name} id={id} key={id} />)
-        }
-      </View>
-    </SubTitle>
+    <SelectRow
+      label={t('setting_basic_sourcename')}
+      value={value}
+      options={options}
+      onSelect={next => { updateSetting({ 'common.sourceNameType': next as SourceNameType }) }}
+    />
   )
-})
-
-const styles = StyleSheet.create({
-  list: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
 })

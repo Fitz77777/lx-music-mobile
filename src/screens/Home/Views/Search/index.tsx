@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react'
-import { Keyboard, Platform, type LayoutChangeEvent, View } from 'react-native'
+import { Keyboard, type LayoutChangeEvent, View } from 'react-native'
 
 // import music from '@/utils/musicSdk'
 // import InsetShadow from 'react-native-inset-shadow'
@@ -89,11 +89,9 @@ export default () => {
   }
   const handleTipSearch: HeaderBarProps['onTipSearch'] = (text) => {
     if (!text.trim()) {
-      // iOS 搜索框的清除按钮：清空关键字后回到历史/热词，不再显示上一次的结果
-      if (Platform.OS == 'ios') {
-        handleHideTipList()
-        listRef.current?.loadList('', searchInfo.current.source, searchInfo.current.searchType)
-      }
+      // 清空关键字后回到历史/热词，不再显示上一次的结果
+      handleHideTipList()
+      listRef.current?.loadList('', searchInfo.current.source, searchInfo.current.searchType)
       return
     }
     setTimeout(() => {

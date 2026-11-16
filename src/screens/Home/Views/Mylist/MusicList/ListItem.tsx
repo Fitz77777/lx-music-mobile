@@ -1,22 +1,28 @@
 import { memo, useRef } from 'react'
 import { View, TouchableOpacity } from 'react-native'
-import { LIST_ITEM_HEIGHT } from '@/config/constant'
-// import { BorderWidths } from '@/theme'
+
 import { Icon } from '@/components/common/Icon'
 import Image from '@/components/common/Image'
 import useMusicPic from '@/utils/hooks/useMusicPic'
-import { createStyle, type RowInfo } from '@/utils/tools'
-import { useTheme } from '@/store/theme/hook'
+import IOSBadge from '@/components/ios/Badge'
+import IOSText from '@/components/ios/Text'
 import { useAssertApiSupport } from '@/store/common/hook'
-import { scaleSizeH } from '@/utils/pixelRatio'
-import Text from '@/components/common/Text'
-import Badge from '@/components/common/Badge'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+import type { RowInfo } from '@/utils/tools'
 
-export const ITEM_HEIGHT = scaleSizeH(LIST_ITEM_HEIGHT)
-const PIC_SIZE = scaleSizeH(40)
+/** iOS 音乐行高（pt，原型 68pt / 封面 44pt） */
+export const ITEM_HEIGHT = 68
+const PIC_SIZE = 44
+const ROW_PADDING = 14
+const TEXT_GAP = 12
+/** 分隔线内缩到文字起点 */
+const SEPARATOR_INSET = ROW_PADDING + PIC_SIZE + TEXT_GAP
 
-
-export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval, isLast }: {
+/**
+ * iOS「我的列表」歌曲行：封面 + 标题 + 音源/歌手 + 时长 + 更多。
+ * 与 Android 版共用 props 与 memo 比较逻辑。
+ */
+export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPress, selectedList, rowInfo, isShowAlbumName, isShowInterval, isLast = false, onToggleSource }: {
   item: LX.Music.MusicInfo
   index: number
   activeIndex: number
@@ -27,21 +33,20 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
   rowInfo: RowInfo
   isShowAlbumName: boolean
   isShowInterval: boolean
-  /** iOS 用于隐藏最后一行分隔线，Android 忽略 */
   isLast?: boolean
-  /** iOS：点击音源标签换源，Android 忽略 */
+  /** 点击音源标签换源 */
   onToggleSource?: (item: LX.Music.MusicInfo) => void
 }) => {
-  const theme = useTheme()
+  const { colors, accent, hairline, withAlpha, radius } = useIOSTheme()
+  const isSupported = useAssertApiSupport(item.source)
+  const picUrl = useMusicPic(item.source, item.id, item.meta.picUrl)
 
   const isSelected = selectedList.includes(item)
-  // console.log(item.name, selectedList, selectedList.includes(item))
-  const isSupported = useAssertApiSupport(item.source)
+
   const moreButtonRef = useRef<TouchableOpacity>(null)
   const handleShowMenu = () => {
     if (moreButtonRef.current?.measure) {
       moreButtonRef.current.measure((fx, fy, width, height, px, py) => {
-        // console.log(fx, fy, width, height, px, py)
         onShowMenu(item, index, { x: Math.ceil(px), y: Math.ceil(py), w: Math.ceil(width), h: Math.ceil(height) })
       })
     }
@@ -51,36 +56,85 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
   const singer = `${item.singer}${isShowAlbumName && item.meta.albumName ? ` · ${item.meta.albumName}` : ''}`
 
   return (
-    <View style={{ ...styles.listItem, width: rowInfo.rowWidth, height: ITEM_HEIGHT, backgroundColor: isSelected ? theme['c-primary-background-hover'] : 'rgba(0,0,0,0)', opacity: isSupported ? 1 : 0.5 }}>
-      <TouchableOpacity style={styles.listItemLeft} onPress={() => { onPress(item, index) }} onLongPress={() => { onLongPress(item, index) }}>
-        {
-          active
-            ? <Icon style={styles.sn} name="play-outline" size={13} color={theme['c-primary-font']} />
-            : <Text style={styles.sn} size={13} color={theme['c-300']}>{index + 1}</Text>
-        }
-        <Image url={useMusicPic(item.source, item.id, item.meta.picUrl)} style={styles.pic} />
-        <View style={styles.itemInfo}>
-          {/* <View style={styles.listItemTitle}> */}
-          <Text color={active ? theme['c-primary-font'] : theme['c-font']} numberOfLines={1}>{item.name}</Text>
-          {/* </View> */}
-          <View style={styles.listItemSingle}>
-            <Badge>{item.source.toUpperCase()}</Badge>
-            <Text style={styles.listItemSingleText} size={11} color={active ? theme['c-primary-alpha-200'] : theme['c-500']} numberOfLines={1}>
-              {singer}
-            </Text>
+    <View style={{
+      width: rowInfo.rowWidth,
+      height: ITEM_HEIGHT,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: isSelected ? withAlpha(accent, 0.12) : 'transparent',
+      opacity: isSupported ? 1 : 0.5,
+    }}>
+      <TouchableOpacity
+        style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingLeft: ROW_PADDING }}
+        activeOpacity={0.6}
+        onPress={() => { onPress(item, index) }}
+        onLongPress={() => { onLongPress(item, index) }}
+      >
+        <Image
+          url={picUrl}
+          style={{
+            width: PIC_SIZE,
+            height: PIC_SIZE,
+            borderRadius: 8,
+            backgroundColor: colors.tertiaryFill,
+          }}
+        />
+        <View style={{ flex: 1, marginLeft: TEXT_GAP, justifyContent: 'center' }}>
+          <IOSText
+            weight="500"
+            color={active ? accent : colors.label}
+            numberOfLines={1}
+          >{item.name}</IOSText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 6 }}>
+            <TouchableOpacity
+              disabled={!onToggleSource}
+              onPress={() => { onToggleSource?.(item) }}
+              hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+              accessibilityRole="button"
+            >
+              <IOSBadge variant="source">{item.source.toUpperCase()}</IOSBadge>
+            </TouchableOpacity>
+            <IOSText
+              variant="footnote"
+              color={colors.secondaryLabel}
+              numberOfLines={1}
+              style={{ flexShrink: 1 }}
+            >{singer}</IOSText>
           </View>
         </View>
         {
-          isShowInterval ? (
-            <Text size={12} color={active ? theme['c-primary-alpha-400'] : theme['c-250']} numberOfLines={1}>{item.interval}</Text>
-          ) : null
+          isShowInterval
+            ? <IOSText variant="subheadline" color={colors.secondaryLabel} numberOfLines={1}>{item.interval}</IOSText>
+            : null
         }
       </TouchableOpacity>
-      {/* <View style={styles.listItemRight}> */}
-      <TouchableOpacity onPress={handleShowMenu} ref={moreButtonRef} style={styles.moreButton}>
-        <Icon name="dots-vertical" style={{ color: theme['c-350'] }} size={12} />
+      <TouchableOpacity
+        onPress={handleShowMenu}
+        ref={moreButtonRef}
+        hitSlop={6}
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: radius.pill,
+          marginHorizontal: 6,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Icon name="dots-vertical" color={colors.secondaryLabel} rawSize={20} />
       </TouchableOpacity>
-      {/* </View> */}
+      {!isLast
+        ? (
+            <View style={{
+              position: 'absolute',
+              left: SEPARATOR_INSET,
+              right: 0,
+              bottom: 0,
+              height: hairline,
+              backgroundColor: colors.rowSeparator,
+            }} />
+          )
+        : null}
     </View>
   )
 }, (prevProps, nextProps) => {
@@ -88,87 +142,9 @@ export default memo(({ item, index, activeIndex, onPress, onShowMenu, onLongPres
     prevProps.index === nextProps.index &&
     prevProps.isShowAlbumName === nextProps.isShowAlbumName &&
     prevProps.isShowInterval === nextProps.isShowInterval &&
+    prevProps.isLast === nextProps.isLast &&
     prevProps.activeIndex != nextProps.index &&
     nextProps.activeIndex != nextProps.index &&
-    nextProps.selectedList.includes(nextProps.item) == prevProps.selectedList.includes(nextProps.item)
+    nextProps.selectedList.includes(nextProps.item) == prevProps.selectedList.includes(prevProps.item)
   )
-})
-
-
-const styles = createStyle({
-  listItem: {
-    // width: '50%',
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    // paddingLeft: 10,
-    paddingRight: 2,
-    alignItems: 'center',
-    // borderBottomWidth: BorderWidths.normal,
-  },
-  listItemLeft: {
-    flex: 1,
-    flexGrow: 1,
-    flexShrink: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  sn: {
-    width: 38,
-    // fontSize: 12,
-    textAlign: 'center',
-    // backgroundColor: 'rgba(0,0,0,0.2)',
-    paddingLeft: 3,
-    paddingRight: 3,
-  },
-  pic: {
-    width: PIC_SIZE,
-    height: PIC_SIZE,
-    borderRadius: 2,
-    marginRight: 6,
-  },
-  itemInfo: {
-    flexGrow: 1,
-    flexShrink: 1,
-    // paddingTop: 10,
-    // paddingBottom: 10,
-    paddingRight: 2,
-  },
-  // listItemTitle: {
-  //   flexGrow: 0,
-  //   flexShrink: 1,
-  // },
-  listItemSingle: {
-    paddingTop: 3,
-    flexDirection: 'row',
-    // alignItems: 'flex-end',
-  },
-  listItemSingleText: {
-    // backgroundColor: 'rgba(0,0,0,0.2)',
-    flexGrow: 0,
-    flexShrink: 1,
-    fontWeight: '300',
-    // fontSize: 15,
-  },
-  // listItemBadge: {
-  //   // fontSize: 10,
-  //   paddingLeft: 5,
-  //   paddingTop: 2,
-  //   alignSelf: 'flex-start',
-  // },
-  listItemRight: {
-    flexGrow: 0,
-    flexShrink: 0,
-    flexBasis: 'auto',
-    justifyContent: 'center',
-  },
-
-  moreButton: {
-    height: '80%',
-    paddingLeft: 16,
-    paddingRight: 16,
-    // paddingTop: 10,
-    // paddingBottom: 10,
-    // backgroundColor: 'rgba(0,0,0,0.2)',
-    justifyContent: 'center',
-  },
 })

@@ -1,4 +1,4 @@
-import { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { ScrollView, Text, View } from 'react-native'
 
 import Image from '@/components/common/Image'
@@ -26,6 +26,61 @@ const DESC_LINE_H = 18
 const DESC_MAX_H = MAX_DESC_LINES * DESC_LINE_H
 /** 右侧文字列恒定高：歌名 2 行 + 间距 + 简介 4 行 */
 const TEXT_COLUMN_H = 22 * 2 + 4 + DESC_MAX_H
+
+/** CJK / 全角字符按 1em 估算，其余按 0.56em（略偏大，宁可少显示也不溢出） */
+const CJK_CHAR_RE = /[\u1100-\u11ff\u2e80-\ua4cf\ua960-\ua97f\uac00-\ud7ff\uf900-\ufaff\ufe30-\ufe4f\uff00-\uff60\uffe0-\uffe6]/
+
+interface DescLayout {
+  text: string
+  truncated: boolean
+}
+
+/**
+ * 按容器宽度模拟换行，取前 4 行。
+ * 不依赖任何文本测量事件（iOS 上 onTextLayout / 隐藏文本高度都不可靠）：
+ * 字符宽度偏大估算 ⇒ 真实排版行数不会多于估算行数，截断点一定落在 4 行内。
+ */
+const layoutDesc = (full: string, width: number, fontSize: number): DescLayout => {
+  if (!full) return { text: '', truncated: false }
+  // 宽度未知时先按全文渲染，等 onLayout 回来后重算
+  if (width <= fontSize) return { text: full, truncated: false }
+  const avail = width - 1
+  const ellipsisW = fontSize
+  const widthOf = (ch: string) => CJK_CHAR_RE.test(ch) ? fontSize : fontSize * 0.56
+
+  const lines: Array<{ start: number, end: number }> = []
+  let pos = 0
+  while (pos < full.length) {
+    const start = pos
+    let w = 0
+    while (pos < full.length && full[pos] != '\n') {
+      const cw = widthOf(full[pos])
+      if (pos > start && w + cw > avail) break
+      w += cw
+      pos++
+    }
+    lines.push({ start, end: pos })
+    if (pos >= full.length) break
+    pos++ // 跳过换行符
+  }
+  if (lines.length <= MAX_DESC_LINES) return { text: full, truncated: false }
+
+  const line4 = lines[MAX_DESC_LINES - 1]
+  // 第 4 行是空行（含「换行后无内容」）：省略号直接落在第 4 行行首
+  if (full.slice(line4.start, line4.end).trim() == '') {
+    return { text: full.slice(0, line4.start), truncated: true }
+  }
+  // 第 4 行有文字：从行尾回退几个字，给省略号腾出位置
+  let w = 0
+  let end = line4.start
+  for (let i = line4.start; i < line4.end; i++) {
+    const cw = widthOf(full[i])
+    if (w + cw + ellipsisW > avail) break
+    w += cw
+    end = i + 1
+  }
+  return { text: full.slice(0, end).replace(/[ \t]+$/, ''), truncated: true }
+}
 
 const CountText = memo(({ count }: { count: string }) => {
   const [animFade] = useAnimateOnecNumber(0, 1, 250, false)
@@ -103,76 +158,19 @@ export interface DetailInfo {
 
 /** iOS 歌单详情头部：返回 + 封面/简介 + 操作按钮 */
 export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, accent, spacing, typography } = useIOSTheme()
   const t = useI18n()
   const info = useListInfo()
   const [detailInfo, setDetailInfo] = useState<DetailInfo>({ name: '', desc: '', playCount: '', imgUrl: info.img })
   const [descVisible, setDescVisible] = useState(false)
 
-  // 简介截断：渲染全文并用 onTextLayout 拿到实际换行结果，
-  // 超过 4 行时按行映射回原文截断，省略号内联在文字末尾（强调色、可点击）
-  const descText = cleanDesc(detailInfo.desc)
-  const [displayText, setDisplayText] = useState('')
-  const [truncated, setTruncated] = useState(false)
-  const [measuring, setMeasuring] = useState(true)
-  const measuringRef = useRef(true)
+  // 简介：固定最多 4 行，超出时把省略号「…」内联在截断处（强调色、可点击看全文）
   const descWidthRef = useRef(0)
   const [descWidth, setDescWidth] = useState(0)
-
-  const handleDescLines = (lines: Array<{ text?: string }>) => {
-    if (!measuringRef.current) return
-    const full = descText
-    if (!full || lines.length <= MAX_DESC_LINES) {
-      measuringRef.current = false
-      setDisplayText(full)
-      setTruncated(false)
-      setMeasuring(false)
-      return
-    }
-    // 把前 4 行文本映射回原文字符串，得到第 4 行的起止位置
-    let idx = 0
-    let lineStart = 0
-    let cut = -1
-    for (let i = 0; i < lines.length; i++) {
-      const text = lines[i]?.text ?? ''
-      if (i == MAX_DESC_LINES - 1) {
-        // 第 4 行：空行则截到行首（省略号落在第 4 行），否则吃掉行尾 2 个字给省略号腾位
-        lineStart = idx
-        if (text.length) {
-          const at = full.indexOf(text, idx)
-          if (at < 0) break
-          idx = at + text.length
-        }
-        cut = text.trim() === '' ? lineStart : Math.max(idx - 2, lineStart)
-        break
-      }
-      if (text.length) {
-        const at = full.indexOf(text, idx)
-        if (at < 0) break
-        idx = at + text.length
-      }
-      if (i < lines.length - 1 && full[idx] == '\n') idx += 1
-      else if (i < lines.length - 1 && full[idx] == '\r' && full[idx + 1] == '\n') idx += 2
-    }
-    measuringRef.current = false
-    if (cut >= 0) {
-      setDisplayText(full.slice(0, cut))
-      setTruncated(true)
-    } else {
-      // 行文本对不上原文时退回整体裁切
-      setDisplayText(full)
-      setTruncated(false)
-    }
-    setMeasuring(false)
-  }
-
-  // 简介内容或可用宽度变化时重新测量
-  useEffect(() => {
-    measuringRef.current = true
-    setTruncated(false)
-    setDisplayText(descText)
-    setMeasuring(true)
-  }, [descText, descWidth])
+  const descLayout = useMemo(
+    () => layoutDesc(cleanDesc(detailInfo.desc), descWidth, typography.footnote.fontSize),
+    [detailInfo.desc, descWidth, typography.footnote.fontSize],
+  )
 
   useImperativeHandle(ref, () => ({
     setInfo(info) {
@@ -203,14 +201,13 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
               <IOSText
                 variant="footnote"
                 color={colors.secondaryLabel}
-                onTextLayout={e => { handleDescLines(e.nativeEvent.lines) }}
-                style={{ opacity: measuring ? 0 : 1 }}
+                numberOfLines={MAX_DESC_LINES}
               >
-                {displayText}
+                {descLayout.text}
                 {
-                  truncated
+                  descLayout.truncated
                     ? (
-                        // 省略号内联在文字末尾，带链接样式可点击查看全文
+                        // 省略号内联在截断处，带链接样式可点击查看全文
                         <Text onPress={() => { setDescVisible(true) }} style={{ color: accent }}>…</Text>
                       )
                     : null

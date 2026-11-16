@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef } from 'react'
-import { TextInput, View, type StyleProp, type ViewStyle } from 'react-native'
+import { Platform, Pressable, TextInput, View, type StyleProp, type ViewStyle } from 'react-native'
 import { useI18n } from '@/lang'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import IOSIcon from './Icon'
@@ -57,6 +57,12 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
     onBlur?.()
   }
 
+  // iOS 用原生的 clearButtonMode，Android 需要自己画清除按钮
+  const showClear = Platform.OS == 'android' && editable && !!value
+  const handleClear = () => {
+    onChangeText('')
+  }
+
   return (
     <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
       <View style={{ flex: 1, justifyContent: 'center' }}>
@@ -82,7 +88,7 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
             height: 38,
             borderRadius: radius.control,
             paddingLeft: 35,
-            paddingRight: 11,
+            paddingRight: showClear ? 30 : 11,
             paddingVertical: 0,
             borderWidth: hairline,
             borderColor: colors.rowSeparator,
@@ -91,6 +97,21 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
             color: colors.label,
           }}
         />
+        {
+          showClear
+            ? (
+                <Pressable
+                  onPress={handleClear}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('close')}
+                  style={{ position: 'absolute', right: 6, top: 0, bottom: 0, justifyContent: 'center', paddingHorizontal: 4 }}
+                >
+                  <IOSIcon name="close" size={14} color={colors.secondaryLabel} />
+                </Pressable>
+              )
+            : null
+        }
       </View>
     </View>
   )

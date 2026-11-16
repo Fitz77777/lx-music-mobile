@@ -1,7 +1,6 @@
-import { Platform, SafeAreaView, ScrollView, View } from 'react-native'
+import { SafeAreaView, ScrollView, View } from 'react-native'
 
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
-import { getIOSStatusBarHeight } from '@/theme/ios/insets'
 import { useIOSPanBack } from '@/navigation/iosGestures'
 import IOSBackdrop from '@/components/ios/Backdrop'
 import Basic from '@/screens/Home/Views/Setting/settings/Basic'
@@ -47,14 +46,12 @@ const SettingContent = ({ id }: { id: SettingScreenIds }) => {
 export default ({ componentId, id }: Props) => {
   const { colors } = useIOSTheme()
   const panBack = useIOSPanBack(componentId)
-  // Android 的 SafeAreaView 不生效，手动留出状态栏高度
-  const topInset = Platform.OS == 'android' ? getIOSStatusBarHeight() : 0
 
   return (
     <View style={{ flex: 1 }}>
       <IOSBackdrop />
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: colors.canvas, paddingTop: topInset }}
+        style={{ flex: 1, backgroundColor: colors.canvas }}
         {...panBack.panHandlers}
       >
         <View style={{ flex: 1, backgroundColor: colors.canvas }}>

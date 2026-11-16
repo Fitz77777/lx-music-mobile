@@ -16,17 +16,21 @@ import { cleanDesc } from '@/utils'
 import ActionBar from './ActionBar'
 
 const PIC_SIZE = 96
+/** 播放量行恒定占位高（caption1 一行） */
+const COUNT_ROW_H = 18
+/** 封面列总高恒定：封面 + 间距 + 播放量行，右侧文字列与其对齐，加载时不跳动 */
+const COVER_COLUMN_H = PIC_SIZE + 4 + COUNT_ROW_H
 
 const CountText = memo(({ count }: { count: string }) => {
   const [animFade] = useAnimateOnecNumber(0, 1, 250, false)
   const [animTranslateY] = useAnimateOnecNumber(10, 0, 250, false)
-  const { colors, spacing } = useIOSTheme()
+  const { colors } = useIOSTheme()
 
   return (
     <View style={{
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: spacing.xs,
+      height: COUNT_ROW_H,
       opacity: animFade,
       transform: [{ translateY: animTranslateY }],
     }}>
@@ -55,7 +59,7 @@ const Pic = ({ componentId, playCount, imgUrl }: {
   })
 
   return (
-    <View>
+    <View style={{ height: COVER_COLUMN_H }}>
       <View style={{
         width: PIC_SIZE,
         height: PIC_SIZE,
@@ -69,7 +73,10 @@ const Pic = ({ componentId, playCount, imgUrl }: {
           style={{ width: '100%', height: '100%' }}
         />
       </View>
-      {playCount && animated ? <CountText count={playCount} /> : null}
+      {/* 播放量行恒定占位，避免出现/消失时头部高度跳动 */}
+      <View style={{ height: COUNT_ROW_H, marginTop: 4 }}>
+        {playCount && animated ? <CountText count={playCount} /> : null}
+      </View>
     </View>
   )
 }
@@ -95,7 +102,6 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
   const info = useListInfo()
   const [detailInfo, setDetailInfo] = useState<DetailInfo>({ name: '', desc: '', playCount: '', imgUrl: info.img })
   const [descVisible, setDescVisible] = useState(false)
-  const [coverH, setCoverH] = useState(0)
   const [descBoxH, setDescBoxH] = useState(0)
   const [descTextH, setDescTextH] = useState(0)
 
@@ -109,16 +115,14 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
     /* 二级页里 RN SafeAreaView 拿不到安全区，用原生状态栏高度显式下移 */
     <View style={{ paddingTop: getIOSStatusBarHeight() }}>
         <View style={{ flexDirection: 'row', paddingHorizontal: spacing.lg }}>
-          <View onLayout={e => { setCoverH(e.nativeEvent.layout.height) }}>
-            <Pic componentId={componentId} playCount={detailInfo.playCount} imgUrl={detailInfo.imgUrl} />
-          </View>
+          <Pic componentId={componentId} playCount={detailInfo.playCount} imgUrl={detailInfo.imgUrl} />
           <View
-            style={{ flex: 1, marginLeft: spacing.lg, height: coverH || undefined, overflow: 'hidden' }}
+            style={{ flex: 1, marginLeft: spacing.lg, height: COVER_COLUMN_H, overflow: 'hidden' }}
             nativeID={NAV_SHEAR_NATIVE_IDS.songlistDetail_title}
           >
             <IOSText variant="headline" numberOfLines={2}>{detailInfo.name}</IOSText>
             <View
-              style={{ flex: 1, marginTop: spacing.xs }}
+              style={{ flex: 1, marginTop: spacing.xs, overflow: 'hidden' }}
               onLayout={e => { setDescBoxH(e.nativeEvent.layout.height) }}
             >
               <IOSText
@@ -143,7 +147,8 @@ export default forwardRef<HeaderType, HeaderProps>(({ componentId }, ref) => {
                         accessibilityLabel={t('songlist_desc')}
                         style={{ position: 'absolute', right: 0, bottom: 0, width: 20, height: 18, alignItems: 'center', justifyContent: 'center' }}
                       >
-                        <IOSIcon name="dots-vertical" size={15} color={colors.secondaryLabel} />
+                        {/* 字体里只有竖向三点，旋转成横向 */}
+                        <IOSIcon name="dots-vertical" size={15} color={colors.secondaryLabel} style={{ transform: [{ rotate: '90deg' }] }} />
                       </Pressable>
                     )
                   : null

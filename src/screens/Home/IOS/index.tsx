@@ -1,7 +1,7 @@
-import { SafeAreaView, View } from 'react-native'
+import { Platform, SafeAreaView, View } from 'react-native'
 import { useI18n } from '@/lang'
 import { NAV_MENUS } from '@/config/constant'
-import { useNavActiveId } from '@/store/common/hook'
+import { useNavActiveId, useStatusbarHeight } from '@/store/common/hook'
 import { setNavActiveId } from '@/core/common'
 import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { type TabBarItem } from '@/components/ios/TabBar'
@@ -26,6 +26,9 @@ export default () => {
   const t = useI18n()
   const activeId = useNavActiveId()
   const { colors } = useIOSTheme()
+  // Android 的 SafeAreaView 不生效，状态栏高度需要手动留出（iOS 由 SafeAreaView 处理）
+  const statusBarHeight = useStatusbarHeight()
+  const topInset = Platform.OS == 'android' ? statusBarHeight : 0
 
   const items: TabBarItem[] = NAV_MENUS.map(menu => ({
     id: menu.id,
@@ -41,9 +44,9 @@ export default () => {
     <View style={{ flex: 1, backgroundColor: colors.canvas }}>
       <IOSBackdrop />
       <SizeView />
-      <SafeAreaView style={{ backgroundColor: colors.canvas }}>
+      <View style={{ backgroundColor: colors.canvas, paddingTop: topInset }}>
         <Header />
-      </SafeAreaView>
+      </View>
       <View style={{ flex: 1, backgroundColor: colors.canvas }}>
         <Main />
       </View>

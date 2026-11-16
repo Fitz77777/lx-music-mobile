@@ -1,13 +1,28 @@
-import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
-import { DrawerLayoutAndroid, type DrawerLayoutAndroidProps, View, type LayoutChangeEvent } from 'react-native'
-// import { getWindowSise } from '@/utils/tools'
-import { usePageVisible } from '@/store/common/hook'
-import { type COMPONENT_IDS } from '@/config/constant'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import {
+  Animated,
+  Pressable,
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native'
 
-interface Props extends DrawerLayoutAndroidProps {
+import { type COMPONENT_IDS } from '@/config/constant'
+import { useIOSTheme } from '@/theme/ios/useIOSTheme'
+
+interface Props {
   visibleNavNames: COMPONENT_IDS[]
   widthPercentage: number
   widthPercentageMax?: number
+  children: React.ReactNode
+  renderNavigationView: () => React.ReactNode
+  drawerPosition?: 'left' | 'right'
+  drawerBackgroundColor?: string
+  style?: StyleProp<ViewStyle>
+  /** 面板开始关闭时触发（用于退出临时模式，如歌单排序） */
+  onDrawerClose?: () => void
 }
 
 export interface DrawerLayoutFixedType {
@@ -16,83 +31,126 @@ export interface DrawerLayoutFixedType {
   fixWidth: () => void
 }
 
-const DrawerLayoutFixed = forwardRef<DrawerLayoutFixedType, Props>(({ visibleNavNames, widthPercentage, widthPercentageMax, children, ...props }, ref) => {
-  const drawerLayoutRef = useRef<DrawerLayoutAndroid>(null)
-  const [w, setW] = useState<number | `${number}%`>('100%')
-  const [drawerWidth, setDrawerWidth] = useState(0)
-  const changedRef = useRef({ width: 0, changed: false })
+/**
+ * iOS 版本不使用侧边抽屉，而是把导航视图放进从底部升起的半屏面板（sheet）。
+ * 保持与 Android 版相同的 ref API，三个列表页无需改动即可获得 iOS 交互。
+ */
+const DrawerLayoutFixed = forwardRef<DrawerLayoutFixedType, Props>(({
+  children,
+  renderNavigationView,
+  drawerBackgroundColor,
+  style,
+  onDrawerClose,
+}, ref) => {
+  const { colors, radius, spacing } = useIOSTheme()
+  const [containerHeight, setContainerHeight] = useState(0)
+  const [visible, setVisible] = useState(false)
+  const animation = useRef(new Animated.Value(0)).current
 
-  const fixDrawerWidth = useCallback(() => {
-    if (!changedRef.current.width) return
-    changedRef.current.changed = true
-    // console.log('usePageVisible', visible, changedRef.current.width)
-    setW(changedRef.current.width - 1)
-  }, [])
+  const sheetHeight = Math.round(containerHeight * 0.72)
 
-  // 修复 DrawerLayoutAndroid 在导航到其他屏幕再返回后无法打开的问题
-  usePageVisible(visibleNavNames, useCallback((visible) => {
-    if (!visible || !changedRef.current.width) return
-    fixDrawerWidth()
-  }, [fixDrawerWidth]))
+  const openDrawer = useCallback(() => {
+    setVisible(true)
+    global.app_event.changeHomePageScrollEnabled(false)
+    Animated.timing(animation, {
+      toValue: 1,
+      duration: 260,
+      useNativeDriver: true,
+    }).start()
+  }, [animation])
+
+  const closeDrawer = useCallback(() => {
+    onDrawerClose?.()
+    Animated.timing(animation, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) setVisible(false)
+      global.app_event.changeHomePageScrollEnabled(true)
+    })
+  }, [animation, onDrawerClose])
 
   useImperativeHandle(ref, () => ({
-    openDrawer() {
-      drawerLayoutRef.current?.openDrawer()
-    },
-    closeDrawer() {
-      drawerLayoutRef.current?.closeDrawer()
-    },
-    fixWidth() {
-      fixDrawerWidth()
-    },
-  }), [fixDrawerWidth])
+    openDrawer,
+    closeDrawer,
+    fixWidth() {},
+  }), [closeDrawer, openDrawer])
 
+  useEffect(() => () => {
+    // 面板还没关闭就离开页面时，恢复主列表的滚动
+    global.app_event.changeHomePageScrollEnabled(true)
+  }, [])
 
-  const handleLayout = useCallback((e: LayoutChangeEvent) => {
-    // console.log('handleLayout', e.nativeEvent.layout.width, changedRef.current.width)
-    if (changedRef.current.changed) {
-      // setW(e.nativeEvent.layout.width - 1)
-      setW('100%')
-      changedRef.current.changed = false
-    } else {
-      const width = e.nativeEvent.layout.width
-      if (changedRef.current.width == width) return
-      changedRef.current.width = width
+  const handleLayout = useCallback(({ nativeEvent: { layout } }: LayoutChangeEvent) => {
+    setContainerHeight(layout.height)
+  }, [])
 
-      // 重新设置面板宽度
-      const wp = Math.floor(width * widthPercentage)
-      // console.log(wp, widthPercentageMax)
-      setDrawerWidth(widthPercentageMax ? Math.min(wp, widthPercentageMax) : wp)
-
-      // 强制触发渲染以应用更改
-      changedRef.current.changed = true
-      setW(width - 1)
-    }
-  }, [widthPercentage, widthPercentageMax])
+  const sheetTranslate = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [sheetHeight || 600, 0],
+  })
+  const overlayOpacity = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 0.4],
+  })
 
   return (
-    <View
-      onLayout={handleLayout}
-      style={{ width: w, flex: 1, overflow: 'hidden' }}
-    >
-      <DrawerLayoutAndroid
-        ref={drawerLayoutRef}
-        keyboardDismissMode="on-drag"
-        drawerWidth={drawerWidth}
-        {...props}
+    <View onLayout={handleLayout} style={[{ flex: 1, width: '100%', overflow: 'hidden' }, style]}>
+      <View style={{ flex: 1, overflow: 'hidden' }}>
+        {children}
+      </View>
+      {/*
+        面板内容必须常驻：标签筛选等页面是先发事件、再打开面板的，
+        如果等面板打开才挂载内容，内容里的监听会漏掉这次事件（标签列表为空）。
+        关闭时靠 translateY 移出可视区域，并用 pointerEvents 关掉交互。
+      */}
+      <View
+        style={StyleSheet.absoluteFill}
+        pointerEvents={visible ? 'box-none' : 'none'}
       >
-        <View style={{ marginRight: w == '100%' ? 0 : -1, flex: 1, overflow: 'hidden' }}>
-          {children}
-        </View>
-      </DrawerLayoutAndroid>
+        <Animated.View
+          style={[StyleSheet.absoluteFill, { backgroundColor: '#000', opacity: overlayOpacity }]}
+        >
+          <Pressable
+            onPress={closeDrawer}
+            accessibilityRole="button"
+            accessibilityLabel={global.i18n.t('close')}
+            style={{ flex: 1 }}
+          />
+        </Animated.View>
+        <Animated.View
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: sheetHeight || undefined,
+            maxHeight: '88%',
+            backgroundColor: drawerBackgroundColor ?? colors.groupedBackground,
+            borderTopLeftRadius: radius.sheet,
+            borderTopRightRadius: radius.sheet,
+            overflow: 'hidden',
+            transform: [{ translateY: sheetTranslate }],
+          }}
+        >
+          <View style={{ alignItems: 'center', paddingTop: spacing.sm, paddingBottom: spacing.xs }}>
+            <View
+              style={{
+                width: 36,
+                height: 5,
+                borderRadius: radius.pill,
+                backgroundColor: colors.tertiaryLabel,
+              }}
+            />
+          </View>
+          <View style={{ flex: 1, overflow: 'hidden' }}>
+            {renderNavigationView()}
+          </View>
+        </Animated.View>
+      </View>
     </View>
   )
 })
-
-// const styles = createStyle({
-//   container: {
-//     flex: 1,
-//   },
-// })
 
 export default DrawerLayoutFixed

@@ -111,6 +111,10 @@ android {
     namespace "cn.toside.music.mobile"
     defaultConfig {
         applicationId "cn.toside.music.mobile"
+        // 本地共存测试包：-PpreviewAppId 时加 .preview 后缀，可与正式版同时安装
+        if (project.hasProperty('previewAppId')) {
+            applicationIdSuffix ".preview"
+        }
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode verCode

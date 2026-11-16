@@ -13,7 +13,7 @@ export interface TagGroupProps {
 
 /** iOS 歌单标签组：分组标题 + 胶囊标签 */
 export default ({ name, list, onTagChange, activeId }: TagGroupProps) => {
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, accent, spacing, hairline } = useIOSTheme()
 
   return (
     <View style={{ marginBottom: spacing.md }}>
@@ -46,7 +46,9 @@ export default ({ name, list, onTagChange, activeId }: TagGroupProps) => {
                   marginRight: spacing.sm,
                   marginBottom: spacing.sm,
                   borderRadius: 999,
-                  backgroundColor: active ? accent : pressed ? colors.tertiaryFill : colors.secondaryFill,
+                  borderWidth: active ? 0 : hairline,
+                  borderColor: colors.rowSeparator,
+                  backgroundColor: active ? accent : pressed ? colors.tertiaryFill : 'transparent',
                 })}
               >
                 <IOSText

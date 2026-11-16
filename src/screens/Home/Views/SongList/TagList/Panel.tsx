@@ -27,7 +27,7 @@ const chunk = <T,>(list: T[], size: number): T[][] => {
 
 export default () => {
   const t = useI18n()
-  const { colors, accent, spacing, radius } = useIOSTheme()
+  const { colors, accent, spacing, radius, hairline } = useIOSTheme()
   const { height: winHeight } = useWindowSize()
   const [visible, setVisible] = useState(false)
   const [list, setList] = useState<TagInfo['tags']>([])
@@ -102,7 +102,9 @@ export default () => {
           justifyContent: 'center',
           paddingHorizontal: spacing.xs,
           borderRadius: radius.control,
-          backgroundColor: active ? accent : pressed ? colors.tertiaryFill : colors.fill,
+          backgroundColor: active ? accent : pressed ? colors.tertiaryFill : 'transparent',
+          borderWidth: active ? 0 : hairline,
+          borderColor: colors.rowSeparator,
           marginRight: inRow ? CHIP_GAP : 0,
         })}
       >

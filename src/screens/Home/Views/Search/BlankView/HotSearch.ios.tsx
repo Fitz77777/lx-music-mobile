@@ -20,7 +20,7 @@ const ListItem = ({ keyword, index, onSearch }: {
   index: number
   onSearch: (keyword: string) => void
 }) => {
-  const { colors, accent, isDark, withAlpha, radius, shadow } = useIOSTheme()
+  const { colors, accent, isDark, withAlpha, radius, hairline } = useIOSTheme()
   const top = index < 3
   return (
     <Pressable
@@ -32,8 +32,9 @@ const ListItem = ({ keyword, index, onSearch }: {
         paddingHorizontal: 15,
         paddingVertical: 10,
         borderRadius: radius.pill,
-        backgroundColor: top ? withAlpha(accent, 0.1) : colors.secondaryGroupedBackground,
-        ...(top || isDark ? null : shadow.chip),
+        borderWidth: top || isDark ? 0 : hairline,
+        borderColor: colors.rowSeparator,
+        backgroundColor: top ? withAlpha(accent, 0.1) : pressed ? colors.tertiaryFill : 'transparent',
         opacity: pressed ? 0.6 : 1,
       })}
     >

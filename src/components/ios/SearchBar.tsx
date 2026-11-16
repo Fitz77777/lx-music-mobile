@@ -35,7 +35,7 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
   style,
 }, ref) => {
   const t = useI18n()
-  const { colors, radius, typography } = useIOSTheme()
+  const { colors, radius, typography, hairline } = useIOSTheme()
   const inputRef = useRef<TextInput>(null)
 
   useImperativeHandle(ref, () => ({
@@ -84,7 +84,9 @@ export default forwardRef<SearchBarType, SearchBarProps>(({
             paddingLeft: 35,
             paddingRight: 11,
             paddingVertical: 0,
-            backgroundColor: colors.fill,
+            borderWidth: hairline,
+            borderColor: colors.rowSeparator,
+            backgroundColor: 'transparent',
             fontSize: typography.callout.fontSize,
             color: colors.label,
           }}

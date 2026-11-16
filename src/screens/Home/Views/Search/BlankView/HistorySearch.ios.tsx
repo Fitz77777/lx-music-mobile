@@ -14,7 +14,7 @@ const ListItem = ({ keyword, onSearch, onRemove }: {
   onSearch: (keyword: string) => void
   onRemove: (keyword: string) => void
 }) => {
-  const { colors, spacing } = useIOSTheme()
+  const { colors, spacing, hairline } = useIOSTheme()
   return (
     <Pressable
       onPress={() => { onSearch(keyword) }}
@@ -23,7 +23,9 @@ const ListItem = ({ keyword, onSearch, onRemove }: {
         paddingHorizontal: spacing.md,
         paddingVertical: spacing.sm - 1,
         borderRadius: 999,
-        backgroundColor: pressed ? colors.tertiaryFill : colors.secondaryFill,
+        borderWidth: hairline,
+        borderColor: colors.rowSeparator,
+        backgroundColor: pressed ? colors.tertiaryFill : 'transparent',
         marginRight: spacing.sm,
         marginTop: spacing.sm,
       })}

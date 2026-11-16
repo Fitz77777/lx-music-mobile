@@ -25,7 +25,7 @@ const QUICK_BOARD_COUNT = 3
 
 /** iOS 排行榜工具条：三个常驻榜单 chips + 音源链接（原型 .chips） */
 export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourceChange, onSelectBoard }, ref) => {
-  const { colors, accent, spacing, radius, shadow } = useIOSTheme()
+  const { colors, accent, spacing, radius } = useIOSTheme()
   const [source, setSource] = useState<Source>('kw')
   const [activeId, setActiveId] = useState('')
   const [boards, setBoards] = useState<BoardItem[]>([])
@@ -112,19 +112,17 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
                   onSelectBoard?.(item.id, item.name)
                 }}
                 style={({ pressed }) => ({
-                  paddingHorizontal: 14,
+                  paddingHorizontal: 10,
                   paddingVertical: 6,
                   marginRight: spacing.sm,
                   borderRadius: radius.pill,
-                  backgroundColor: active ? accent : colors.secondaryGroupedBackground,
-                  ...(active ? null : shadow.chip),
-                  opacity: pressed ? 0.7 : 1,
+                  opacity: pressed ? 0.6 : active ? 1 : 0.7,
                 })}
               >
                 <IOSText
                   variant="subheadline"
                   weight={active ? '600' : '400'}
-                  color={active ? colors.onAccent : colors.label}
+                  color={active ? accent : colors.label}
                   numberOfLines={1}
                 >{item.name}</IOSText>
               </Pressable>

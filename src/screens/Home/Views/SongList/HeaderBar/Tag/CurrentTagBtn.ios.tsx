@@ -13,11 +13,11 @@ export interface CurrentTagBtnType {
   setCurrentTagInfo: (name: string) => void
 }
 
-/** iOS 标签筛选按钮：29×29 圆形图标，已选标签时使用强调色（原型 .chip.filter） */
+/** iOS 标签筛选按钮：无边框小图标，已选标签时使用强调色（原型 .chip.filter） */
 export default forwardRef<CurrentTagBtnType, CurrentTagBtnProps>(({ onShowList }, ref) => {
   const t = useI18n()
   const [active, setActive] = useState(false)
-  const { colors, accent, radius, shadow } = useIOSTheme()
+  const { colors, accent, radius } = useIOSTheme()
 
   useImperativeHandle(ref, () => ({
     setCurrentTagInfo(name) {
@@ -38,11 +38,9 @@ export default forwardRef<CurrentTagBtnType, CurrentTagBtnProps>(({ onShowList }
         marginRight: 8,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: active ? accent : colors.secondaryGroupedBackground,
-        ...(active ? null : shadow.chip),
       }}
     >
-      <IOSIcon name="slider" size={16} color={active ? colors.onAccent : colors.secondaryLabel} />
+      <IOSIcon name="slider" size={16} color={active ? accent : colors.secondaryLabel} />
     </Pressable>
   )
 })

@@ -127,7 +127,7 @@ const DrawerLayoutFixed = forwardRef<DrawerLayoutFixedType, Props>(({
             bottom: 0,
             height: sheetHeight || undefined,
             maxHeight: '88%',
-            backgroundColor: drawerBackgroundColor ?? colors.secondaryBackground,
+            backgroundColor: drawerBackgroundColor ?? colors.groupedBackground,
             borderTopLeftRadius: radius.sheet,
             borderTopRightRadius: radius.sheet,
             overflow: 'hidden',

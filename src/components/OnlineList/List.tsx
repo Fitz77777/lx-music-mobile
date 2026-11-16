@@ -13,7 +13,6 @@ import { useI18n } from '@/lang'
 import Text from '@/components/common/Text'
 import { handlePlay } from './listAction'
 import { useSettingValue } from '@/store/setting/hook'
-import { useIOSTheme } from '@/theme/ios/useIOSTheme'
 import { useIOSHomeBottomInset } from '@/theme/ios/useIOSBottomInset'
 
 type FlatListType = FlatListProps<LX.Music.MusicInfoOnline>
@@ -62,7 +61,6 @@ const List = forwardRef<ListType, ListProps>(({
 }, ref) => {
   // const t = useI18n()
   const theme = useTheme()
-  const iosTheme = useIOSTheme()
   const bottomInset = useIOSHomeBottomInset()
   const flatListRef = useRef<FlatList>(null)
   const [currentList, setList] = useState<LX.Music.MusicInfoOnline[]>([])
@@ -237,20 +235,10 @@ const List = forwardRef<ListType, ListProps>(({
     )
   }, [onLoadMore, status, visibleMultiSelect])
 
-  const listCardStyle = Platform.OS == 'ios' && currentList.length
-    ? {
-        marginHorizontal: 16,
-        marginTop: 8,
-        borderRadius: 12,
-        overflow: 'hidden' as const,
-        backgroundColor: iosTheme.colors.secondaryGroupedBackground,
-      }
-    : null
-
   return (
     <FlatList
       ref={flatListRef}
-      style={[styles.list, listCardStyle]}
+      style={styles.list}
       data={currentList}
       numColumns={rowInfo.current.rowNum}
       horizontal={false}

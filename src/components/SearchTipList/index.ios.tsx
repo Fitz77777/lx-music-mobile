@@ -28,7 +28,7 @@ const noop = () => {}
  * 面板高度随内容区高度自适应，但不会像原来那样铺满整屏。
  */
 const Component = <T extends ItemT<T>>({ onPressBg = noop, hideWhenEmpty = true, ...props }: SearchTipListProps<T>, ref: Ref<SearchTipListType<T>>) => {
-  const { colors, radius, shadow, hairline } = useIOSTheme()
+  const { colors } = useIOSTheme()
   const translateY = useRef(new Animated.Value(0)).current
   const scaleY = useRef(new Animated.Value(0)).current
   const [visible, setVisible] = useState(false)
@@ -108,12 +108,8 @@ const Component = <T extends ItemT<T>>({ onPressBg = noop, hideWhenEmpty = true,
 
   const component = useMemo(() => {
     const panelStyle: StyleProp<ViewStyle> = {
-      backgroundColor: colors.secondaryGroupedBackground,
-      borderRadius: radius.card,
-      borderWidth: hairline,
-      borderColor: colors.separator,
+      backgroundColor: colors.groupedBackground,
       overflow: 'hidden',
-      ...shadow.raised,
     }
 
     return (
@@ -134,7 +130,7 @@ const Component = <T extends ItemT<T>>({ onPressBg = noop, hideWhenEmpty = true,
         </View>
       </Animated.View>
     )
-  }, [colors, hairline, onPressBg, panelMaxHeight, props, radius, scaleY, shadow.raised, translateY])
+  }, [colors, onPressBg, panelMaxHeight, props, scaleY, translateY])
 
   return !visible && animatePlayed ? null : component
 }
@@ -158,6 +154,6 @@ const styles = StyleSheet.create({
   content: {
     zIndex: 1,
     paddingTop: 6,
-    paddingHorizontal: 8,
+    paddingHorizontal: 0,
   },
 })

@@ -13,12 +13,12 @@ export interface SortTabType {
   setSource: (source: Source, activeTab: SortInfo['id']) => void
 }
 
-/** iOS 歌单排序：纯文字 chips（无底色），选中态使用主题强调色 */
+/** iOS 歌单排序：胶囊 chips（选中强调色实底，未选中浅灰底） */
 export default forwardRef<SortTabType, SortTabProps>(({ onSortChange }, ref) => {
   const [sortList, setSortList] = useState<SortInfo[]>([])
   const [activeId, setActiveId] = useState<SortInfo['id']>('')
   const t = useI18n()
-  const { colors, accent, spacing } = useIOSTheme()
+  const { colors, accent, spacing, radius } = useIOSTheme()
   const scrollViewRef = useRef<ScrollView>(null)
 
   useImperativeHandle(ref, () => ({
@@ -54,17 +54,19 @@ export default forwardRef<SortTabType, SortTabProps>(({ onSortChange }, ref) => 
             <Pressable
               key={s.id}
               onPress={() => { handleSortChange(s.id) }}
-              style={{
-                paddingHorizontal: 10,
-                paddingVertical: 8,
+              style={({ pressed }) => ({
+                paddingHorizontal: 14,
+                paddingVertical: 7,
                 marginRight: spacing.sm,
-                opacity: active ? 1 : 0.7,
-              }}
+                borderRadius: radius.pill,
+                backgroundColor: active ? accent : colors.tertiaryFill,
+                opacity: pressed ? 0.7 : 1,
+              })}
             >
               <IOSText
                 variant="subheadline"
                 weight={active ? '600' : '400'}
-                color={active ? accent : colors.label}
+                color={active ? colors.onAccent : colors.label}
                 numberOfLines={1}
               >{s.label}</IOSText>
             </Pressable>

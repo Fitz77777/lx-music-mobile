@@ -112,17 +112,18 @@ export default forwardRef<HeaderBarType, HeaderBarProps>(({ onShowBound, onSourc
                   onSelectBoard?.(item.id, item.name)
                 }}
                 style={({ pressed }) => ({
-                  paddingHorizontal: 10,
+                  paddingHorizontal: 14,
                   paddingVertical: 6,
                   marginRight: spacing.sm,
                   borderRadius: radius.pill,
-                  opacity: pressed ? 0.6 : active ? 1 : 0.7,
+                  backgroundColor: active ? accent : colors.tertiaryFill,
+                  opacity: pressed ? 0.7 : 1,
                 })}
               >
                 <IOSText
                   variant="subheadline"
                   weight={active ? '600' : '400'}
-                  color={active ? accent : colors.label}
+                  color={active ? colors.onAccent : colors.label}
                   numberOfLines={1}
                 >{item.name}</IOSText>
               </Pressable>

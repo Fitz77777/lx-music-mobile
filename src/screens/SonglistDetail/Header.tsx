@@ -1,5 +1,5 @@
 import { forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
-import { ScrollView, Text, View } from 'react-native'
+import { Animated, ScrollView, Text, View } from 'react-native'
 
 import Image from '@/components/common/Image'
 import IOSBottomSheet from '@/components/ios/BottomSheet'
@@ -88,7 +88,9 @@ const CountText = memo(({ count }: { count: string }) => {
   const { colors } = useIOSTheme()
 
   return (
-    <View style={{
+    // 注意：样式里绑定了 Animated.Value，必须用 Animated.View，
+    // 普通 View 在 Android 上会把动画对象当数值传给原生导致崩溃
+    <Animated.View style={{
       flexDirection: 'row',
       alignItems: 'center',
       height: COUNT_ROW_H,
@@ -97,7 +99,7 @@ const CountText = memo(({ count }: { count: string }) => {
     }}>
       <IOSIcon name="play" size={11} color={colors.secondaryLabel} />
       <IOSText variant="caption1" color={colors.secondaryLabel} numberOfLines={1} style={{ marginLeft: 3 }}>{count}</IOSText>
-    </View>
+    </Animated.View>
   )
 }, () => true)
 
